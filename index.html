@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>信息 · 单返回按钮</title>
+    <style>
+        /* ===== 基础样式 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        input, textarea, select, [contenteditable="true"] {
+            user-select: text;
+            -webkit-user-select: text;
+        }
+        body {
+            background: #111;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+        }
+        .phone-mock {
+            width: 100%;
+            max-width: 380px;
+            background: #1a1a1a;
+            border-radius: 48px;
+            padding: 12px;
+            box-shadow: 0 30px 50px -20px rgba(0,0,0,0.8), 0 0 0 8px #2c2c2c, 0 0 0 12px #3d3d3d;
+            position: relative;
+        }
+        .phone-screen {
+            background: #000;
+            border-radius: 36px;
+            overflow: hidden;
+            aspect-ratio: 9 / 19.5;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
+        }
+        .desktop {
+            flex: 1;
+            background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .status-bar {
+            padding: 12px 20px 4px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3), transparent);
+        }
+        .app-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            padding: 20px 16px;
+            align-content: start;
+        }
+        .app-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+        .app-icon:active {
+            transform: scale(0.95);
+        }
+        .icon-bg {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(5px);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .app-label {
+            color: white;
+            font-size: 11px;
+            font-weight: 500;
+            text-shadow: 0 1px 3px black;
+            max-width: 70px;
+            text-align: center;
+        }
+        .dock {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(20px);
+            margin: 0 16px 16px;
+            padding: 8px 12px;
+            border-radius: 40px;
+            display: flex;
+            justify-content: space-around;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .dock .app-icon .icon-bg {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.9);
+        }
+        .home-button {
+            width: 140px;
+            height: 5px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 3px;
+            margin: 8px auto 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .home-button:active {
+            background: white;
+        }
+        .app-view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 20;
+            display: none;
+            flex-direction: column;
+            transition: transform 0.2s ease;
+        }
+        .app-view.active {
+            display: flex;
+        }
+        .app-header {
+            padding: 20px 16px 8px;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        /* 统一返回按钮样式（浅灰圆背景，左箭头 ←） */
+        .nav-button {
+            background: #e0e0e0;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #333;
+        }
+        .app-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        /* ===== 设置界面样式 ===== */
+        .settings-container {
+            flex: 1;
+            padding: 16px;
+            background: #f5f5f5;
+            overflow-y: auto;
+        }
+        .config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .config-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .add-config-btn {
+            background: #07c160;
+            color: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .config-item {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        .config-item.active {
+            border: 2px solid #07c160;
+        }
+        .config-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .config-name {
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .active-badge {
+            background: #07c160;
+            color: white;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+        .config-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .config-actions button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .config-detail {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+            word-break: break-all;
+        }
+        .config-detail div {
+            margin-bottom: 4px;
+        }
+        .config-model-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 8px;
+        }
+        .config-model-row select {
+            flex: 2;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            background: white;
+            user-select: text;
+        }
+        .config-model-row button {
+            flex: 1;
+            padding: 8px;
+            background: #07c160;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .delete-config-btn {
+            color: #ff3b30;
+        }
+        .edit-form {
+            background: #f0f2f5;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+        .edit-form input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+        .edit-form button {
+            padding: 8px 16px;
+            background: #07c160;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            margin-right: 8px;
+        }
+        .edit-form .cancel-btn {
+            background: #999;
+        }
+        .activate-config {
+            margin-top: 8px;
+            width: 100%;
+            padding: 8px;
+            background: #07c160;
+            color: white;
+            border: none;
+            border-radius: 8px;
+        }
+
+        /* ===== 聊天界面样式 ===== */
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+            background: #fff;
+        }
+        .list-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: white;
+            border-bottom: 1px solid #eee;
+        }
+        .list-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .list-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0;
+        }
+        .new-chat-btn {
+            background: #07c160;
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .conv-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+        .conv-avatar {
+            width: 48px;
+            height: 48px;
+            background: #07c160;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .conv-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .conv-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .conv-lastmsg {
+            color: #999;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .conv-delete {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #999;
+            cursor: pointer;
+            padding: 8px;
+        }
+        .chat-detail {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #ebebeb;
+        }
+        .detail-header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start; /* 左对齐 */
+            padding: 8px 16px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+        .detail-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .detail-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .message-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .message {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 20px;
+            font-size: 15px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        .user-message {
+            align-self: flex-end;
+            background-color: #07c160;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .ai-message {
+            align-self: flex-start;
+            background-color: white;
+            color: black;
+            border: 1px solid #d0d0d0;
+            border-bottom-left-radius: 4px;
+        }
+        .input-area {
+            background: #f5f5f5;
+            border-top: 1px solid #ddd;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .text-input {
+            flex: 1;
+            border: none;
+            background: white;
+            border-radius: 30px;
+            padding: 10px 15px;
+            font-size: 15px;
+            outline: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            user-select: text;
+            -webkit-user-select: text;
+        }
+        .icon-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .send-button {
+            background: #07c160;
+            color: white;
+            font-size: 20px;
+        }
+        .recording {
+            background: #ff3b30 !important;
+            color: white;
+        }
+
+        .side-button {
+            position: absolute;
+            width: 4px;
+            height: 40px;
+            background: #2c2c2c;
+            border-radius: 4px 0 0 4px;
+            right: -4px;
+            top: 100px;
+        }
+        .side-button.volume-up {
+            top: 160px;
+            height: 50px;
+        }
+        .side-button.volume-down {
+            top: 220px;
+            height: 50px;
+        }
+        .side-button.power {
+            left: -4px;
+            top: 160px;
+            height: 50px;
+            border-radius: 0 4px 4px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-mock">
+        <div class="side-button"></div>
+        <div class="side-button volume-up"></div>
+        <div class="side-button volume-down"></div>
+        <div class="side-button power"></div>
+
+        <div class="phone-screen">
+            <!-- 桌面 -->
+            <div class="desktop" id="desktop">
+                <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+                <div class="app-grid">
+                    <div class="app-icon" data-app="chat"><div class="icon-bg">💬</div><span class="app-label">信息</span></div>
+                    <div class="app-icon" data-app="settings"><div class="icon-bg">⚙️</div><span class="app-label">设置</span></div>
+                    <div class="app-icon" data-app="gallery"><div class="icon-bg">🖼️</div><span class="app-label">相册</span></div>
+                    <div class="app-icon" data-app="camera"><div class="icon-bg">📷</div><span class="app-label">相机</span></div>
+                    <div class="app-icon"><div class="icon-bg">📱</div><span class="app-label">应用4</span></div>
+                    <div class="app-icon"><div class="icon-bg">🎵</div><span class="app-label">音乐</span></div>
+                    <div class="app-icon"><div class="icon-bg">📺</div><span class="app-label">视频</span></div>
+                    <div class="app-icon"><div class="icon-bg">🧮</div><span class="app-label">计算器</span></div>
+                </div>
+                <div class="dock">
+                    <div class="app-icon" data-app="chat"><div class="icon-bg">💬</div><span class="app-label">信息</span></div>
+                    <div class="app-icon" data-app="settings"><div class="icon-bg">⚙️</div><span class="app-label">设置</span></div>
+                    <div class="app-icon" data-app="gallery"><div class="icon-bg">🖼️</div><span class="app-label">相册</span></div>
+                    <div class="app-icon" data-app="camera"><div class="icon-bg">📷</div><span class="app-label">相机</span></div>
+                </div>
+                <div class="home-button" id="homeButton"></div>
+            </div>
+
+            <!-- 信息应用（聊天列表+详情） -->
+            <div class="app-view" id="chatView">
+                <!-- 聊天列表页 -->
+                <div id="chatListPage" style="display:flex; flex-direction:column; flex:1;">
+                    <div class="list-header">
+                        <div class="list-header-left">
+                            <!-- 返回桌面按钮 (样式同设置页) 使用 ← -->
+                            <button class="nav-button" id="listHomeBtn">←</button>
+                            <h2>聊天</h2>
+                        </div>
+                        <button class="new-chat-btn" id="newChatBtn">+</button>
+                    </div>
+                    <div class="chat-list" id="chatListContainer"></div>
+                </div>
+
+                <!-- 聊天详情页 (已移除右上角返回按钮) -->
+                <div id="chatDetailPage" style="display:none; flex-direction:column; flex:1;">
+                    <div class="detail-header">
+                        <div class="detail-header-left">
+                            <!-- 返回列表按钮 使用 ← -->
+                            <button class="nav-button" id="backToListBtn">←</button>
+                            <span class="detail-title" id="detailConvName">对话</span>
+                        </div>
+                    </div>
+                    <div class="message-area" id="messageArea"></div>
+                    <div class="input-area">
+                        <input type="text" class="text-input" id="messageInput" placeholder="输入消息...">
+                        <button class="icon-button" id="recordBtn">🎤</button>
+                        <button class="icon-button send-button" id="sendBtn">➤</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 设置应用（多API配置管理） -->
+            <div class="app-view" id="settingsView">
+                <div class="app-header">
+                    <button class="nav-button" data-back>←</button>
+                    <span class="app-title">设置</span>
+                </div>
+                <div class="settings-container" id="settingsContainer">
+                    <div class="config-header">
+                        <h3>API 配置</h3>
+                        <button class="add-config-btn" id="addConfigBtn">+</button>
+                    </div>
+                    <div id="configList"></div>
+                </div>
+            </div>
+
+            <!-- 其他应用占位 -->
+            <div class="app-view" id="galleryView"><div class="app-header"><button class="nav-button" data-back>←</button><span class="app-title">相册</span></div><div style="padding:20px; text-align:center;">相册开发中</div></div>
+            <div class="app-view" id="cameraView"><div class="app-header"><button class="nav-button" data-back>←</button><span class="app-title">相机</span></div><div style="padding:20px; text-align:center;">相机开发中</div></div>
+        </div>
+    </div>
+
+    <script>
+        // ========== 后端地址 ==========
+        const BACKEND_URL = 'http://YOUR_COMPUTER_IP:3000'; // 请替换为你的电脑IP
+
+        // ========== 桌面切换 ==========
+        const homeButton = document.getElementById('homeButton');
+        const chatView = document.getElementById('chatView');
+        const settingsView = document.getElementById('settingsView');
+        const galleryView = document.getElementById('galleryView');
+        const cameraView = document.getElementById('cameraView');
+        const backButtons = document.querySelectorAll('[data-back]');
+
+        const appIcons = document.querySelectorAll('.app-icon[data-app]');
+        appIcons.forEach(icon => {
+            icon.addEventListener('click', (e) => {
+                const app = icon.getAttribute('data-app');
+                openApp(app);
+            });
+        });
+
+        function openApp(app) {
+            hideAllAppViews();
+            if (app === 'chat') {
+                chatView.classList.add('active');
+                renderChatList();
+            } else if (app === 'settings') {
+                settingsView.classList.add('active');
+                renderConfigList();
+            } else if (app === 'gallery') galleryView.classList.add('active');
+            else if (app === 'camera') cameraView.classList.add('active');
+        }
+
+        function hideAllAppViews() {
+            chatView.classList.remove('active');
+            settingsView.classList.remove('active');
+            galleryView.classList.remove('active');
+            cameraView.classList.remove('active');
+        }
+
+        function goHome() { hideAllAppViews(); }
+        homeButton.addEventListener('click', goHome);
+        backButtons.forEach(btn => btn.addEventListener('click', goHome));
+        // ========== 多API配置管理 ==========
+        let apiConfigs = [];           // 所有配置 { id, name, base_url, api_key, models, currentModel }
+        let activeConfigId = null;
+
+        function loadConfigs() {
+            const saved = localStorage.getItem('apiConfigs');
+            if (saved) {
+                apiConfigs = JSON.parse(saved);
+            } else {
+                // 默认只创建一个空配置
+                apiConfigs = [{
+                    id: Date.now().toString(),
+                    name: '默认配置',
+                    base_url: '',
+                    api_key: '',
+                    models: [],
+                    currentModel: ''
+                }];
+            }
+            const activeId = localStorage.getItem('activeConfigId');
+            if (activeId && apiConfigs.some(c => c.id === activeId)) {
+                activeConfigId = activeId;
+            } else if (apiConfigs.length > 0) {
+                activeConfigId = apiConfigs[0].id;
+            }
+        }
+
+        function saveConfigs() {
+            localStorage.setItem('apiConfigs', JSON.stringify(apiConfigs));
+            if (activeConfigId) localStorage.setItem('activeConfigId', activeConfigId);
+        }
+
+        function getActiveConfig() {
+            return apiConfigs.find(c => c.id === activeConfigId) || apiConfigs[0];
+        }
+
+        function renderConfigList() {
+            const container = document.getElementById('configList');
+            container.innerHTML = '';
+            apiConfigs.forEach(config => {
+                const item = document.createElement('div');
+                item.className = `config-item ${config.id === activeConfigId ? 'active' : ''}`;
+                item.dataset.id = config.id;
+
+                const header = document.createElement('div');
+                header.className = 'config-header-row';
+                header.innerHTML = `
+                    <div class="config-name">
+                        <span>${config.name}</span>
+                        ${config.id === activeConfigId ? '<span class="active-badge">使用中</span>' : ''}
+                    </div>
+                    <div class="config-actions">
+                        <button class="edit-config" data-id="${config.id}">✏️</button>
+                        <button class="delete-config" data-id="${config.id}">🗑️</button>
+                    </div>
+                `;
+                item.appendChild(header);
+
+                const detail = document.createElement('div');
+                detail.className = 'config-detail';
+                detail.innerHTML = `
+                    <div>URL: ${config.base_url || '未设置'}</div>
+                    <div>Key: ${config.api_key ? '••••••' + config.api_key.slice(-4) : '未设置'}</div>
+                `;
+                item.appendChild(detail);
+
+                const modelRow = document.createElement('div');
+                modelRow.className = 'config-model-row';
+                const select = document.createElement('select');
+                select.id = `modelSelect_${config.id}`;
+                if (config.models && config.models.length > 0) {
+                    config.models.forEach(m => {
+                        const option = document.createElement('option');
+                        option.value = m.id;
+                        option.textContent = m.name || m.id;
+                        if (m.id === config.currentModel) option.selected = true;
+                        select.appendChild(option);
+                    });
+                } else {
+                    select.innerHTML = '<option value="">暂无模型</option>';
+                }
+                const fetchBtn = document.createElement('button');
+                fetchBtn.textContent = '拉取';
+                fetchBtn.dataset.id = config.id;
+                modelRow.appendChild(select);
+                modelRow.appendChild(fetchBtn);
+                item.appendChild(modelRow);
+
+                if (config.id !== activeConfigId) {
+                    const activateBtn = document.createElement('button');
+                    activateBtn.textContent = '使用此配置';
+                    activateBtn.className = 'activate-config';
+                    activateBtn.dataset.id = config.id;
+                    item.appendChild(activateBtn);
+
+                    activateBtn.addEventListener('click', () => {
+                        activeConfigId = config.id;
+                        saveConfigs();
+                        renderConfigList();
+                    });
+                }
+
+                container.appendChild(item);
+
+                fetchBtn.addEventListener('click', () => fetchModelsForConfig(config.id));
+                select.addEventListener('change', (e) => {
+                    config.currentModel = e.target.value;
+                    saveConfigs();
+                });
+            });
+
+            document.querySelectorAll('.edit-config').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = btn.dataset.id;
+                    editConfig(id);
+                });
+            });
+            document.querySelectorAll('.delete-config').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = btn.dataset.id;
+                    deleteConfig(id);
+                });
+            });
+        }
+
+        async function fetchModelsForConfig(configId) {
+            const config = apiConfigs.find(c => c.id === configId);
+            if (!config) return;
+            if (!config.base_url || !config.api_key) {
+                alert('请先填写 Base URL 和 API Key');
+                return;
+            }
+
+            const fetchBtns = document.querySelectorAll('.config-model-row button');
+            fetchBtns.forEach(b => b.disabled = true);
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/models`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ base_url: config.base_url, api_key: config.api_key })
+                });
+                const data = await response.json();
+                if (data.models && Array.isArray(data.models)) {
+                    config.models = data.models;
+                    if (!config.currentModel || !config.models.some(m => m.id === config.currentModel)) {
+                        config.currentModel = config.models[0]?.id || '';
+                    }
+                    saveConfigs();
+                    renderConfigList();
+                } else {
+                    alert('返回的模型列表格式不正确');
+                }
+            } catch (error) {
+                alert('拉取失败：' + error.message);
+            } finally {
+                fetchBtns.forEach(b => b.disabled = false);
+            }
+        }
+
+        function editConfig(id) {
+            const config = apiConfigs.find(c => c.id === id);
+            if (!config) return;
+            const item = document.querySelector(`.config-item[data-id="${id}"]`);
+            if (!item) return;
+            const existingForm = item.querySelector('.edit-form');
+            if (existingForm) {
+                existingForm.remove();
+                return;
+            }
+            const form = document.createElement('div');
+            form.className = 'edit-form';
+            form.innerHTML = `
+                <input type="text" id="edit_name_${id}" placeholder="配置名称" value="${config.name}">
+                <input type="text" id="edit_url_${id}" placeholder="Base URL" value="${config.base_url || ''}">
+                <input type="text" id="edit_key_${id}" placeholder="API Key" value="${config.api_key || ''}">
+                <div>
+                    <button class="save-edit" data-id="${id}">保存</button>
+                    <button class="cancel-edit">取消</button>
+                </div>
+            `;
+            item.appendChild(form);
+
+            form.querySelector('.save-edit').addEventListener('click', () => {
+                const newName = document.getElementById(`edit_name_${id}`).value.trim();
+                const newUrl = document.getElementById(`edit_url_${id}`).value.trim();
+                const newKey = document.getElementById(`edit_key_${id}`).value.trim();
+                if (!newName) {
+                    alert('请输入配置名称');
+                    return;
+                }
+                config.name = newName;
+                config.base_url = newUrl;
+                config.api_key = newKey;
+                saveConfigs();
+                renderConfigList();
+            });
+
+            form.querySelector('.cancel-edit').addEventListener('click', () => {
+                form.remove();
+            });
+        }
+
+        function deleteConfig(id) {
+            if (apiConfigs.length <= 1) {
+                alert('至少保留一个配置');
+                return;
+            }
+            if (!confirm('确定删除此配置吗？')) return;
+            apiConfigs = apiConfigs.filter(c => c.id !== id);
+            if (activeConfigId === id) {
+                activeConfigId = apiConfigs[0].id;
+            }
+            saveConfigs();
+            renderConfigList();
+        }
+
+        document.getElementById('addConfigBtn').addEventListener('click', () => {
+            const newId = Date.now().toString();
+            apiConfigs.push({
+                id: newId,
+                name: `新配置 ${apiConfigs.length + 1}`,
+                base_url: '',
+                api_key: '',
+                models: [],
+                currentModel: ''
+            });
+            saveConfigs();
+            renderConfigList();
+            setTimeout(() => editConfig(newId), 50);
+        });
+        // ========== 对话管理 ==========
+        let conversations = [];
+        let currentConvId = null;
+
+        function loadConversations() {
+            const saved = localStorage.getItem('conversations');
+            if (saved) {
+                conversations = JSON.parse(saved);
+            } else {
+                conversations = [{
+                    id: Date.now().toString(),
+                    name: '对话 1',
+                    messages: [{ role: 'assistant', content: '你好！我是你的AI助手，有什么可以帮你的？' }]
+                }];
+            }
+            if (conversations.length === 0) createNewConversation();
+            else currentConvId = conversations[0].id;
+        }
+
+        function saveConversations() {
+            localStorage.setItem('conversations', JSON.stringify(conversations));
+        }
+
+        function createNewConversation() {
+            const newId = Date.now().toString();
+            const newName = `对话 ${conversations.length + 1}`;
+            conversations.push({ id: newId, name: newName, messages: [{ role: 'assistant', content: '你好！我是你的AI助手，有什么可以帮你的？' }] });
+            currentConvId = newId;
+            saveConversations();
+            return newId;
+        }
+
+        function deleteConversation(convId) {
+            if (conversations.length <= 1) { alert('至少保留一个对话'); return; }
+            conversations = conversations.filter(c => c.id !== convId);
+            if (currentConvId === convId) currentConvId = conversations[0].id;
+            saveConversations();
+            renderChatList();
+            if (document.getElementById('chatDetailPage').style.display === 'flex' && currentConvId !== convId) showChatList();
+        }
+
+        function getCurrentConversation() {
+            return conversations.find(c => c.id === currentConvId) || conversations[0];
+        }
+
+        function renderChatList() {
+            const container = document.getElementById('chatListContainer');
+            container.innerHTML = '';
+            conversations.forEach(conv => {
+                const lastMsg = conv.messages.length ? conv.messages[conv.messages.length-1].content : '';
+                const item = document.createElement('div');
+                item.className = 'conv-item';
+                item.innerHTML = `
+                    <div class="conv-avatar">💬</div>
+                    <div class="conv-info">
+                        <div class="conv-name">${conv.name}</div>
+                        <div class="conv-lastmsg">${lastMsg.substring(0,30)}${lastMsg.length>30?'...':''}</div>
+                    </div>
+                    <button class="conv-delete" data-id="${conv.id}">🗑️</button>
+                `;
+                item.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('conv-delete')) return;
+                    currentConvId = conv.id;
+                    enterChatDetail(conv.id);
+                });
+                const deleteBtn = item.querySelector('.conv-delete');
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteConversation(conv.id);
+                });
+                container.appendChild(item);
+            });
+        }
+
+        function enterChatDetail(convId) {
+            currentConvId = convId;
+            const conv = getCurrentConversation();
+            document.getElementById('detailConvName').textContent = conv.name;
+            renderMessages(conv.messages);
+            document.getElementById('chatListPage').style.display = 'none';
+            document.getElementById('chatDetailPage').style.display = 'flex';
+        }
+
+        function showChatList() {
+            document.getElementById('chatListPage').style.display = 'flex';
+            document.getElementById('chatDetailPage').style.display = 'none';
+            renderChatList();
+        }
+
+        function renderMessages(messages) {
+            const area = document.getElementById('messageArea');
+            area.innerHTML = '';
+            messages.forEach(msg => {
+                const div = document.createElement('div');
+                div.className = `message ${msg.role === 'user' ? 'user-message' : 'ai-message'}`;
+                div.textContent = msg.content;
+                area.appendChild(div);
+            });
+            area.scrollTop = area.scrollHeight;
+        }
+
+        function addMessageToCurrent(text, isUser) {
+            const conv = getCurrentConversation();
+            conv.messages.push({ role: isUser ? 'user' : 'assistant', content: text });
+            saveConversations();
+            if (document.getElementById('chatDetailPage').style.display === 'flex') {
+                const area = document.getElementById('messageArea');
+                const div = document.createElement('div');
+                div.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+                div.textContent = text;
+                area.appendChild(div);
+                area.scrollTop = area.scrollHeight;
+            }
+        }
+
+        // ========== 聊天发送 ==========
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const recordBtn = document.getElementById('recordBtn');
+        const backToListBtn = document.getElementById('backToListBtn');
+        backToListBtn.addEventListener('click', showChatList);
+        document.getElementById('newChatBtn').addEventListener('click', () => {
+            const newId = createNewConversation();
+            enterChatDetail(newId);
+        });
+
+        // 返回桌面按钮（只有列表页左上角）
+        document.getElementById('listHomeBtn').addEventListener('click', goHome);
+
+        async function handleSend() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            const activeConfig = getActiveConfig();
+            if (!activeConfig.base_url || !activeConfig.api_key || !activeConfig.currentModel) {
+                alert('请先在设置中配置并激活一个有效的API配置，并拉取模型');
+                return;
+            }
+
+            addMessageToCurrent(text, true);
+            messageInput.value = '';
+
+            const conv = getCurrentConversation();
+            const messages = conv.messages.map(m => ({ role: m.role, content: m.content }));
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        base_url: activeConfig.base_url,
+                        api_key: activeConfig.api_key,
+                        model: activeConfig.currentModel,
+                        messages
+                    })
+                });
+                const data = await response.json();
+                const reply = data.choices?.[0]?.message?.content || '无回复';
+                addMessageToCurrent(reply, false);
+            } catch (error) {
+                addMessageToCurrent('请求失败：' + error.message, false);
+            }
+        }
+
+        let isRecording = false;
+        recordBtn.addEventListener('click', () => {
+            if (!isRecording) {
+                recordBtn.classList.add('recording');
+                recordBtn.textContent = '⏹️';
+                isRecording = true;
+                setTimeout(() => {
+                    if (isRecording) {
+                        stopRecording();
+                        messageInput.value = '这是一段语音转文字';
+                    }
+                }, 2000);
+            } else {
+                stopRecording();
+            }
+        });
+        function stopRecording() {
+            recordBtn.classList.remove('recording');
+            recordBtn.textContent = '🎤';
+            isRecording = false;
+        }
+
+        sendBtn.addEventListener('click', handleSend);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSend();
+        });
+
+        // 初始化
+        window.addEventListener('load', () => {
+            loadConfigs();
+            loadConversations();
+            renderChatList();
+        });
+    </script>
+</body>
+</html>
