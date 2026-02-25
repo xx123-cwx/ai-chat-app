@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 头像自定义（图片压缩版）</title>
+    <title>AI角色 · 更多菜单版（真实拉黑）</title>
     <style>
         /* ===== 基础样式 ===== */
         * {
@@ -409,14 +409,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .contact-delete {
-            background: none;
-            border: none;
-            font-size: 20px;
-            color: #999;
-            cursor: pointer;
-            padding: 8px;
-        }
 
         /* 新建联系人表单模态框 */
         .modal-overlay {
@@ -588,6 +580,18 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+        .more-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
         .message-area {
             flex: 1;
             overflow-y: auto;
@@ -617,6 +621,15 @@
             border: 1px solid #d0d0d0;
             border-bottom-left-radius: 4px;
         }
+        .system-message {
+            align-self: center;
+            background-color: #f0f0f0;
+            color: #999;
+            font-size: 13px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            max-width: 90%;
+        }
         .input-area {
             background: #f5f5f5;
             border-top: 1px solid #ddd;
@@ -637,6 +650,10 @@
             user-select: text;
             -webkit-user-select: text;
         }
+        .text-input:disabled {
+            background: #e0e0e0;
+            color: #999;
+        }
         .icon-button {
             background: none;
             border: none;
@@ -650,6 +667,10 @@
             border-radius: 50%;
             background: white;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .icon-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         .send-button {
             background: #07c160;
@@ -683,6 +704,34 @@
             top: 160px;
             height: 50px;
             border-radius: 0 4px 4px 0;
+        }
+
+        /* 联系人操作菜单 */
+        .menu-content {
+            text-align: center;
+        }
+        .menu-item {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #f5f5f5;
+            color: #333;
+        }
+        .menu-item.danger {
+            color: #ff3b30;
+        }
+        .menu-item:active {
+            background: #e0e0e0;
+        }
+        .blocked-badge {
+            color: #ff3b30;
+            font-size: 12px;
+            margin-left: 8px;
         }
     </style>
 </head>
@@ -741,6 +790,7 @@
                                 <div class="detail-personality" id="detailPersonality"></div>
                             </div>
                         </div>
+                        <button class="more-btn" id="moreMenuBtn">⋮</button>
                     </div>
                     <div class="message-area" id="messageArea"></div>
                     <div class="input-area">
@@ -820,6 +870,19 @@
         </div>
     </div>
 
+    <!-- 联系人操作菜单模态框 -->
+    <div class="modal-overlay" id="contactMenuModal">
+        <div class="modal-content menu-content">
+            <div class="modal-header">
+                <h3>联系人选项</h3>
+                <span class="close-modal" id="closeMenuModal">&times;</span>
+            </div>
+            <button class="menu-item" id="menuDelete">删除好友</button>
+            <button class="menu-item" id="menuBlock">拉黑好友</button>
+            <button class="menu-item" id="menuClear">清除聊天记录</button>
+        </div>
+    </div>
+
     <script>
         // ========== 后端地址 ==========
         const BACKEND_URL = '';
@@ -867,6 +930,10 @@
             const saved = localStorage.getItem('contacts');
             if (saved) {
                 contacts = JSON.parse(saved);
+                // 为旧数据添加 blocked 字段
+                contacts.forEach(c => {
+                    if (c.blocked === undefined) c.blocked = false;
+                });
             } else {
                 contacts = [{
                     id: Date.now().toString(),
@@ -874,6 +941,7 @@
                     name: '默认助手',
                     personality: '你是一个友好的AI助手，乐于助人。',
                     configId: '',
+                    blocked: false,
                     messages: [{ role: 'assistant', content: '你好！我是你的AI助手，有什么可以帮你的？' }]
                 }];
             }
@@ -947,25 +1015,14 @@
                 const infoDiv = document.createElement('div');
                 infoDiv.className = 'contact-info';
                 infoDiv.innerHTML = `
-                    <div class="contact-name">${contact.name}</div>
+                    <div class="contact-name">${contact.name} ${contact.blocked ? '<span class="blocked-badge">(已拉黑)</span>' : ''}</div>
                     <div class="contact-lastmsg">${lastMsg.substring(0,30)}${lastMsg.length>30?'...':''}</div>
                 `;
                 item.appendChild(infoDiv);
 
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'contact-delete';
-                deleteBtn.dataset.id = contact.id;
-                deleteBtn.textContent = '🗑️';
-                item.appendChild(deleteBtn);
-
                 item.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('contact-delete')) return;
                     currentContactId = contact.id;
                     enterChatDetail(contact.id);
-                });
-                deleteBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    deleteContact(contact.id);
                 });
                 container.appendChild(item);
             });
@@ -1073,9 +1130,23 @@
                 }
             }
             const detailContactName = document.getElementById('detailContactName');
-            if (detailContactName) detailContactName.textContent = contact.name;
+            if (detailContactName) detailContactName.textContent = contact.name + (contact.blocked ? ' (已拉黑)' : '');
             const detailPersonality = document.getElementById('detailPersonality');
             if (detailPersonality) detailPersonality.textContent = contact.personality.substring(0, 20) + (contact.personality.length>20?'...':'');
+
+            // 根据拉黑状态禁用输入框
+            const messageInput = document.getElementById('messageInput');
+            const sendBtn = document.getElementById('sendBtn');
+            if (contact.blocked) {
+                messageInput.disabled = true;
+                messageInput.placeholder = '你已拉黑该联系人，无法发送消息';
+                sendBtn.disabled = true;
+            } else {
+                messageInput.disabled = false;
+                messageInput.placeholder = '输入消息...';
+                sendBtn.disabled = false;
+            }
+
             renderMessages(contact.messages);
             document.getElementById('contactListPage').style.display = 'none';
             document.getElementById('chatDetailPage').style.display = 'flex';
@@ -1093,21 +1164,22 @@
             area.innerHTML = '';
             messages.forEach(msg => {
                 const div = document.createElement('div');
-                div.className = `message ${msg.role === 'user' ? 'user-message' : 'ai-message'}`;
+                div.className = `message ${msg.role === 'user' ? 'user-message' : (msg.role === 'system' ? 'system-message' : 'ai-message')}`;
                 div.textContent = msg.content;
                 area.appendChild(div);
             });
             area.scrollTop = area.scrollHeight;
         }
 
-        function addMessageToCurrent(text, isUser) {
+        function addMessageToCurrent(text, isUser, isSystem = false) {
             const contact = getCurrentContact();
-            contact.messages.push({ role: isUser ? 'user' : 'assistant', content: text });
+            const role = isSystem ? 'system' : (isUser ? 'user' : 'assistant');
+            contact.messages.push({ role, content: text });
             saveContacts();
             if (document.getElementById('chatDetailPage').style.display === 'flex') {
                 const area = document.getElementById('messageArea');
                 const div = document.createElement('div');
-                div.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+                div.className = `message ${role === 'user' ? 'user-message' : (role === 'system' ? 'system-message' : 'ai-message')}`;
                 div.textContent = text;
                 area.appendChild(div);
                 area.scrollTop = area.scrollHeight;
@@ -1288,6 +1360,17 @@
             if (modal) modal.classList.remove('active');
         }
 
+        // 打开联系人菜单
+        function openContactMenu() {
+            const menuModal = document.getElementById('contactMenuModal');
+            if (menuModal) menuModal.classList.add('active');
+        }
+
+        function closeContactMenu() {
+            const menuModal = document.getElementById('contactMenuModal');
+            if (menuModal) menuModal.classList.remove('active');
+        }
+
         // ========== 初始化所有事件 (DOMContentLoaded) ==========
         document.addEventListener('DOMContentLoaded', function() {
             // 加载数据
@@ -1365,10 +1448,10 @@
             const cancelContactBtn = document.getElementById('cancelContact');
             if (cancelContactBtn) cancelContactBtn.addEventListener('click', closeNewContactModal);
 
-            const modal = document.getElementById('newContactModal');
-            if (modal) {
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) closeNewContactModal();
+            const newModal = document.getElementById('newContactModal');
+            if (newModal) {
+                newModal.addEventListener('click', (e) => {
+                    if (e.target === newModal) closeNewContactModal();
                 });
             }
 
@@ -1474,6 +1557,7 @@
                         name: name,
                         personality: personality || '你是一个友好的AI助手。',
                         configId: configId,
+                        blocked: false,
                         messages: [{ role: 'assistant', content: `你好！我是${name}，很高兴认识你！` }]
                     });
                     saveContacts();
@@ -1491,6 +1575,67 @@
             const listHomeBtn = document.getElementById('listHomeBtn');
             if (listHomeBtn) listHomeBtn.addEventListener('click', () => hideAllAppViews());
 
+            // 更多菜单按钮
+            const moreMenuBtn = document.getElementById('moreMenuBtn');
+            if (moreMenuBtn) {
+                moreMenuBtn.addEventListener('click', openContactMenu);
+            }
+
+            // 菜单模态框关闭
+            const closeMenuModal = document.getElementById('closeMenuModal');
+            if (closeMenuModal) {
+                closeMenuModal.addEventListener('click', closeContactMenu);
+            }
+            const menuModal = document.getElementById('contactMenuModal');
+            if (menuModal) {
+                menuModal.addEventListener('click', (e) => {
+                    if (e.target === menuModal) closeContactMenu();
+                });
+            }
+
+            // 菜单按钮操作
+            const menuDelete = document.getElementById('menuDelete');
+            if (menuDelete) {
+                menuDelete.addEventListener('click', () => {
+                    const contact = getCurrentContact();
+                    if (contact) {
+                        deleteContact(contact.id);
+                        closeContactMenu();
+                    }
+                });
+            }
+
+            const menuBlock = document.getElementById('menuBlock');
+            if (menuBlock) {
+                menuBlock.addEventListener('click', () => {
+                    const contact = getCurrentContact();
+                    if (contact) {
+                        contact.blocked = !contact.blocked; // 切换拉黑状态
+                        saveContacts();
+                        // 刷新当前聊天界面
+                        enterChatDetail(contact.id);
+                        closeContactMenu();
+                    }
+                });
+            }
+
+            const menuClear = document.getElementById('menuClear');
+            if (menuClear) {
+                menuClear.addEventListener('click', () => {
+                    const contact = getCurrentContact();
+                    if (contact) {
+                        if (confirm('确定清空所有聊天记录吗？')) {
+                            contact.messages = []; // 清空消息
+                            // 可添加一条系统提示
+                            contact.messages.push({ role: 'system', content: '聊天记录已清空' });
+                            saveContacts();
+                            renderMessages(contact.messages);
+                            closeContactMenu();
+                        }
+                    }
+                });
+            }
+
             const sendBtn = document.getElementById('sendBtn');
             const messageInput = document.getElementById('messageInput');
             const recordBtn = document.getElementById('recordBtn');
@@ -1500,6 +1645,11 @@
                 if (!text) return;
 
                 const contact = getCurrentContact();
+                if (contact.blocked) {
+                    alert('你已将对方拉黑，无法发送消息');
+                    return;
+                }
+
                 let config;
                 if (contact.configId) {
                     config = apiConfigs.find(c => c.id === contact.configId);
@@ -1521,7 +1671,7 @@
 
                 const messages = [
                     { role: 'system', content: contact.personality },
-                    ...contact.messages.map(m => ({ role: m.role, content: m.content }))
+                    ...contact.messages.filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.content }))
                 ];
 
                 try {
