@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 头像自定义</title>
+    <title>AI角色 · 头像自定义（修复版）</title>
     <style>
         /* ===== 基础样式 ===== */
         * {
@@ -190,6 +190,7 @@
             font-size: 18px;
             font-weight: 600;
         }
+
         /* ===== 设置界面样式 ===== */
         .settings-container {
             flex: 1;
@@ -329,7 +330,6 @@
             border: none;
             border-radius: 8px;
         }
-
         /* ===== 联系人列表样式 ===== */
         .contact-list {
             flex: 1;
@@ -386,7 +386,7 @@
             font-size: 24px;
             margin-right: 12px;
             flex-shrink: 0;
-            overflow: hidden; /* 让图片超出部分隐藏 */
+            overflow: hidden;
         }
         .contact-avatar img {
             width: 100%;
@@ -417,7 +417,7 @@
             padding: 8px;
         }
 
-        /* 新建联系人表单模态框（增强） */
+        /* 新建联系人表单模态框 */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -475,7 +475,6 @@
             min-height: 80px;
             resize: vertical;
         }
-        /* 头像类型切换 */
         .avatar-type {
             display: flex;
             gap: 10px;
@@ -538,6 +537,7 @@
             background: #f0f0f0;
             color: #333;
         }
+
         /* ===== 聊天详情页 ===== */
         .chat-detail {
             flex: 1;
@@ -764,13 +764,14 @@
                     <div id="configList"></div>
                 </div>
             </div>
+
             <!-- 其他应用占位 -->
             <div class="app-view" id="galleryView"><div class="app-header"><button class="nav-button" data-back>←</button><span class="app-title">相册</span></div><div style="padding:20px; text-align:center;">相册开发中</div></div>
             <div class="app-view" id="cameraView"><div class="app-header"><button class="nav-button" data-back>←</button><span class="app-title">相机</span></div><div style="padding:20px; text-align:center;">相机开发中</div></div>
         </div>
     </div>
 
-    <!-- 新建联系人模态框（增强版） -->
+    <!-- 新建联系人模态框 -->
     <div class="modal-overlay" id="newContactModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -821,7 +822,6 @@
     <script>
         // ========== 后端地址（使用相对路径，同域）==========
         const BACKEND_URL = '';
-
         // ========== 桌面切换 ==========
         const homeButton = document.getElementById('homeButton');
         const chatView = document.getElementById('chatView');
@@ -861,7 +861,7 @@
         homeButton.addEventListener('click', goHome);
         backButtons.forEach(btn => btn.addEventListener('click', goHome));
 
-        // ========== 多API配置管理（与之前相同）==========
+        // ========== 多API配置管理 ==========
         let apiConfigs = [];
         let activeConfigId = null;
 
@@ -896,7 +896,6 @@
             return apiConfigs.find(c => c.id === activeConfigId) || apiConfigs[0];
         }
 
-        // 渲染配置列表（保持原样，此处略，但实际代码中必须有）
         function renderConfigList() {
             const container = document.getElementById('configList');
             container.innerHTML = '';
@@ -972,6 +971,7 @@
                 });
             });
 
+            // 编辑按钮事件
             document.querySelectorAll('.edit-config').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -979,6 +979,7 @@
                     editConfig(id);
                 });
             });
+            // 删除按钮事件
             document.querySelectorAll('.delete-config').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -1133,10 +1134,8 @@
                 const avatarDiv = document.createElement('div');
                 avatarDiv.className = 'contact-avatar';
                 if (contact.avatar && contact.avatar.startsWith('data:image')) {
-                    // 图片头像
                     avatarDiv.innerHTML = `< img src="${contact.avatar}" alt="avatar">`;
                 } else {
-                    // 文字头像
                     avatarDiv.textContent = contact.avatar || '🤖';
                 }
                 item.appendChild(avatarDiv);
@@ -1250,7 +1249,7 @@
         const avatarPreviewText = document.getElementById('avatarPreviewText');
         const avatarPreviewImg = document.getElementById('avatarPreviewImg');
 
-        let selectedAvatarData = '🤖'; // 最终存储的头像值（可能是文字或图片dataURL）
+        let selectedAvatarData = '🤖'; // 最终存储的头像值
 
         // 切换头像类型
         avatarTypeRadios.forEach(radio => {
@@ -1258,7 +1257,6 @@
                 if (e.target.value === 'text') {
                     avatarTextDiv.style.display = 'block';
                     avatarImageDiv.style.display = 'none';
-                    // 恢复文字预览
                     avatarPreviewText.style.display = 'inline';
                     avatarPreviewImg.style.display = 'none';
                     selectedAvatarData = contactAvatarText.value.trim() || '🤖';
@@ -1267,7 +1265,6 @@
                     avatarImageDiv.style.display = 'block';
                     avatarPreviewText.style.display = 'none';
                     avatarPreviewImg.style.display = 'block';
-                    // 如果没有图片，暂时用默认占位
                 }
             });
         });
