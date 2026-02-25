@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>信息 · 单返回按钮</title>
+    <title>AI角色 · 联系人版</title>
     <style>
         /* ===== 基础样式 ===== */
         * {
@@ -154,7 +154,7 @@
             gap: 12px;
             border-bottom: 1px solid #ddd;
         }
-        /* 统一返回按钮样式（浅灰圆背景，左箭头 ←） */
+        /* 统一返回按钮样式 */
         .nav-button {
             background: #e0e0e0;
             border: none;
@@ -277,9 +277,6 @@
             border-radius: 8px;
             cursor: pointer;
         }
-        .delete-config-btn {
-            color: #ff3b30;
-        }
         .edit-form {
             background: #f0f2f5;
             padding: 12px;
@@ -316,8 +313,8 @@
             border-radius: 8px;
         }
 
-        /* ===== 聊天界面样式 ===== */
-        .chat-list {
+        /* ===== 联系人列表样式 ===== */
+        .contact-list {
             flex: 1;
             overflow-y: auto;
             background: #fff;
@@ -340,7 +337,7 @@
             font-weight: 600;
             margin: 0;
         }
-        .new-chat-btn {
+        .new-contact-btn {
             background: #07c160;
             color: white;
             border: none;
@@ -353,14 +350,14 @@
             justify-content: center;
             cursor: pointer;
         }
-        .conv-item {
+        .contact-item {
             display: flex;
             align-items: center;
             padding: 12px 16px;
             border-bottom: 1px solid #f0f0f0;
             cursor: pointer;
         }
-        .conv-avatar {
+        .contact-avatar {
             width: 48px;
             height: 48px;
             background: #07c160;
@@ -373,22 +370,22 @@
             margin-right: 12px;
             flex-shrink: 0;
         }
-        .conv-info {
+        .contact-info {
             flex: 1;
             min-width: 0;
         }
-        .conv-name {
+        .contact-name {
             font-weight: 600;
             margin-bottom: 4px;
         }
-        .conv-lastmsg {
+        .contact-lastmsg {
             color: #999;
             font-size: 14px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .conv-delete {
+        .contact-delete {
             background: none;
             border: none;
             font-size: 20px;
@@ -396,6 +393,87 @@
             cursor: pointer;
             padding: 8px;
         }
+
+        /* 新建联系人表单模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 30;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 340px;
+            border-radius: 20px;
+            padding: 20px;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .modal-header h3 {
+            font-size: 18px;
+        }
+        .close-modal {
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 4px;
+            color: #666;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+        }
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .form-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .form-actions .save-btn {
+            background: #07c160;
+            color: white;
+        }
+        .form-actions .cancel-btn {
+            background: #f0f0f0;
+            color: #333;
+        }
+        /* ===== 聊天详情页 ===== */
         .chat-detail {
             flex: 1;
             display: flex;
@@ -405,7 +483,7 @@
         .detail-header {
             display: flex;
             align-items: center;
-            justify-content: flex-start; /* 左对齐 */
+            justify-content: space-between;
             padding: 8px 16px;
             background: #f5f5f5;
             border-bottom: 1px solid #ddd;
@@ -415,9 +493,28 @@
             align-items: center;
             gap: 8px;
         }
+        .detail-avatar {
+            width: 36px;
+            height: 36px;
+            background: #07c160;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
         .detail-title {
             font-size: 18px;
             font-weight: 600;
+        }
+        .detail-personality {
+            font-size: 12px;
+            color: #666;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .message-area {
             flex: 1;
@@ -529,7 +626,7 @@
             <div class="desktop" id="desktop">
                 <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
                 <div class="app-grid">
-                    <div class="app-icon" data-app="chat"><div class="icon-bg">💬</div><span class="app-label">信息</span></div>
+                    <div class="app-icon" data-app="chat"><div class="icon-bg">💬</div><span class="app-label">联系人</span></div>
                     <div class="app-icon" data-app="settings"><div class="icon-bg">⚙️</div><span class="app-label">设置</span></div>
                     <div class="app-icon" data-app="gallery"><div class="icon-bg">🖼️</div><span class="app-label">相册</span></div>
                     <div class="app-icon" data-app="camera"><div class="icon-bg">📷</div><span class="app-label">相机</span></div>
@@ -539,7 +636,7 @@
                     <div class="app-icon"><div class="icon-bg">🧮</div><span class="app-label">计算器</span></div>
                 </div>
                 <div class="dock">
-                    <div class="app-icon" data-app="chat"><div class="icon-bg">💬</div><span class="app-label">信息</span></div>
+                    <div class="app-icon" data-app="chat"><div class="icon-bg">💬</div><span class="app-label">联系人</span></div>
                     <div class="app-icon" data-app="settings"><div class="icon-bg">⚙️</div><span class="app-label">设置</span></div>
                     <div class="app-icon" data-app="gallery"><div class="icon-bg">🖼️</div><span class="app-label">相册</span></div>
                     <div class="app-icon" data-app="camera"><div class="icon-bg">📷</div><span class="app-label">相机</span></div>
@@ -547,29 +644,32 @@
                 <div class="home-button" id="homeButton"></div>
             </div>
 
-            <!-- 信息应用（聊天列表+详情） -->
+            <!-- 联系人应用（列表+详情） -->
             <div class="app-view" id="chatView">
-                <!-- 聊天列表页 -->
-                <div id="chatListPage" style="display:flex; flex-direction:column; flex:1;">
+                <!-- 联系人列表页 -->
+                <div id="contactListPage" style="display:flex; flex-direction:column; flex:1;">
                     <div class="list-header">
                         <div class="list-header-left">
-                            <!-- 返回桌面按钮 (样式同设置页) 使用 ← -->
                             <button class="nav-button" id="listHomeBtn">←</button>
-                            <h2>聊天</h2>
+                            <h2>联系人</h2>
                         </div>
-                        <button class="new-chat-btn" id="newChatBtn">+</button>
+                        <button class="new-contact-btn" id="newContactBtn">+</button>
                     </div>
-                    <div class="chat-list" id="chatListContainer"></div>
+                    <div class="contact-list" id="contactListContainer"></div>
                 </div>
 
-                <!-- 聊天详情页 (已移除右上角返回按钮) -->
+                <!-- 聊天详情页 -->
                 <div id="chatDetailPage" style="display:none; flex-direction:column; flex:1;">
                     <div class="detail-header">
                         <div class="detail-header-left">
-                            <!-- 返回列表按钮 使用 ← -->
                             <button class="nav-button" id="backToListBtn">←</button>
-                            <span class="detail-title" id="detailConvName">对话</span>
+                            <div class="detail-avatar" id="detailAvatar">🤖</div>
+                            <div>
+                                <span class="detail-title" id="detailContactName">角色</span>
+                                <div class="detail-personality" id="detailPersonality"></div>
+                            </div>
                         </div>
+                        <!-- 暂无右侧按钮 -->
                     </div>
                     <div class="message-area" id="messageArea"></div>
                     <div class="input-area">
@@ -594,17 +694,6 @@
                     <div id="configList"></div>
                 </div>
             </div>
-
-            <!-- 其他应用占位 -->
-            <div class="app-view" id="galleryView"><div class="app-header"><button class="nav-button" data-back>←</button><span class="app-title">相册</span></div><div style="padding:20px; text-align:center;">相册开发中</div></div>
-            <div class="app-view" id="cameraView"><div class="app-header"><button class="nav-button" data-back>←</button><span class="app-title">相机</span></div><div style="padding:20px; text-align:center;">相机开发中</div></div>
-        </div>
-    </div>
-
-    <script>
-        // ========== 后端地址 ==========
-        const BACKEND_URL = ''; // 
-
         // ========== 桌面切换 ==========
         const homeButton = document.getElementById('homeButton');
         const chatView = document.getElementById('chatView');
@@ -625,7 +714,7 @@
             hideAllAppViews();
             if (app === 'chat') {
                 chatView.classList.add('active');
-                renderChatList();
+                renderContactList();
             } else if (app === 'settings') {
                 settingsView.classList.add('active');
                 renderConfigList();
@@ -643,8 +732,9 @@
         function goHome() { hideAllAppViews(); }
         homeButton.addEventListener('click', goHome);
         backButtons.forEach(btn => btn.addEventListener('click', goHome));
-        // ========== 多API配置管理 ==========
-        let apiConfigs = [];           // 所有配置 { id, name, base_url, api_key, models, currentModel }
+
+        // ========== 多API配置管理（保持不变）==========
+        let apiConfigs = [];
         let activeConfigId = null;
 
         function loadConfigs() {
@@ -652,7 +742,6 @@
             if (saved) {
                 apiConfigs = JSON.parse(saved);
             } else {
-                // 默认只创建一个空配置
                 apiConfigs = [{
                     id: Date.now().toString(),
                     name: '默认配置',
@@ -679,6 +768,197 @@
             return apiConfigs.find(c => c.id === activeConfigId) || apiConfigs[0];
         }
 
+        // 渲染配置列表（与之前相同，略）
+        function renderConfigList() {
+            const container = document.getElementById('configList');
+            container.innerHTML = '';
+            apiConfigs.forEach(config => {
+                const item = document.createElement('div');
+                item.className = `config-item ${config.id === activeConfigId ? 'active' : ''}`;
+                item.dataset.id = config.id;
+
+                const header = document.createElement('div');
+                header.className = 'config-header-row';
+                header.innerHTML = `
+                    <div class="config-name">
+                        <span>${config.name}</span>
+                        ${config.id === activeConfigId ? '<span class="active-badge">使用中</span>' : ''}
+                    </div>
+                    <div class="config-actions">
+                        <button class="edit-config" data-id="${config.id}">✏️</button>
+                        <button class="delete-config" data-id="${config.id}">🗑️</button>
+                    </div>
+                `;
+                item.appendChild(header);
+
+                const detail = document.createElement('div');
+                detail.className = 'config-detail';
+                detail.innerHTML = `
+                    <div>URL: ${config.base_url || '未设置'}</div>
+                    <div>Key: ${config.api_key ? '••••••' + config.api_key.slice(-4) : '未设置'}</div>
+                `;
+                item.appendChild(detail);
+
+                const modelRow = document.createElement('div');
+                modelRow.className = 'config-model-row';
+                const select = document.createElement('select');
+                select.id = `modelSelect_${config.id}`;
+                if (config.models && config.models.length > 0) {
+                    config.models.forEach(m => {
+                        const option = document.createElement('option');
+                        option.value = m.id;
+                        option.textContent = m.name || m.id;
+                        if (m.id === config.currentModel) option.selected = true;
+                        select.appendChild(option);
+                    });
+                } else {
+                    select.innerHTML = '<option value="">暂无模型</option>';
+                }
+                const fetchBtn = document.createElement('button');
+                fetchBtn.textContent = '拉取';
+                fetchBtn.dataset.id = config.id;
+                modelRow.appendChild(select);
+                modelRow.appendChild(fetchBtn);
+                item.appendChild(modelRow);
+
+                if (config.id !== activeConfigId) {
+                    const activateBtn = document.createElement('button');
+                    activateBtn.textContent = '使用此配置';
+                    activateBtn.className = 'activate-config';
+                    activateBtn.dataset.id = config.id;
+                    item.appendChild(activateBtn);
+
+                    activateBtn.addEventListener('click', () => {
+                        activeConfigId = config.id;
+                        saveConfigs();
+                        renderConfigList();
+                    });
+                }
+
+                container.appendChild(item);
+
+                fetchBtn.addEventListener('click', () => fetchModelsForConfig(config.id));
+                select.addEventListener('change', (e) => {
+                    config.currentModel = e.target.value;
+                    saveConfigs();
+                });
+            });
+            <!-- 其他应用占位 -->
+            <div class="app-view" id="galleryView"><div class="app-header"><button class="nav-button" data-back>←</button><span class="app-title">相册</span></div><div style="padding:20px; text-align:center;">相册开发中</div></div>
+            <div class="app-view" id="cameraView"><div class="app-header"><button class="nav-button" data-back>←</button><span class="app-title">相机</span></div><div style="padding:20px; text-align:center;">相机开发中</div></div>
+        </div>
+    </div>
+
+    <!-- 新建联系人模态框 -->
+    <div class="modal-overlay" id="newContactModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>新建联系人</h3>
+                <span class="close-modal" id="closeModal">&times;</span>
+            </div>
+            <div class="form-group">
+                <label>头像（输入一个字符，如 😊）</label>
+                <input type="text" id="contactAvatar" maxlength="2" placeholder="😊" value="🤖">
+            </div>
+            <div class="form-group">
+                <label>名称</label>
+                <input type="text" id="contactName" placeholder="例如 小爱同学">
+            </div>
+            <div class="form-group">
+                <label>人设（系统提示）</label>
+                <textarea id="contactPersonality" placeholder="例如：你是一个温柔体贴的知心姐姐"></textarea>
+            </div>
+            <div class="form-group">
+                <label>使用哪个API配置？</label>
+                <select id="contactConfigId">
+                    <option value="">使用当前激活配置</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button class="save-btn" id="saveContact">保存</button>
+                <button class="cancel-btn" id="cancelContact">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== 后端地址（使用相对路径，同域）==========
+        const BACKEND_URL = '';  // 空字符串表示同域
+
+        // ========== 桌面切换 ==========
+        const homeButton = document.getElementById('homeButton');
+        const chatView = document.getElementById('chatView');
+        const settingsView = document.getElementById('settingsView');
+        const galleryView = document.getElementById('galleryView');
+        const cameraView = document.getElementById('cameraView');
+        const backButtons = document.querySelectorAll('[data-back]');
+
+        const appIcons = document.querySelectorAll('.app-icon[data-app]');
+        appIcons.forEach(icon => {
+            icon.addEventListener('click', (e) => {
+                const app = icon.getAttribute('data-app');
+                openApp(app);
+            });
+        });
+
+        function openApp(app) {
+            hideAllAppViews();
+            if (app === 'chat') {
+                chatView.classList.add('active');
+                renderContactList();
+            } else if (app === 'settings') {
+                settingsView.classList.add('active');
+                renderConfigList();
+            } else if (app === 'gallery') galleryView.classList.add('active');
+            else if (app === 'camera') cameraView.classList.add('active');
+        }
+
+        function hideAllAppViews() {
+            chatView.classList.remove('active');
+            settingsView.classList.remove('active');
+            galleryView.classList.remove('active');
+            cameraView.classList.remove('active');
+        }
+
+        function goHome() { hideAllAppViews(); }
+        homeButton.addEventListener('click', goHome);
+        backButtons.forEach(btn => btn.addEventListener('click', goHome));
+        // ========== 多API配置管理 ==========
+        let apiConfigs = [];
+        let activeConfigId = null;
+
+        function loadConfigs() {
+            const saved = localStorage.getItem('apiConfigs');
+            if (saved) {
+                apiConfigs = JSON.parse(saved);
+            } else {
+                apiConfigs = [{
+                    id: Date.now().toString(),
+                    name: '默认配置',
+                    base_url: '',
+                    api_key: '',
+                    models: [],
+                    currentModel: ''
+                }];
+            }
+            const activeId = localStorage.getItem('activeConfigId');
+            if (activeId && apiConfigs.some(c => c.id === activeId)) {
+                activeConfigId = activeId;
+            } else if (apiConfigs.length > 0) {
+                activeConfigId = apiConfigs[0].id;
+            }
+        }
+
+        function saveConfigs() {
+            localStorage.setItem('apiConfigs', JSON.stringify(apiConfigs));
+            if (activeConfigId) localStorage.setItem('activeConfigId', activeConfigId);
+        }
+
+        function getActiveConfig() {
+            return apiConfigs.find(c => c.id === activeConfigId) || apiConfigs[0];
+        }
+
+        // 渲染配置列表
         function renderConfigList() {
             const container = document.getElementById('configList');
             container.innerHTML = '';
@@ -777,10 +1057,8 @@
                 alert('请先填写 Base URL 和 API Key');
                 return;
             }
-
             const fetchBtns = document.querySelectorAll('.config-model-row button');
             fetchBtns.forEach(b => b.disabled = true);
-
             try {
                 const response = await fetch(`${BACKEND_URL}/api/models`, {
                     method: 'POST',
@@ -876,95 +1154,115 @@
             renderConfigList();
             setTimeout(() => editConfig(newId), 50);
         });
-        // ========== 对话管理 ==========
-        let conversations = [];
-        let currentConvId = null;
+        // ========== 联系人管理 ==========
+        let contacts = [];
+        let currentContactId = null;
 
-        function loadConversations() {
-            const saved = localStorage.getItem('conversations');
+        function loadContacts() {
+            const saved = localStorage.getItem('contacts');
             if (saved) {
-                conversations = JSON.parse(saved);
+                contacts = JSON.parse(saved);
             } else {
-                conversations = [{
+                // 默认创建一个示例联系人
+                contacts = [{
                     id: Date.now().toString(),
-                    name: '对话 1',
+                    avatar: '🤖',
+                    name: '默认助手',
+                    personality: '你是一个友好的AI助手，乐于助人。',
+                    configId: '',
                     messages: [{ role: 'assistant', content: '你好！我是你的AI助手，有什么可以帮你的？' }]
                 }];
             }
-            if (conversations.length === 0) createNewConversation();
-            else currentConvId = conversations[0].id;
+            if (contacts.length === 0) createDefaultContact();
+            else currentContactId = contacts[0].id;
         }
 
-        function saveConversations() {
-            localStorage.setItem('conversations', JSON.stringify(conversations));
-        }
-
-        function createNewConversation() {
+        function createDefaultContact() {
             const newId = Date.now().toString();
-            const newName = `对话 ${conversations.length + 1}`;
-            conversations.push({ id: newId, name: newName, messages: [{ role: 'assistant', content: '你好！我是你的AI助手，有什么可以帮你的？' }] });
-            currentConvId = newId;
-            saveConversations();
-            return newId;
+            contacts.push({
+                id: newId,
+                avatar: '🤖',
+                name: '默认助手',
+                personality: '你是一个友好的AI助手，乐于助人。',
+                configId: '',
+                messages: [{ role: 'assistant', content: '你好！我是你的AI助手，有什么可以帮你的？' }]
+            });
+            currentContactId = newId;
+            saveContacts();
         }
 
-        function deleteConversation(convId) {
-            if (conversations.length <= 1) { alert('至少保留一个对话'); return; }
-            conversations = conversations.filter(c => c.id !== convId);
-            if (currentConvId === convId) currentConvId = conversations[0].id;
-            saveConversations();
-            renderChatList();
-            if (document.getElementById('chatDetailPage').style.display === 'flex' && currentConvId !== convId) showChatList();
+        function saveContacts() {
+            localStorage.setItem('contacts', JSON.stringify(contacts));
         }
 
-        function getCurrentConversation() {
-            return conversations.find(c => c.id === currentConvId) || conversations[0];
+        function getCurrentContact() {
+            return contacts.find(c => c.id === currentContactId) || contacts[0];
         }
 
-        function renderChatList() {
-            const container = document.getElementById('chatListContainer');
+        // 渲染联系人列表
+        function renderContactList() {
+            const container = document.getElementById('contactListContainer');
             container.innerHTML = '';
-            conversations.forEach(conv => {
-                const lastMsg = conv.messages.length ? conv.messages[conv.messages.length-1].content : '';
+            contacts.forEach(contact => {
+                const lastMsg = contact.messages.length ? contact.messages[contact.messages.length-1].content : '';
                 const item = document.createElement('div');
-                item.className = 'conv-item';
+                item.className = 'contact-item';
                 item.innerHTML = `
-                    <div class="conv-avatar">💬</div>
-                    <div class="conv-info">
-                        <div class="conv-name">${conv.name}</div>
-                        <div class="conv-lastmsg">${lastMsg.substring(0,30)}${lastMsg.length>30?'...':''}</div>
+                    <div class="contact-avatar">${contact.avatar}</div>
+                    <div class="contact-info">
+                        <div class="contact-name">${contact.name}</div>
+                        <div class="contact-lastmsg">${lastMsg.substring(0,30)}${lastMsg.length>30?'...':''}</div>
                     </div>
-                    <button class="conv-delete" data-id="${conv.id}">🗑️</button>
+                    <button class="contact-delete" data-id="${contact.id}">🗑️</button>
                 `;
                 item.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('conv-delete')) return;
-                    currentConvId = conv.id;
-                    enterChatDetail(conv.id);
+                    if (e.target.classList.contains('contact-delete')) return;
+                    currentContactId = contact.id;
+                    enterChatDetail(contact.id);
                 });
-                const deleteBtn = item.querySelector('.conv-delete');
+                const deleteBtn = item.querySelector('.contact-delete');
                 deleteBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    deleteConversation(conv.id);
+                    deleteContact(contact.id);
                 });
                 container.appendChild(item);
             });
         }
 
-        function enterChatDetail(convId) {
-            currentConvId = convId;
-            const conv = getCurrentConversation();
-            document.getElementById('detailConvName').textContent = conv.name;
-            renderMessages(conv.messages);
-            document.getElementById('chatListPage').style.display = 'none';
+        function deleteContact(id) {
+            if (contacts.length <= 1) {
+                alert('至少保留一个联系人');
+                return;
+            }
+            contacts = contacts.filter(c => c.id !== id);
+            if (currentContactId === id) {
+                currentContactId = contacts[0].id;
+            }
+            saveContacts();
+            renderContactList();
+            if (document.getElementById('chatDetailPage').style.display === 'flex' && currentContactId !== id) showContactList();
+        }
+
+        // 进入聊天详情
+        function enterChatDetail(contactId) {
+            currentContactId = contactId;
+            const contact = getCurrentContact();
+            document.getElementById('detailAvatar').textContent = contact.avatar;
+            document.getElementById('detailContactName').textContent = contact.name;
+            document.getElementById('detailPersonality').textContent = contact.personality.substring(0, 20) + (contact.personality.length>20?'...':'');
+            renderMessages(contact.messages);
+            document.getElementById('contactListPage').style.display = 'none';
             document.getElementById('chatDetailPage').style.display = 'flex';
         }
 
-        function showChatList() {
-            document.getElementById('chatListPage').style.display = 'flex';
+        // 返回联系人列表
+        function showContactList() {
+            document.getElementById('contactListPage').style.display = 'flex';
             document.getElementById('chatDetailPage').style.display = 'none';
-            renderChatList();
+            renderContactList();
         }
 
+        // 渲染消息
         function renderMessages(messages) {
             const area = document.getElementById('messageArea');
             area.innerHTML = '';
@@ -977,10 +1275,11 @@
             area.scrollTop = area.scrollHeight;
         }
 
+        // 添加消息到当前联系人
         function addMessageToCurrent(text, isUser) {
-            const conv = getCurrentConversation();
-            conv.messages.push({ role: isUser ? 'user' : 'assistant', content: text });
-            saveConversations();
+            const contact = getCurrentContact();
+            contact.messages.push({ role: isUser ? 'user' : 'assistant', content: text });
+            saveContacts();
             if (document.getElementById('chatDetailPage').style.display === 'flex') {
                 const area = document.getElementById('messageArea');
                 const div = document.createElement('div');
@@ -991,26 +1290,93 @@
             }
         }
 
+        // ========== 新建联系人模态框 ==========
+        const modal = document.getElementById('newContactModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelContact');
+        const saveBtn = document.getElementById('saveContact');
+        const contactAvatar = document.getElementById('contactAvatar');
+        const contactName = document.getElementById('contactName');
+        const contactPersonality = document.getElementById('contactPersonality');
+        const contactConfigId = document.getElementById('contactConfigId');
+
+        function openNewContactModal() {
+            // 填充配置下拉框
+            contactConfigId.innerHTML = '<option value="">使用当前激活配置</option>';
+            apiConfigs.forEach(config => {
+                const option = document.createElement('option');
+                option.value = config.id;
+                option.textContent = config.name;
+                contactConfigId.appendChild(option);
+            });
+            modal.classList.add('active');
+        }
+
+        function closeNewContactModal() {
+            modal.classList.remove('active');
+            contactAvatar.value = '🤖';
+            contactName.value = '';
+            contactPersonality.value = '';
+        }
+
+        document.getElementById('newContactBtn').addEventListener('click', openNewContactModal);
+        closeModalBtn.addEventListener('click', closeNewContactModal);
+        cancelBtn.addEventListener('click', closeNewContactModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeNewContactModal();
+        });
+
+        saveBtn.addEventListener('click', () => {
+            const avatar = contactAvatar.value.trim() || '🤖';
+            const name = contactName.value.trim();
+            const personality = contactPersonality.value.trim();
+            if (!name) {
+                alert('请输入联系人名称');
+                return;
+            }
+            const configId = contactConfigId.value; // 可能为空字符串
+            const newId = Date.now().toString();
+            contacts.push({
+                id: newId,
+                avatar: avatar,
+                name: name,
+                personality: personality || '你是一个友好的AI助手。',
+                configId: configId,
+                messages: [{ role: 'assistant', content: `你好！我是${name}，很高兴认识你！` }]
+            });
+            saveContacts();
+            closeNewContactModal();
+            renderContactList();
+            // 自动进入新联系人聊天
+            currentContactId = newId;
+            enterChatDetail(newId);
+        });
         // ========== 聊天发送 ==========
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
         const recordBtn = document.getElementById('recordBtn');
         const backToListBtn = document.getElementById('backToListBtn');
-        backToListBtn.addEventListener('click', showChatList);
-        document.getElementById('newChatBtn').addEventListener('click', () => {
-            const newId = createNewConversation();
-            enterChatDetail(newId);
-        });
-
-        // 返回桌面按钮（只有列表页左上角）
+        backToListBtn.addEventListener('click', showContactList);
         document.getElementById('listHomeBtn').addEventListener('click', goHome);
 
         async function handleSend() {
             const text = messageInput.value.trim();
             if (!text) return;
 
-            const activeConfig = getActiveConfig();
-            if (!activeConfig.base_url || !activeConfig.api_key || !activeConfig.currentModel) {
+            const contact = getCurrentContact();
+            // 确定使用的配置：如果联系人指定了configId，则使用那个配置；否则使用当前激活配置
+            let config;
+            if (contact.configId) {
+                config = apiConfigs.find(c => c.id === contact.configId);
+                if (!config) {
+                    alert('联系人关联的API配置不存在，请重新选择');
+                    return;
+                }
+            } else {
+                config = getActiveConfig();
+            }
+
+            if (!config.base_url || !config.api_key || !config.currentModel) {
                 alert('请先在设置中配置并激活一个有效的API配置，并拉取模型');
                 return;
             }
@@ -1018,17 +1384,20 @@
             addMessageToCurrent(text, true);
             messageInput.value = '';
 
-            const conv = getCurrentConversation();
-            const messages = conv.messages.map(m => ({ role: m.role, content: m.content }));
+            // 构建消息历史：包含系统人设 + 历史消息
+            const messages = [
+                { role: 'system', content: contact.personality },
+                ...contact.messages.map(m => ({ role: m.role, content: m.content }))
+            ];
 
             try {
                 const response = await fetch(`${BACKEND_URL}/api/chat`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        base_url: activeConfig.base_url,
-                        api_key: activeConfig.api_key,
-                        model: activeConfig.currentModel,
+                        base_url: config.base_url,
+                        api_key: config.api_key,
+                        model: config.currentModel,
                         messages
                     })
                 });
@@ -1040,6 +1409,7 @@
             }
         }
 
+        // 录音模拟（可后续升级）
         let isRecording = false;
         recordBtn.addEventListener('click', () => {
             if (!isRecording) {
@@ -1070,8 +1440,8 @@
         // 初始化
         window.addEventListener('load', () => {
             loadConfigs();
-            loadConversations();
-            renderChatList();
+            loadContacts();
+            renderContactList();
         });
     </script>
 </body>
