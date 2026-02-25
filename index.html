@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 更多菜单版（真实拉黑）</title>
+    <title>AI角色 · 仿LINE界面</title>
     <style>
         /* ===== 基础样式 ===== */
         * {
@@ -331,43 +331,68 @@
             border-radius: 8px;
         }
 
-        /* ===== 联系人列表样式 ===== */
+        /* ===== 仿LINE联系人列表样式 ===== */
         .contact-list {
             flex: 1;
             overflow-y: auto;
             background: #fff;
         }
-        .list-header {
+        /* 顶部导航 */
+        .line-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px;
-            background: white;
+            padding: 12px 16px;
+            background: #f9f9f9;
             border-bottom: 1px solid #eee;
         }
-        .list-header-left {
+        .line-header-left {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
         }
-        .list-header h2 {
-            font-size: 20px;
+        .line-header-left h2 {
+            font-size: 22px;
             font-weight: 600;
-            margin: 0;
+            color: #333;
         }
-        .new-contact-btn {
-            background: #07c160;
-            color: white;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            font-size: 24px;
+        .line-header-right {
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 16px;
+        }
+        .header-icon {
+            font-size: 22px;
+            cursor: pointer;
+            color: #555;
+        }
+        /* 底部标签栏 */
+        .tab-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 8px 0;
+            background: #f9f9f9;
+            border-top: 1px solid #eee;
+        }
+        .tab-item {
+            flex: 1;
+            text-align: center;
+            font-size: 14px;
+            color: #999;
+            padding: 6px 0;
             cursor: pointer;
         }
+        .tab-item.active {
+            color: #07c160;
+            font-weight: 500;
+        }
+        /* 标签内容区 */
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+        /* 列表项 */
         .contact-item {
             display: flex;
             align-items: center;
@@ -376,8 +401,8 @@
             cursor: pointer;
         }
         .contact-avatar {
-            width: 48px;
-            height: 48px;
+            width: 50px;
+            height: 50px;
             background: #07c160;
             border-radius: 50%;
             display: flex;
@@ -398,16 +423,42 @@
             flex: 1;
             min-width: 0;
         }
-        .contact-name {
-            font-weight: 600;
+        .contact-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
             margin-bottom: 4px;
         }
-        .contact-lastmsg {
+        .contact-name {
+            font-weight: 600;
+            font-size: 16px;
+            color: #333;
+        }
+        .contact-time {
+            font-size: 12px;
             color: #999;
+        }
+        .contact-lastmsg {
+            color: #666;
             font-size: 14px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+        .unread-badge {
+            background: #07c160;
+            color: white;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 12px;
+            min-width: 20px;
+            text-align: center;
+            margin-left: 8px;
+        }
+        .blocked-badge {
+            color: #ff3b30;
+            font-size: 12px;
+            margin-left: 6px;
         }
 
         /* 新建联系人表单模态框 */
@@ -531,7 +582,7 @@
             color: #333;
         }
 
-        /* ===== 聊天详情页 ===== */
+        /* ===== 聊天详情页（暂保留原有样式） ===== */
         .chat-detail {
             flex: 1;
             display: flex;
@@ -733,6 +784,16 @@
             font-size: 12px;
             margin-left: 8px;
         }
+
+        /* 占位页面 */
+        .placeholder-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #999;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -765,21 +826,47 @@
                 <div class="home-button" id="homeButton"></div>
             </div>
 
-            <!-- 联系人应用（列表+详情） -->
+            <!-- 联系人应用（仿LINE界面） -->
             <div class="app-view" id="chatView">
-                <!-- 联系人列表页 -->
+                <!-- 仿LINE主界面：顶部+底部tab+内容区 -->
                 <div id="contactListPage" style="display:flex; flex-direction:column; flex:1;">
-                    <div class="list-header">
-                        <div class="list-header-left">
+                    <!-- 顶部 -->
+                    <div class="line-header">
+                        <div class="line-header-left">
                             <button class="nav-button" id="listHomeBtn">←</button>
-                            <h2>联系人</h2>
+                            <h2>聊天</h2>
                         </div>
-                        <button class="new-contact-btn" id="newContactBtn">+</button>
+                        <div class="line-header-right">
+                            <span class="header-icon">🔍</span>
+                            <span class="header-icon" id="newContactBtn">➕</span>
+                        </div>
                     </div>
-                    <div class="contact-list" id="contactListContainer"></div>
+
+                    <!-- 底部标签栏 -->
+                    <div class="tab-bar">
+                        <span class="tab-item active" data-tab="chats">聊天</span>
+                        <span class="tab-item" data-tab="friends">好友</span>
+                        <span class="tab-item" data-tab="dynamic">动态</span>
+                    </div>
+
+                    <!-- 标签内容区 -->
+                    <div class="tab-content" id="tabContent">
+                        <!-- 聊天列表 (默认显示) -->
+                        <div id="chatsTab" style="display: block;">
+                            <div class="contact-list" id="contactListContainer"></div>
+                        </div>
+                        <!-- 好友列表 (占位) -->
+                        <div id="friendsTab" style="display: none;">
+                            <div class="placeholder-page">好友列表开发中</div>
+                        </div>
+                        <!-- 动态 (占位) -->
+                        <div id="dynamicTab" style="display: none;">
+                            <div class="placeholder-page">动态开发中</div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- 聊天详情页 -->
+                <!-- 聊天详情页（暂保留原有样式） -->
                 <div id="chatDetailPage" style="display:none; flex-direction:column; flex:1;">
                     <div class="detail-header">
                         <div class="detail-header-left">
@@ -994,15 +1081,23 @@
             });
         }
 
-        // ========== 渲染函数 ==========
+        // ========== 渲染联系人列表（仿LINE样式） ==========
         function renderContactList() {
             const container = document.getElementById('contactListContainer');
             if (!container) return;
             container.innerHTML = '';
             contacts.forEach(contact => {
                 const lastMsg = contact.messages.length ? contact.messages[contact.messages.length-1].content : '';
+
+                // 模拟时间和未读数（仅用于UI演示）
+                const now = new Date();
+                const timeStr = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes());
+                const unread = Math.floor(Math.random() * 5); // 随机0-4条未读
+
                 const item = document.createElement('div');
                 item.className = 'contact-item';
+                item.dataset.id = contact.id;
+
                 const avatarDiv = document.createElement('div');
                 avatarDiv.className = 'contact-avatar';
                 if (contact.avatar && contact.avatar.startsWith('data:image')) {
@@ -1014,16 +1109,48 @@
 
                 const infoDiv = document.createElement('div');
                 infoDiv.className = 'contact-info';
-                infoDiv.innerHTML = `
-                    <div class="contact-name">${contact.name} ${contact.blocked ? '<span class="blocked-badge">(已拉黑)</span>' : ''}</div>
-                    <div class="contact-lastmsg">${lastMsg.substring(0,30)}${lastMsg.length>30?'...':''}</div>
-                `;
+
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'contact-row';
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'contact-name';
+                nameSpan.textContent = contact.name;
+                if (contact.blocked) {
+                    const blockSpan = document.createElement('span');
+                    blockSpan.className = 'blocked-badge';
+                    blockSpan.textContent = '(已拉黑)';
+                    nameSpan.appendChild(blockSpan);
+                }
+                rowDiv.appendChild(nameSpan);
+
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'contact-time';
+                timeSpan.textContent = timeStr;
+                rowDiv.appendChild(timeSpan);
+
+                infoDiv.appendChild(rowDiv);
+
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'contact-lastmsg';
+                msgDiv.textContent = lastMsg.substring(0, 30) + (lastMsg.length > 30 ? '...' : '');
+                infoDiv.appendChild(msgDiv);
+
                 item.appendChild(infoDiv);
+
+                // 未读计数
+                if (unread > 0) {
+                    const unreadSpan = document.createElement('span');
+                    unreadSpan.className = 'unread-badge';
+                    unreadSpan.textContent = unread;
+                    item.appendChild(unreadSpan);
+                }
 
                 item.addEventListener('click', (e) => {
                     currentContactId = contact.id;
                     enterChatDetail(contact.id);
                 });
+
                 container.appendChild(item);
             });
         }
@@ -1728,6 +1855,36 @@
                 }
                 isRecording = false;
             }
+
+            // ----- 底部标签切换 -----
+            const tabItems = document.querySelectorAll('.tab-item');
+            const chatsTab = document.getElementById('chatsTab');
+            const friendsTab = document.getElementById('friendsTab');
+            const dynamicTab = document.getElementById('dynamicTab');
+
+            tabItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    // 移除所有active
+                    tabItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+
+                    const tab = item.dataset.tab;
+                    if (tab === 'chats') {
+                        chatsTab.style.display = 'block';
+                        friendsTab.style.display = 'none';
+                        dynamicTab.style.display = 'none';
+                        renderContactList(); // 刷新列表（如果需要）
+                    } else if (tab === 'friends') {
+                        chatsTab.style.display = 'none';
+                        friendsTab.style.display = 'flex';
+                        dynamicTab.style.display = 'none';
+                    } else if (tab === 'dynamic') {
+                        chatsTab.style.display = 'none';
+                        friendsTab.style.display = 'none';
+                        dynamicTab.style.display = 'flex';
+                    }
+                });
+            });
         });
     </script>
 </body>
