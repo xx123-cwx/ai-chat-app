@@ -2,8 +2,8 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 最新版LINE风格（简约图标）</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI角色 · 仿LINE全屏版</title>
     <!-- Font Awesome 6 图标库（用于底部标签） -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -18,51 +18,24 @@
         html, body {
             height: 100%;
             width: 100%;
+            background: #fff;
         }
         input, textarea, select, [contenteditable="true"] {
             user-select: text;
             -webkit-user-select: text;
         }
-        body {
-            background: #111;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 8px;
-        }
-        .phone-mock {
-            width: 100%;
-            max-width: 380px;
-            max-height: 90vh;
-            background: #1a1a1a;
-            border-radius: 48px;
-            padding: 12px;
-            box-shadow: 0 30px 50px -20px rgba(0,0,0,0.8), 0 0 0 8px #2c2c2c, 0 0 0 12px #3d3d3d;
-            position: relative;
-        }
+
+        /* 主屏幕容器 - 全屏显示 */
         .phone-screen {
-            background: #000;
-            border-radius: 36px;
-            overflow-y: auto;
-            aspect-ratio: 9 / 19.5;
+            height: 100%;
+            width: 100%;
+            background: #fff;
             display: flex;
             flex-direction: column;
-            position: relative;
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
-            scrollbar-width: thin;
-            scrollbar-color: #888 #333;
+            overflow: hidden;
         }
-        .phone-screen::-webkit-scrollbar {
-            width: 4px;
-        }
-        .phone-screen::-webkit-scrollbar-track {
-            background: #333;
-        }
-        .phone-screen::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
+
+        /* 桌面 */
         .desktop {
             flex: 1;
             background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format&fit=crop');
@@ -71,7 +44,7 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            min-height: min-content;
+            min-height: 0;
         }
         .status-bar {
             padding: 12px 20px 4px;
@@ -151,8 +124,10 @@
         .home-button:active {
             background: white;
         }
+
+        /* 应用视图（全屏覆盖） */
         .app-view {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
@@ -335,8 +310,6 @@
 
         /* ===== 仿LINE最新版联系人列表样式 ===== */
         .contact-list {
-            flex: 1;
-            overflow-y: auto;
             background: #fff;
         }
         /* 顶部导航 */
@@ -348,36 +321,32 @@
             background: #ffffff;
             border-bottom: 1px solid #f0f0f0;
         }
-        .line-header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .line-header-left h2 {
+        .line-header h2 {
             font-size: 22px;
             font-weight: 600;
             color: #1a1a1a;
             letter-spacing: -0.3px;
         }
-        .line-header-right {
+        .header-right {
             display: flex;
             align-items: center;
-            gap: 20px;
         }
-        .header-icon {
-            font-size: 20px;
-            cursor: pointer;
-            color: #555;
-            font-weight: 400;
-            line-height: 1;
-        }
-        .search-icon {
-            font-size: 22px;  /* 稍微大一点，与加号协调 */
-            font-weight: 500;
-        }
-        .plus-icon {
+        .circle-plus {
+            display: inline-block;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            text-align: center;
+            line-height: 36px;
             font-size: 26px;
             font-weight: 300;
+            cursor: pointer;
+            color: #555;
+            transition: background 0.2s;
+        }
+        .circle-plus:hover {
+            background: #e0e0e0;
         }
         /* 底部标签栏 */
         .tab-bar {
@@ -405,7 +374,7 @@
             font-size: 22px;
         }
         .tab-item.active {
-            color: #06c755; /* LINE绿 */
+            color: #06c755;
             font-weight: 500;
         }
         /* 标签内容区 */
@@ -609,7 +578,7 @@
             color: #333;
         }
 
-        /* ===== 聊天详情页（暂保留原有样式） ===== */
+        /* ===== 聊天详情页 ===== */
         .chat-detail {
             flex: 1;
             display: flex;
@@ -760,30 +729,6 @@
             color: white;
         }
 
-        .side-button {
-            position: absolute;
-            width: 4px;
-            height: 40px;
-            background: #2c2c2c;
-            border-radius: 4px 0 0 4px;
-            right: -4px;
-            top: 100px;
-        }
-        .side-button.volume-up {
-            top: 160px;
-            height: 50px;
-        }
-        .side-button.volume-down {
-            top: 220px;
-            height: 50px;
-        }
-        .side-button.power {
-            left: -4px;
-            top: 160px;
-            height: 50px;
-            border-radius: 0 4px 4px 0;
-        }
-
         /* 联系人操作菜单 */
         .menu-content {
             text-align: center;
@@ -806,11 +751,6 @@
         .menu-item:active {
             background: #e0e0e0;
         }
-        .blocked-badge {
-            color: #ff3b30;
-            font-size: 12px;
-            margin-left: 8px;
-        }
 
         /* 占位页面 */
         .placeholder-page {
@@ -824,125 +764,114 @@
     </style>
 </head>
 <body>
-    <div class="phone-mock">
-        <div class="side-button"></div>
-        <div class="side-button volume-up"></div>
-        <div class="side-button volume-down"></div>
-        <div class="side-button power"></div>
-
-        <div class="phone-screen">
-            <!-- 桌面 -->
-            <div class="desktop" id="desktop">
-                <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
-                <div class="app-grid">
-                    <div class="app-icon" data-app="chat"><div class="icon-bg">💬</div><span class="app-label">信息</span></div>
-                    <div class="app-icon" data-app="settings"><div class="icon-bg">⚙️</div><span class="app-label">设置</span></div>
-                    <div class="app-icon" data-app="gallery"><div class="icon-bg">🖼️</div><span class="app-label">相册</span></div>
-                    <div class="app-icon" data-app="camera"><div class="icon-bg">📷</div><span class="app-label">相机</span></div>
-                    <div class="app-icon"><div class="icon-bg">📱</div><span class="app-label">应用4</span></div>
-                    <div class="app-icon"><div class="icon-bg">🎵</div><span class="app-label">音乐</span></div>
-                    <div class="app-icon"><div class="icon-bg">📺</div><span class="app-label">视频</span></div>
-                    <div class="app-icon"><div class="icon-bg">🧮</div><span class="app-label">计算器</span></div>
-                </div>
-                <div class="dock">
-                    <div class="app-icon" data-app="chat"><div class="icon-bg">💬</div><span class="app-label">信息</span></div>
-                    <div class="app-icon" data-app="settings"><div class="icon-bg">⚙️</div><span class="app-label">设置</span></div>
-                    <div class="app-icon" data-app="gallery"><div class="icon-bg">🖼️</div><span class="app-label">相册</span></div>
-                    <div class="app-icon" data-app="camera"><div class="icon-bg">📷</div><span class="app-label">相机</span></div>
-                </div>
-                <div class="home-button" id="homeButton"></div>
+    <div class="phone-screen">
+        <!-- 桌面 -->
+        <div class="desktop" id="desktop">
+            <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+            <div class="app-grid">
+                <div class="app-icon" data-app="chat"><div class="icon-bg">💬</div><span class="app-label">信息</span></div>
+                <div class="app-icon" data-app="settings"><div class="icon-bg">⚙️</div><span class="app-label">设置</span></div>
+                <div class="app-icon" data-app="gallery"><div class="icon-bg">🖼️</div><span class="app-label">相册</span></div>
+                <div class="app-icon" data-app="camera"><div class="icon-bg">📷</div><span class="app-label">相机</span></div>
+                <div class="app-icon"><div class="icon-bg">📱</div><span class="app-label">应用4</span></div>
+                <div class="app-icon"><div class="icon-bg">🎵</div><span class="app-label">音乐</span></div>
+                <div class="app-icon"><div class="icon-bg">📺</div><span class="app-label">视频</span></div>
+                <div class="app-icon"><div class="icon-bg">🧮</div><span class="app-label">计算器</span></div>
             </div>
-
-            <!-- 联系人应用（仿LINE界面） -->
-            <div class="app-view" id="chatView">
-                <!-- 仿LINE主界面：顶部+底部tab+内容区 -->
-                <div id="contactListPage" style="display:flex; flex-direction:column; flex:1;">
-                    <!-- 顶部 -->
-                    <div class="line-header">
-                        <div class="line-header-left">
-                            <button class="nav-button" id="listHomeBtn">←</button>
-                            <h2>聊天</h2>
-                        </div>
-                        <div class="line-header-right">
-                            <span class="header-icon search-icon" title="搜索">Q</span>
-                            <span class="header-icon plus-icon" id="newContactBtn" title="新建聊天">+</span>
-                        </div>
-                    </div>
-
-                    <!-- 底部标签栏 -->
-                    <div class="tab-bar">
-                        <div class="tab-item active" data-tab="chats">
-                            <i class="fa-regular fa-comment-dots"></i>
-                            <span>聊天</span>
-                        </div>
-                        <div class="tab-item" data-tab="friends">
-                            <i class="fa-regular fa-user"></i>
-                            <span>好友</span>
-                        </div>
-                        <div class="tab-item" data-tab="dynamic">
-                            <i class="fa-regular fa-clock"></i>
-                            <span>动态</span>
-                        </div>
-                    </div>
-
-                    <!-- 标签内容区 -->
-                    <div class="tab-content" id="tabContent">
-                        <!-- 聊天列表 (默认显示) -->
-                        <div id="chatsTab" style="display: block;">
-                            <div class="contact-list" id="contactListContainer"></div>
-                        </div>
-                        <!-- 好友列表 (占位) -->
-                        <div id="friendsTab" style="display: none;">
-                            <div class="placeholder-page">好友列表开发中</div>
-                        </div>
-                        <!-- 动态 (占位) -->
-                        <div id="dynamicTab" style="display: none;">
-                            <div class="placeholder-page">动态开发中</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 聊天详情页（暂保留原有样式） -->
-                <div id="chatDetailPage" style="display:none; flex-direction:column; flex:1;">
-                    <div class="detail-header">
-                        <div class="detail-header-left">
-                            <button class="nav-button" id="backToListBtn">←</button>
-                            <div class="detail-avatar" id="detailAvatar">🤖</div>
-                            <div>
-                                <span class="detail-title" id="detailContactName">角色</span>
-                                <div class="detail-personality" id="detailPersonality"></div>
-                            </div>
-                        </div>
-                        <button class="more-btn" id="moreMenuBtn">⋮</button>
-                    </div>
-                    <div class="message-area" id="messageArea"></div>
-                    <div class="input-area">
-                        <input type="text" class="text-input" id="messageInput" placeholder="输入消息...">
-                        <button class="icon-button" id="recordBtn">🎤</button>
-                        <button class="icon-button send-button" id="sendBtn">➤</button>
-                    </div>
-                </div>
+            <div class="dock">
+                <div class="app-icon" data-app="chat"><div class="icon-bg">💬</div><span class="app-label">信息</span></div>
+                <div class="app-icon" data-app="settings"><div class="icon-bg">⚙️</div><span class="app-label">设置</span></div>
+                <div class="app-icon" data-app="gallery"><div class="icon-bg">🖼️</div><span class="app-label">相册</span></div>
+                <div class="app-icon" data-app="camera"><div class="icon-bg">📷</div><span class="app-label">相机</span></div>
             </div>
-
-            <!-- 设置应用（多API配置管理） -->
-            <div class="app-view" id="settingsView">
-                <div class="app-header">
-                    <button class="nav-button" data-back>←</button>
-                    <span class="app-title">设置</span>
-                </div>
-                <div class="settings-container" id="settingsContainer">
-                    <div class="config-header">
-                        <h3>API 配置</h3>
-                        <button class="add-config-btn" id="addConfigBtn">+</button>
-                    </div>
-                    <div id="configList"></div>
-                </div>
-            </div>
-
-            <!-- 其他应用占位 -->
-            <div class="app-view" id="galleryView"><div class="app-header"><button class="nav-button" data-back>←</button><span class="app-title">相册</span></div><div style="padding:20px; text-align:center;">相册开发中</div></div>
-            <div class="app-view" id="cameraView"><div class="app-header"><button class="nav-button" data-back>←</button><span class="app-title">相机</span></div><div style="padding:20px; text-align:center;">相机开发中</div></div>
+            <div class="home-button" id="homeButton"></div>
         </div>
+
+        <!-- 联系人应用（仿LINE界面） -->
+        <div class="app-view" id="chatView">
+            <!-- 仿LINE主界面：顶部+底部tab+内容区 -->
+            <div id="contactListPage" style="display:flex; flex-direction:column; flex:1;">
+                <!-- 顶部 -->
+                <div class="line-header">
+                    <h2>聊天</h2>
+                    <div class="header-right">
+                        <span class="circle-plus" id="newContactBtn" title="新建聊天">+</span>
+                    </div>
+                </div>
+
+                <!-- 底部标签栏 -->
+                <div class="tab-bar">
+                    <div class="tab-item active" data-tab="chats">
+                        <i class="fa-regular fa-comment-dots"></i>
+                        <span>聊天</span>
+                    </div>
+                    <div class="tab-item" data-tab="friends">
+                        <i class="fa-regular fa-user"></i>
+                        <span>好友</span>
+                    </div>
+                    <div class="tab-item" data-tab="dynamic">
+                        <i class="fa-regular fa-clock"></i>
+                        <span>动态</span>
+                    </div>
+                </div>
+
+                <!-- 标签内容区 -->
+                <div class="tab-content" id="tabContent">
+                    <!-- 聊天列表 (默认显示) -->
+                    <div id="chatsTab" style="display: block;">
+                        <div class="contact-list" id="contactListContainer"></div>
+                    </div>
+                    <!-- 好友列表 (占位) -->
+                    <div id="friendsTab" style="display: none;">
+                        <div class="placeholder-page">好友列表开发中</div>
+                    </div>
+                    <!-- 动态 (占位) -->
+                    <div id="dynamicTab" style="display: none;">
+                        <div class="placeholder-page">动态开发中</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 聊天详情页 -->
+            <div id="chatDetailPage" style="display:none; flex-direction:column; flex:1;">
+                <div class="detail-header">
+                    <div class="detail-header-left">
+                        <button class="nav-button" id="backToListBtn">←</button>
+                        <div class="detail-avatar" id="detailAvatar">🤖</div>
+                        <div>
+                            <span class="detail-title" id="detailContactName">角色</span>
+                            <div class="detail-personality" id="detailPersonality"></div>
+                        </div>
+                    </div>
+                    <button class="more-btn" id="moreMenuBtn">⋮</button>
+                </div>
+                <div class="message-area" id="messageArea"></div>
+                <div class="input-area">
+                    <input type="text" class="text-input" id="messageInput" placeholder="输入消息...">
+                    <button class="icon-button" id="recordBtn">🎤</button>
+                    <button class="icon-button send-button" id="sendBtn">➤</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 设置应用（多API配置管理） -->
+        <div class="app-view" id="settingsView">
+            <div class="app-header">
+                <button class="nav-button" data-back>←</button>
+                <span class="app-title">设置</span>
+            </div>
+            <div class="settings-container" id="settingsContainer">
+                <div class="config-header">
+                    <h3>API 配置</h3>
+                    <button class="add-config-btn" id="addConfigBtn">+</button>
+                </div>
+                <div id="configList"></div>
+            </div>
+        </div>
+
+        <!-- 其他应用占位 -->
+        <div class="app-view" id="galleryView"><div class="app-header"><button class="nav-button" data-back>←</button><span class="app-title">相册</span></div><div style="padding:20px; text-align:center;">相册开发中</div></div>
+        <div class="app-view" id="cameraView"><div class="app-header"><button class="nav-button" data-back>←</button><span class="app-title">相机</span></div><div style="padding:20px; text-align:center;">相机开发中</div></div>
     </div>
 
     <!-- 新建联系人模态框 -->
@@ -1015,7 +944,7 @@
         let activeConfigId = null;
         let contacts = [];
         let currentContactId = null;
-        let selectedAvatarData = '🤖'; // 存储当前选中的头像（文字或压缩后的DataURL）
+        let selectedAvatarData = '🤖';
 
         // ========== 工具函数：数据加载与保存 ==========
         function loadConfigs() {
@@ -1053,7 +982,6 @@
             const saved = localStorage.getItem('contacts');
             if (saved) {
                 contacts = JSON.parse(saved);
-                // 为旧数据添加 blocked 字段
                 contacts.forEach(c => {
                     if (c.blocked === undefined) c.blocked = false;
                 });
@@ -1084,7 +1012,6 @@
             return new Promise((resolve, reject) => {
                 const img = new Image();
                 img.onload = () => {
-                    // 计算缩放后的尺寸（保持宽高比）
                     let width = img.width;
                     let height = img.height;
                     if (width > height) {
@@ -1098,15 +1025,11 @@
                             height = maxSize;
                         }
                     }
-
-                    // 创建 canvas 并绘制
                     const canvas = document.createElement('canvas');
                     canvas.width = width;
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-
-                    // 导出为 JPEG 格式（支持质量参数）
                     const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
                     resolve(compressedDataUrl);
                 };
@@ -1117,18 +1040,16 @@
             });
         }
 
-        // ========== 渲染联系人列表（仿LINE样式） ==========
+        // ========== 渲染联系人列表 ==========
         function renderContactList() {
             const container = document.getElementById('contactListContainer');
             if (!container) return;
             container.innerHTML = '';
             contacts.forEach(contact => {
                 const lastMsg = contact.messages.length ? contact.messages[contact.messages.length-1].content : '';
-
-                // 模拟时间和未读数（仅用于UI演示）
                 const now = new Date();
                 const timeStr = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes());
-                const unread = Math.floor(Math.random() * 5); // 随机0-4条未读
+                const unread = Math.floor(Math.random() * 5);
 
                 const item = document.createElement('div');
                 item.className = 'contact-item';
@@ -1174,7 +1095,6 @@
 
                 item.appendChild(infoDiv);
 
-                // 未读计数
                 if (unread > 0) {
                     const unreadSpan = document.createElement('span');
                     unreadSpan.className = 'unread-badge';
@@ -1250,7 +1170,6 @@
                     activateBtn.className = 'activate-config';
                     activateBtn.dataset.id = config.id;
                     item.appendChild(activateBtn);
-
                     activateBtn.addEventListener('click', () => {
                         activeConfigId = config.id;
                         saveConfigs();
@@ -1297,7 +1216,6 @@
             const detailPersonality = document.getElementById('detailPersonality');
             if (detailPersonality) detailPersonality.textContent = contact.personality.substring(0, 20) + (contact.personality.length>20?'...':'');
 
-            // 根据拉黑状态禁用输入框
             const messageInput = document.getElementById('messageInput');
             const sendBtn = document.getElementById('sendBtn');
             if (contact.blocked) {
@@ -1451,7 +1369,6 @@
             if (activeConfigId === id) {
                 activeConfigId = apiConfigs[0].id;
             }
-            // 清除联系人中对该配置的引用
             contacts.forEach(c => { if (c.configId === id) c.configId = ''; });
             saveContacts();
             saveConfigs();
@@ -1461,10 +1378,8 @@
         // ========== 模态框操作 ==========
         function openNewContactModal() {
             try {
-                // 确保配置数据已加载
                 if (!apiConfigs || apiConfigs.length === 0) loadConfigs();
 
-                // 填充配置下拉框
                 const configSelect = document.getElementById('contactConfigId');
                 if (configSelect) {
                     configSelect.innerHTML = '<option value="">使用当前激活配置</option>';
@@ -1476,7 +1391,6 @@
                     });
                 }
 
-                // 重置表单
                 const avatarTextInput = document.getElementById('contactAvatarText');
                 if (avatarTextInput) avatarTextInput.value = '🤖';
                 selectedAvatarData = '🤖';
@@ -1495,7 +1409,6 @@
                 const upload = document.getElementById('avatarUpload');
                 if (upload) upload.value = '';
 
-                // 默认选中文字类型
                 const textRadio = document.querySelector('input[name="avatarType"][value="text"]');
                 if (textRadio) textRadio.checked = true;
 
@@ -1509,7 +1422,6 @@
                 const personalityInput = document.getElementById('contactPersonality');
                 if (personalityInput) personalityInput.value = '';
 
-                // 显示模态框
                 const modal = document.getElementById('newContactModal');
                 if (modal) modal.classList.add('active');
             } catch (e) {
@@ -1523,7 +1435,6 @@
             if (modal) modal.classList.remove('active');
         }
 
-        // 打开联系人菜单
         function openContactMenu() {
             const menuModal = document.getElementById('contactMenuModal');
             if (menuModal) menuModal.classList.add('active');
@@ -1534,16 +1445,12 @@
             if (menuModal) menuModal.classList.remove('active');
         }
 
-        // ========== 初始化所有事件 (DOMContentLoaded) ==========
+        // ========== 初始化所有事件 ==========
         document.addEventListener('DOMContentLoaded', function() {
-            // 加载数据
             loadConfigs();
             loadContacts();
-
-            // 渲染初始列表
             renderContactList();
 
-            // ----- 桌面图标事件 -----
             const appIcons = document.querySelectorAll('.app-icon[data-app]');
             appIcons.forEach(icon => {
                 icon.addEventListener('click', (e) => {
@@ -1573,16 +1480,13 @@
                 cameraView.classList.remove('active');
             }
 
-            // 返回主页
             const homeButton = document.getElementById('homeButton');
             if (homeButton) homeButton.addEventListener('click', () => hideAllAppViews());
 
-            // 所有带 data-back 的按钮返回主页
             document.querySelectorAll('[data-back]').forEach(btn => {
                 btn.addEventListener('click', () => hideAllAppViews());
             });
 
-            // 设置页添加配置
             const addConfigBtn = document.getElementById('addConfigBtn');
             if (addConfigBtn) {
                 addConfigBtn.addEventListener('click', () => {
@@ -1601,7 +1505,6 @@
                 });
             }
 
-            // ----- 新建联系人模态框事件 -----
             const newContactBtn = document.getElementById('newContactBtn');
             if (newContactBtn) newContactBtn.addEventListener('click', openNewContactModal);
 
@@ -1618,7 +1521,6 @@
                 });
             }
 
-            // 头像类型切换
             const avatarTypeRadios = document.querySelectorAll('input[name="avatarType"]');
             avatarTypeRadios.forEach(radio => {
                 radio.addEventListener('change', (e) => {
@@ -1641,7 +1543,6 @@
                 });
             });
 
-            // 文字头像输入
             const contactAvatarText = document.getElementById('contactAvatarText');
             if (contactAvatarText) {
                 contactAvatarText.addEventListener('input', (e) => {
@@ -1653,7 +1554,6 @@
                 });
             }
 
-            // 点击“选择图片”按钮
             const uploadBtn = document.getElementById('uploadBtn');
             if (uploadBtn) {
                 uploadBtn.addEventListener('click', () => {
@@ -1661,23 +1561,17 @@
                 });
             }
 
-            // 处理图片上传（压缩后存储）
             const avatarUpload = document.getElementById('avatarUpload');
             if (avatarUpload) {
                 avatarUpload.addEventListener('change', async (e) => {
                     const file = e.target.files[0];
                     if (!file) return;
-
-                    // 先读取为 DataURL
                     const reader = new FileReader();
                     reader.onload = async (event) => {
                         const originalDataUrl = event.target.result;
                         try {
-                            // 压缩图片：最大尺寸 200px，质量 0.8
                             const compressedDataUrl = await compressImage(originalDataUrl, 200, 0.8);
                             selectedAvatarData = compressedDataUrl;
-
-                            // 更新预览
                             const previewImg = document.getElementById('avatarPreviewImg');
                             const previewText = document.getElementById('avatarPreviewText');
                             if (previewImg) {
@@ -1687,7 +1581,6 @@
                             if (previewText) previewText.style.display = 'none';
                         } catch (err) {
                             alert('图片压缩失败，使用原图');
-                            // 降级：使用原图
                             selectedAvatarData = originalDataUrl;
                             const previewImg = document.getElementById('avatarPreviewImg');
                             const previewText = document.getElementById('avatarPreviewText');
@@ -1702,7 +1595,6 @@
                 });
             }
 
-            // 保存联系人
             const saveContact = document.getElementById('saveContact');
             if (saveContact) {
                 saveContact.addEventListener('click', () => {
@@ -1731,20 +1623,17 @@
                 });
             }
 
-            // ----- 聊天功能事件 -----
             const backToListBtn = document.getElementById('backToListBtn');
             if (backToListBtn) backToListBtn.addEventListener('click', showContactList);
 
             const listHomeBtn = document.getElementById('listHomeBtn');
             if (listHomeBtn) listHomeBtn.addEventListener('click', () => hideAllAppViews());
 
-            // 更多菜单按钮
             const moreMenuBtn = document.getElementById('moreMenuBtn');
             if (moreMenuBtn) {
                 moreMenuBtn.addEventListener('click', openContactMenu);
             }
 
-            // 菜单模态框关闭
             const closeMenuModal = document.getElementById('closeMenuModal');
             if (closeMenuModal) {
                 closeMenuModal.addEventListener('click', closeContactMenu);
@@ -1756,7 +1645,6 @@
                 });
             }
 
-            // 菜单按钮操作
             const menuDelete = document.getElementById('menuDelete');
             if (menuDelete) {
                 menuDelete.addEventListener('click', () => {
@@ -1773,9 +1661,8 @@
                 menuBlock.addEventListener('click', () => {
                     const contact = getCurrentContact();
                     if (contact) {
-                        contact.blocked = !contact.blocked; // 切换拉黑状态
+                        contact.blocked = !contact.blocked;
                         saveContacts();
-                        // 刷新当前聊天界面
                         enterChatDetail(contact.id);
                         closeContactMenu();
                     }
@@ -1788,8 +1675,7 @@
                     const contact = getCurrentContact();
                     if (contact) {
                         if (confirm('确定清空所有聊天记录吗？')) {
-                            contact.messages = []; // 清空消息
-                            // 可添加一条系统提示
+                            contact.messages = [];
                             contact.messages.push({ role: 'system', content: '聊天记录已清空' });
                             saveContacts();
                             renderMessages(contact.messages);
@@ -1863,7 +1749,6 @@
                 });
             }
 
-            // 录音模拟
             let isRecording = false;
             let recordTimeout;
             if (recordBtn) {
@@ -1892,7 +1777,6 @@
                 isRecording = false;
             }
 
-            // ----- 底部标签切换 -----
             const tabItems = document.querySelectorAll('.tab-item');
             const chatsTab = document.getElementById('chatsTab');
             const friendsTab = document.getElementById('friendsTab');
@@ -1900,16 +1784,14 @@
 
             tabItems.forEach(item => {
                 item.addEventListener('click', () => {
-                    // 移除所有active
                     tabItems.forEach(i => i.classList.remove('active'));
                     item.classList.add('active');
-
                     const tab = item.dataset.tab;
                     if (tab === 'chats') {
                         chatsTab.style.display = 'block';
                         friendsTab.style.display = 'none';
                         dynamicTab.style.display = 'none';
-                        renderContactList(); // 刷新列表（如果需要）
+                        renderContactList();
                     } else if (tab === 'friends') {
                         chatsTab.style.display = 'none';
                         friendsTab.style.display = 'flex';
