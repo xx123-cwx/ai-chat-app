@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 自适应完整版</title>
+    <title>AI角色 · 头像自定义</title>
     <style>
         /* ===== 基础样式 ===== */
         * {
@@ -32,7 +32,7 @@
         .phone-mock {
             width: 100%;
             max-width: 380px;
-            max-height: 90vh; /* 防止屏幕过高导致显示不全 */
+            max-height: 90vh;
             background: #1a1a1a;
             border-radius: 48px;
             padding: 12px;
@@ -42,7 +42,7 @@
         .phone-screen {
             background: #000;
             border-radius: 36px;
-            overflow-y: auto; /* 允许内部滚动 */
+            overflow-y: auto;
             aspect-ratio: 9 / 19.5;
             display: flex;
             flex-direction: column;
@@ -69,7 +69,7 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            min-height: min-content; /* 确保内容不被压缩 */
+            min-height: min-content;
         }
         .status-bar {
             padding: 12px 20px 4px;
@@ -329,6 +329,7 @@
             border: none;
             border-radius: 8px;
         }
+
         /* ===== 联系人列表样式 ===== */
         .contact-list {
             flex: 1;
@@ -385,6 +386,12 @@
             font-size: 24px;
             margin-right: 12px;
             flex-shrink: 0;
+            overflow: hidden; /* 让图片超出部分隐藏 */
+        }
+        .contact-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         .contact-info {
             flex: 1;
@@ -410,7 +417,7 @@
             padding: 8px;
         }
 
-        /* 新建联系人表单模态框 */
+        /* 新建联系人表单模态框（增强） */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -468,6 +475,48 @@
             min-height: 80px;
             resize: vertical;
         }
+        /* 头像类型切换 */
+        .avatar-type {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .avatar-type label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            color: #333;
+        }
+        .avatar-preview {
+            width: 60px;
+            height: 60px;
+            background: #07c160;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .upload-btn {
+            background: #07c160;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 5px;
+        }
         .form-actions {
             display: flex;
             gap: 10px;
@@ -519,6 +568,12 @@
             justify-content: center;
             color: white;
             font-size: 18px;
+            overflow: hidden;
+        }
+        .detail-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         .detail-title {
             font-size: 18px;
@@ -715,7 +770,7 @@
         </div>
     </div>
 
-    <!-- 新建联系人模态框 -->
+    <!-- 新建联系人模态框（增强版） -->
     <div class="modal-overlay" id="newContactModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -723,8 +778,24 @@
                 <span class="close-modal" id="closeModal">&times;</span>
             </div>
             <div class="form-group">
-                <label>头像（输入一个字符，如 😊）</label>
-                <input type="text" id="contactAvatar" maxlength="2" placeholder="😊" value="🤖">
+                <label>头像类型</label>
+                <div class="avatar-type">
+                    <label><input type="radio" name="avatarType" value="text" checked> 文字</label>
+                    <label><input type="radio" name="avatarType" value="image"> 图片</label>
+                </div>
+            </div>
+            <div id="avatarTextInput" class="form-group">
+                <label>文字头像（输入一个字符，如 😊）</label>
+                <input type="text" id="contactAvatarText" maxlength="2" placeholder="😊" value="🤖">
+            </div>
+            <div id="avatarImageInput" class="form-group" style="display: none;">
+                <label>图片头像</label>
+                <div class="avatar-preview" id="avatarPreview">
+                    <span id="avatarPreviewText">🤖</span>
+                    < img id="avatarPreviewImg" src="#" style="display: none;">
+                </div>
+                <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
+                <button class="upload-btn" id="uploadBtn">选择图片</button>
             </div>
             <div class="form-group">
                 <label>名称</label>
@@ -749,7 +820,7 @@
 
     <script>
         // ========== 后端地址（使用相对路径，同域）==========
-        const BACKEND_URL = '';  // 空字符串表示同域
+        const BACKEND_URL = '';
 
         // ========== 桌面切换 ==========
         const homeButton = document.getElementById('homeButton');
@@ -790,7 +861,7 @@
         homeButton.addEventListener('click', goHome);
         backButtons.forEach(btn => btn.addEventListener('click', goHome));
 
-        // ========== 多API配置管理 ==========
+        // ========== 多API配置管理（与之前相同）==========
         let apiConfigs = [];
         let activeConfigId = null;
 
@@ -824,7 +895,8 @@
         function getActiveConfig() {
             return apiConfigs.find(c => c.id === activeConfigId) || apiConfigs[0];
         }
-        // 渲染配置列表
+
+        // 渲染配置列表（保持原样，此处略，但实际代码中必须有）
         function renderConfigList() {
             const container = document.getElementById('configList');
             container.innerHTML = '';
@@ -1029,7 +1101,6 @@
             if (saved) {
                 contacts = JSON.parse(saved);
             } else {
-                // 默认创建一个示例联系人
                 contacts = [{
                     id: Date.now().toString(),
                     avatar: '🤖',
@@ -1043,20 +1114,6 @@
             else currentContactId = contacts[0].id;
         }
 
-        function createDefaultContact() {
-            const newId = Date.now().toString();
-            contacts.push({
-                id: newId,
-                avatar: '🤖',
-                name: '默认助手',
-                personality: '你是一个友好的AI助手，乐于助人。',
-                configId: '',
-                messages: [{ role: 'assistant', content: '你好！我是你的AI助手，有什么可以帮你的？' }]
-            });
-            currentContactId = newId;
-            saveContacts();
-        }
-
         function saveContacts() {
             localStorage.setItem('contacts', JSON.stringify(contacts));
         }
@@ -1065,7 +1122,7 @@
             return contacts.find(c => c.id === currentContactId) || contacts[0];
         }
 
-        // 渲染联系人列表
+        // 渲染联系人列表（支持图片头像）
         function renderContactList() {
             const container = document.getElementById('contactListContainer');
             container.innerHTML = '';
@@ -1073,20 +1130,36 @@
                 const lastMsg = contact.messages.length ? contact.messages[contact.messages.length-1].content : '';
                 const item = document.createElement('div');
                 item.className = 'contact-item';
-                item.innerHTML = `
-                    <div class="contact-avatar">${contact.avatar}</div>
-                    <div class="contact-info">
-                        <div class="contact-name">${contact.name}</div>
-                        <div class="contact-lastmsg">${lastMsg.substring(0,30)}${lastMsg.length>30?'...':''}</div>
-                    </div>
-                    <button class="contact-delete" data-id="${contact.id}">🗑️</button>
+                const avatarDiv = document.createElement('div');
+                avatarDiv.className = 'contact-avatar';
+                if (contact.avatar && contact.avatar.startsWith('data:image')) {
+                    // 图片头像
+                    avatarDiv.innerHTML = `< img src="${contact.avatar}" alt="avatar">`;
+                } else {
+                    // 文字头像
+                    avatarDiv.textContent = contact.avatar || '🤖';
+                }
+                item.appendChild(avatarDiv);
+
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'contact-info';
+                infoDiv.innerHTML = `
+                    <div class="contact-name">${contact.name}</div>
+                    <div class="contact-lastmsg">${lastMsg.substring(0,30)}${lastMsg.length>30?'...':''}</div>
                 `;
+                item.appendChild(infoDiv);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'contact-delete';
+                deleteBtn.dataset.id = contact.id;
+                deleteBtn.textContent = '🗑️';
+                item.appendChild(deleteBtn);
+
                 item.addEventListener('click', (e) => {
                     if (e.target.classList.contains('contact-delete')) return;
                     currentContactId = contact.id;
                     enterChatDetail(contact.id);
                 });
-                const deleteBtn = item.querySelector('.contact-delete');
                 deleteBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     deleteContact(contact.id);
@@ -1109,11 +1182,16 @@
             if (document.getElementById('chatDetailPage').style.display === 'flex' && currentContactId !== id) showContactList();
         }
 
-        // 进入聊天详情
+        // 进入聊天详情（支持图片头像）
         function enterChatDetail(contactId) {
             currentContactId = contactId;
             const contact = getCurrentContact();
-            document.getElementById('detailAvatar').textContent = contact.avatar;
+            const detailAvatar = document.getElementById('detailAvatar');
+            if (contact.avatar && contact.avatar.startsWith('data:image')) {
+                detailAvatar.innerHTML = `< img src="${contact.avatar}" alt="avatar">`;
+            } else {
+                detailAvatar.textContent = contact.avatar || '🤖';
+            }
             document.getElementById('detailContactName').textContent = contact.name;
             document.getElementById('detailPersonality').textContent = contact.personality.substring(0, 20) + (contact.personality.length>20?'...':'');
             renderMessages(contact.messages);
@@ -1121,14 +1199,12 @@
             document.getElementById('chatDetailPage').style.display = 'flex';
         }
 
-        // 返回联系人列表
         function showContactList() {
             document.getElementById('contactListPage').style.display = 'flex';
             document.getElementById('chatDetailPage').style.display = 'none';
             renderContactList();
         }
 
-        // 渲染消息
         function renderMessages(messages) {
             const area = document.getElementById('messageArea');
             area.innerHTML = '';
@@ -1141,7 +1217,6 @@
             area.scrollTop = area.scrollHeight;
         }
 
-        // 添加消息到当前联系人
         function addMessageToCurrent(text, isUser) {
             const contact = getCurrentContact();
             contact.messages.push({ role: isUser ? 'user' : 'assistant', content: text });
@@ -1156,18 +1231,76 @@
             }
         }
 
-        // ========== 新建联系人模态框 ==========
+        // ========== 新建联系人模态框（头像自定义）==========
         const modal = document.getElementById('newContactModal');
         const closeModalBtn = document.getElementById('closeModal');
         const cancelBtn = document.getElementById('cancelContact');
         const saveBtn = document.getElementById('saveContact');
-        const contactAvatar = document.getElementById('contactAvatar');
         const contactName = document.getElementById('contactName');
         const contactPersonality = document.getElementById('contactPersonality');
         const contactConfigId = document.getElementById('contactConfigId');
 
+        // 头像相关元素
+        const avatarTypeRadios = document.querySelectorAll('input[name="avatarType"]');
+        const avatarTextDiv = document.getElementById('avatarTextInput');
+        const avatarImageDiv = document.getElementById('avatarImageInput');
+        const contactAvatarText = document.getElementById('contactAvatarText');
+        const avatarUpload = document.getElementById('avatarUpload');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const avatarPreviewText = document.getElementById('avatarPreviewText');
+        const avatarPreviewImg = document.getElementById('avatarPreviewImg');
+
+        let selectedAvatarData = '🤖'; // 最终存储的头像值（可能是文字或图片dataURL）
+
+        // 切换头像类型
+        avatarTypeRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'text') {
+                    avatarTextDiv.style.display = 'block';
+                    avatarImageDiv.style.display = 'none';
+                    // 恢复文字预览
+                    avatarPreviewText.style.display = 'inline';
+                    avatarPreviewImg.style.display = 'none';
+                    selectedAvatarData = contactAvatarText.value.trim() || '🤖';
+                } else {
+                    avatarTextDiv.style.display = 'none';
+                    avatarImageDiv.style.display = 'block';
+                    avatarPreviewText.style.display = 'none';
+                    avatarPreviewImg.style.display = 'block';
+                    // 如果没有图片，暂时用默认占位
+                }
+            });
+        });
+
+        // 文字头像输入变化
+        contactAvatarText.addEventListener('input', (e) => {
+            if (avatarTypeRadios[0].checked) {
+                selectedAvatarData = e.target.value.trim() || '🤖';
+                avatarPreviewText.textContent = selectedAvatarData;
+            }
+        });
+
+        // 点击选择图片按钮
+        uploadBtn.addEventListener('click', () => {
+            avatarUpload.click();
+        });
+
+        // 处理图片选择
+        avatarUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                selectedAvatarData = event.target.result; // DataURL
+                avatarPreviewImg.src = selectedAvatarData;
+                avatarPreviewImg.style.display = 'block';
+                avatarPreviewText.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // 打开模态框时填充配置下拉框
         function openNewContactModal() {
-            // 填充配置下拉框
             contactConfigId.innerHTML = '<option value="">使用当前激活配置</option>';
             apiConfigs.forEach(config => {
                 const option = document.createElement('option');
@@ -1175,14 +1308,25 @@
                 option.textContent = config.name;
                 contactConfigId.appendChild(option);
             });
+            // 重置表单
+            contactAvatarText.value = '🤖';
+            selectedAvatarData = '🤖';
+            avatarPreviewText.textContent = '🤖';
+            avatarPreviewText.style.display = 'inline';
+            avatarPreviewImg.style.display = 'none';
+            avatarPreviewImg.src = '#';
+            avatarUpload.value = '';
+            // 默认选中文字类型
+            avatarTypeRadios[0].checked = true;
+            avatarTextDiv.style.display = 'block';
+            avatarImageDiv.style.display = 'none';
+            contactName.value = '';
+            contactPersonality.value = '';
             modal.classList.add('active');
         }
 
         function closeNewContactModal() {
             modal.classList.remove('active');
-            contactAvatar.value = '🤖';
-            contactName.value = '';
-            contactPersonality.value = '';
         }
 
         document.getElementById('newContactBtn').addEventListener('click', openNewContactModal);
@@ -1193,18 +1337,17 @@
         });
 
         saveBtn.addEventListener('click', () => {
-            const avatar = contactAvatar.value.trim() || '🤖';
             const name = contactName.value.trim();
             const personality = contactPersonality.value.trim();
             if (!name) {
                 alert('请输入联系人名称');
                 return;
             }
-            const configId = contactConfigId.value; // 可能为空字符串
+            const configId = contactConfigId.value;
             const newId = Date.now().toString();
             contacts.push({
                 id: newId,
-                avatar: avatar,
+                avatar: selectedAvatarData,
                 name: name,
                 personality: personality || '你是一个友好的AI助手。',
                 configId: configId,
@@ -1213,7 +1356,6 @@
             saveContacts();
             closeNewContactModal();
             renderContactList();
-            // 自动进入新联系人聊天
             currentContactId = newId;
             enterChatDetail(newId);
         });
@@ -1230,7 +1372,6 @@
             if (!text) return;
 
             const contact = getCurrentContact();
-            // 确定使用的配置：如果联系人指定了configId，则使用那个配置；否则使用当前激活配置
             let config;
             if (contact.configId) {
                 config = apiConfigs.find(c => c.id === contact.configId);
@@ -1250,7 +1391,6 @@
             addMessageToCurrent(text, true);
             messageInput.value = '';
 
-            // 构建消息历史：包含系统人设 + 历史消息
             const messages = [
                 { role: 'system', content: contact.personality },
                 ...contact.messages.map(m => ({ role: m.role, content: m.content }))
@@ -1275,7 +1415,7 @@
             }
         }
 
-        // 录音模拟（可后续升级）
+        // 录音模拟
         let isRecording = false;
         recordBtn.addEventListener('click', () => {
             if (!isRecording) {
