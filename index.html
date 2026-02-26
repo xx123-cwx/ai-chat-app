@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 话筒按钮发送文本</title>
+    <title>AI角色 · 完全采用您的LINE风格</title>
     <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -3028,7 +3028,25 @@
             const recordBtn = document.getElementById('recordBtn');
             const loadingIndicator = document.getElementById('loadingIndicator');
 
-            async function handleSend() {
+            // ========== 纯发送消息（不调用AI） ==========
+            function sendOnlyMessage() {
+                const text = messageInput.value.trim();
+                if (!text) return;
+
+                const contact = getCurrentContact();
+                if (contact.blocked) {
+                    alert('你已将对方拉黑，无法发送消息');
+                    return;
+                }
+
+                // 只添加用户消息，不请求AI
+                addMessageToCurrent(text, true);
+                messageInput.value = '';
+                // 无加载状态，不禁用输入框
+            }
+
+            // ========== 完整发送+AI回复（带加载状态） ==========
+            async function handleSendWithAI() {
                 const text = messageInput.value.trim();
                 if (!text) return;
 
@@ -3096,12 +3114,16 @@
                 }
             }
 
+            // 回车发送：只添加消息，不调用AI
             messageInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') handleSend();
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // 防止意外提交
+                    sendOnlyMessage();
+                }
             });
 
-            // 话筒按钮点击事件 - 改为发送文本消息
-            recordBtn.addEventListener('click', handleSend);
+            // 话筒按钮点击：完整流程（发送+AI回复）
+            recordBtn.addEventListener('click', handleSendWithAI);
 
             const tabItems = document.querySelectorAll('.tab-item');
             const chatsTab = document.getElementById('chatsTab');
