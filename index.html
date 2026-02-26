@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 全屏自适应（保留状态栏）</title>
+    <title>AI角色 · 全屏自适应（顶部返回按钮）</title>
     <!-- Font Awesome 6 图标库（用于底部标签） -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -19,7 +19,7 @@
             width: 100%;
             height: 100%;
             background: #fff;
-            overflow: hidden; /* 防止整体滚动，内部滚动由各容器处理 */
+            overflow: hidden;
         }
         input, textarea, select, [contenteditable="true"] {
             user-select: text;
@@ -48,10 +48,9 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            overflow-y: auto; /* 允许桌面内容滚动 */
-            min-height: 0; /* 防止flex溢出 */
+            overflow-y: auto;
+            min-height: 0;
         }
-        /* 状态栏 - 保留，并增加半透明背景保证可读性 */
         .status-bar {
             padding: 12px 20px 4px;
             display: flex;
@@ -331,7 +330,12 @@
             background: #ffffff;
             border-bottom: 1px solid #f0f0f0;
         }
-        .line-header h2 {
+        .line-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .line-header-left h2 {
             font-size: 22px;
             font-weight: 600;
             color: #1a1a1a;
@@ -801,9 +805,12 @@
         <div class="app-view" id="chatView">
             <!-- 仿LINE主界面：顶部+底部tab+内容区 -->
             <div id="contactListPage" style="display:flex; flex-direction:column; flex:1;">
-                <!-- 顶部 -->
+                <!-- 顶部：左侧返回按钮 + 标题“聊天” + 右侧加号 -->
                 <div class="line-header">
-                    <h2>聊天</h2>
+                    <div class="line-header-left">
+                        <button class="nav-button" id="chatBackHomeBtn" title="返回主界面">←</button>
+                        <h2>聊天</h2>
+                    </div>
                     <div class="header-right">
                         <span class="circle-plus" id="newContactBtn" title="新建聊天">+</span>
                     </div>
@@ -1492,6 +1499,10 @@
 
             const homeButton = document.getElementById('homeButton');
             if (homeButton) homeButton.addEventListener('click', () => hideAllAppViews());
+
+            // 信息应用顶部的返回按钮
+            const chatBackHomeBtn = document.getElementById('chatBackHomeBtn');
+            if (chatBackHomeBtn) chatBackHomeBtn.addEventListener('click', () => hideAllAppViews());
 
             document.querySelectorAll('[data-back]').forEach(btn => {
                 btn.addEventListener('click', () => hideAllAppViews());
