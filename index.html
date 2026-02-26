@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 完全采用您的LINE风格</title>
-    <!-- Font Awesome 6 图标库 (确保图标显示) -->
+    <title>AI角色 · 话筒按钮发送文本</title>
+    <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         /* ===== 基础样式：彻底去除所有边距，全屏自适应 ===== */
@@ -365,7 +365,7 @@
             padding: 16px;
             background: #ffffff;
             border-bottom: 1px solid #f0f0f0;
-            cursor: pointer; /* 点击整个区域可跳转，但输入框优先 */
+            cursor: pointer;
         }
         .user-info {
             flex: 1;
@@ -704,13 +704,13 @@
             color: #333;
         }
 
-        /* ===== 聊天详情页 - 完全采用您提供的LINE风格，时间戳位置已调整 ===== */
+        /* ===== 聊天详情页 - 时间戳位置已调整 ===== */
         .chat-detail {
             flex: 1;
             display: flex;
             flex-direction: column;
             background: #87CEFA;
-            min-height: 0; /* 确保内部flex子项可滚动 */
+            min-height: 0;
         }
 
         .chat-header {
@@ -749,7 +749,7 @@
             gap: 8px;
             background-size: cover;
             background-position: center;
-            /* 默认背景通过JS动态设置，这里保留fallback */
+            -webkit-overflow-scrolling: touch;
             background: #87CEFA;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%2387CEFA"/><circle cx="20" cy="20" r="15" fill="%23fff" opacity="0.1"/><circle cx="80" cy="80" r="20" fill="%23fff" opacity="0.1"/></svg>');
         }
@@ -812,10 +812,10 @@
             margin: 0 6px;
             white-space: nowrap;
         }
-        /* 对方消息时间戳在气泡右侧（默认位置，无需调整） */
-        /* 自己消息时间戳在气泡左侧，通过order调整 */
+        /* 自己消息的时间戳：移到绿色气泡前方（左侧），并调整间距使其更贴近气泡 */
         .message.me .msg-time {
-            order: -1; /* 让时间戳位于气泡之前 */
+            order: -1;
+            margin: 0 2px 0 6px;
         }
 
         .input-area {
@@ -825,7 +825,7 @@
             background-color: #f7f7f7;
             border-top: 1px solid #dbdbdb;
             gap: 10px;
-            flex-shrink: 0; /* 防止被压缩 */
+            flex-shrink: 0;
         }
         .input-btn {
             font-size: 20px;
@@ -853,6 +853,10 @@
         .input-field:focus {
             border-color: #00C73C;
         }
+        .input-field:disabled {
+            background-color: #f0f0f0;
+            color: #aaa;
+        }
         .input-smile {
             position: absolute;
             right: 10px;
@@ -872,6 +876,21 @@
         }
         #recordBtn {
             margin-left: 0;
+        }
+        /* 加载指示器样式 */
+        .input-loading {
+            position: absolute;
+            right: 40px;  /* 位于表情按钮左侧 */
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #888;
+            width: 24px;
+            height: 24px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
         }
 
         /* 联系人选项页面样式 */
@@ -1339,6 +1358,8 @@
                     <div class="input-field-container">
                         <input type="text" class="input-field" id="messageInput" placeholder="Aa">
                         <span class="input-smile" id="smileBtn"><i class="fa-regular fa-face-smile"></i></span>
+                        <!-- 加载指示器 -->
+                        <span class="input-loading" id="loadingIndicator"><i class="fa-solid fa-spinner fa-spin"></i></span>
                     </div>
                     <span class="input-btn" id="recordBtn"><i class="fa-solid fa-microphone"></i></span>
                 </div>
@@ -3005,6 +3026,7 @@
             // 发送消息 - 加入用户档案信息
             const messageInput = document.getElementById('messageInput');
             const recordBtn = document.getElementById('recordBtn');
+            const loadingIndicator = document.getElementById('loadingIndicator');
 
             async function handleSend() {
                 const text = messageInput.value.trim();
@@ -3032,7 +3054,12 @@
                     return;
                 }
 
-                // 构建用户档案信息字符串
+                // 加载状态开始
+                messageInput.disabled = true;
+                recordBtn.style.pointerEvents = 'none';
+                recordBtn.style.opacity = '0.5';
+                loadingIndicator.style.display = 'flex';
+
                 const userInfo = `用户信息：真名：${userProfile.realName || '未填写'}，地址：${userProfile.address || '未填写'}，LINE号码：${userProfile.lineId || '未填写'}，个性签名：${userProfile.bio || '未填写'}，用户设定：${userProfile.userSetting || '未填写'}`;
 
                 addMessageToCurrent(text, true);
@@ -3060,6 +3087,12 @@
                     addMessageToCurrent(reply, false);
                 } catch (error) {
                     addMessageToCurrent('请求失败：' + error.message, false);
+                } finally {
+                    // 恢复状态
+                    messageInput.disabled = false;
+                    recordBtn.style.pointerEvents = 'auto';
+                    recordBtn.style.opacity = '1';
+                    loadingIndicator.style.display = 'none';
                 }
             }
 
@@ -3067,29 +3100,8 @@
                 if (e.key === 'Enter') handleSend();
             });
 
-            let isRecording = false;
-            let recordTimeout;
-            recordBtn.addEventListener('click', () => {
-                if (isRecording) {
-                    stopRecording();
-                    return;
-                }
-                if (getCurrentContact().blocked) {
-                    alert('对方已被拉黑');
-                    return;
-                }
-                recordBtn.classList.add('recording');
-                isRecording = true;
-                recordTimeout = setTimeout(() => {
-                    stopRecording();
-                    messageInput.value = '这是一段语音转文字';
-                }, 2000);
-            });
-            function stopRecording() {
-                clearTimeout(recordTimeout);
-                recordBtn.classList.remove('recording');
-                isRecording = false;
-            }
+            // 话筒按钮点击事件 - 改为发送文本消息
+            recordBtn.addEventListener('click', handleSend);
 
             const tabItems = document.querySelectorAll('.tab-item');
             const chatsTab = document.getElementById('chatsTab');
