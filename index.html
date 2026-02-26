@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · LINE风格完整版（气泡带尾巴）</title>
-    <!-- Font Awesome 6 图标库 -->
+    <title>AI角色 · 完全采用您的LINE风格</title>
+    <!-- Font Awesome 6 图标库 (确保图标显示) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ===== 基础样式 ===== */
+        /* ===== 基础样式：彻底去除所有边距，全屏自适应 ===== */
         * {
             margin: 0;
             padding: 0;
@@ -130,7 +130,7 @@
             background: white;
         }
 
-        /* 应用视图 */
+        /* 应用视图（全屏覆盖） */
         .app-view {
             position: fixed;
             top: 0;
@@ -287,7 +287,7 @@
             border-radius: 8px;
         }
 
-        /* ===== 仿LINE联系人列表样式 ===== */
+        /* ===== 仿LINE最新版联系人列表样式 ===== */
         .contact-list {
             background: #fff;
         }
@@ -419,6 +419,18 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+        .unread-badge {
+            background: #06c755;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 16px;
+            min-width: 22px;
+            text-align: center;
+            margin-left: 10px;
+            line-height: 1.2;
+        }
         .blocked-badge {
             color: #ff3b30;
             font-size: 12px;
@@ -546,7 +558,7 @@
             color: #333;
         }
 
-        /* ===== 聊天详情页 - LINE风格带小尾巴 ===== */
+        /* ===== 聊天详情页 - 完全采用您提供的LINE风格 ===== */
         .chat-detail {
             flex: 1;
             display: flex;
@@ -594,7 +606,7 @@
             background-size: cover;
         }
 
-        /* 消息行 */
+        /* 通用消息布局 */
         .message {
             display: flex;
             align-items: flex-end;
@@ -623,65 +635,30 @@
             object-fit: cover;
         }
 
-        /* 气泡容器（用于定位小尾巴） */
         .bubble-wrapper {
             position: relative;
             display: flex;
             align-items: center;
         }
 
-        /* 气泡本体 */
         .msg-bubble {
             padding: 10px 14px;
             font-size: 16px;
             line-height: 1.4;
-            border-radius: 20px;
             position: relative;
-            word-wrap: break-word;
-            max-width: 100%;
+            border-radius: 18px;
         }
-        /* 对方气泡 */
         .message.other .msg-bubble {
             background-color: #ffffff;
             color: #000;
-            border-top-left-radius: 4px; /* 左上角小圆角形成尾巴效果 */
+            border-top-left-radius: 4px;
         }
-        /* 自己气泡 */
         .message.me .msg-bubble {
             background-color: #00C73C;
             color: #fff;
             border-top-right-radius: 4px;
         }
 
-        /* 小尾巴（伪元素实现） */
-        .message.other .bubble-wrapper::before {
-            content: '';
-            position: absolute;
-            left: -8px; /* 在头像和气泡之间 */
-            bottom: 0;
-            width: 0;
-            height: 0;
-            border: 8px solid transparent;
-            border-right-color: #ffffff;
-            border-left: 0;
-            border-bottom: 0;
-            transform: rotate(45deg);
-        }
-        .message.me .bubble-wrapper::after {
-            content: '';
-            position: absolute;
-            right: -8px;
-            bottom: 0;
-            width: 0;
-            height: 0;
-            border: 8px solid transparent;
-            border-left-color: #00C73C;
-            border-right: 0;
-            border-bottom: 0;
-            transform: rotate(45deg);
-        }
-
-        /* 时间戳 */
         .msg-time {
             font-size: 11px;
             color: #666;
@@ -751,7 +728,7 @@
             font-size: 16px;
         }
 
-        /* 系统消息 */
+        /* 系统消息样式（可自定） */
         .system-message {
             align-self: center;
             background-color: #e0e0e0;
@@ -790,7 +767,7 @@
 
         <!-- 联系人应用 -->
         <div class="app-view" id="chatView">
-            <!-- 联系人列表页（带返回按钮） -->
+            <!-- 联系人列表页 -->
             <div id="contactListPage" style="display:flex; flex-direction:column; flex:1;">
                 <div class="line-header">
                     <div class="line-header-left">
@@ -828,12 +805,12 @@
                 </div>
             </div>
 
-            <!-- 聊天详情页 - LINE风格带小尾巴（已去掉99+） -->
+            <!-- 聊天详情页 - 完全采用您提供的LINE风格 -->
             <div id="chatDetailPage" style="display:none; flex-direction:column; flex:1;">
                 <div class="chat-header">
                     <div class="header-left">
                         <span id="backToListBtn" style="cursor:pointer;">&lt;</span>
-                        <!-- 99+ 已删除 -->
+                        <span>99+</span>
                         <span id="detailContactName">Ezmjl</span>
                     </div>
                     <div class="header-right">
@@ -1040,7 +1017,7 @@
             });
         }
 
-        // ========== 渲染联系人列表（去掉未读标记） ==========
+        // ========== 渲染联系人列表 ==========
         function renderContactList() {
             const container = document.getElementById('contactListContainer');
             if (!container) return;
@@ -1049,6 +1026,7 @@
                 const lastMsg = contact.messages.length ? contact.messages[contact.messages.length-1].content : '';
                 const now = new Date();
                 const timeStr = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes());
+                const unread = Math.floor(Math.random() * 5);
 
                 const item = document.createElement('div');
                 item.className = 'contact-item';
@@ -1094,7 +1072,12 @@
 
                 item.appendChild(infoDiv);
 
-                // 未读标记已删除
+                if (unread > 0) {
+                    const unreadSpan = document.createElement('span');
+                    unreadSpan.className = 'unread-badge';
+                    unreadSpan.textContent = unread;
+                    item.appendChild(unreadSpan);
+                }
 
                 item.addEventListener('click', (e) => {
                     currentContactId = contact.id;
@@ -1194,7 +1177,7 @@
             });
         }
 
-        // ========== 渲染聊天消息（LINE风格带小尾巴） ==========
+        // ========== 渲染聊天消息（完全采用您提供的LINE风格） ==========
         function renderMessages(messages) {
             const area = document.getElementById('messageArea');
             if (!area) return;
@@ -1207,6 +1190,7 @@
 
             messages.forEach((msg, index) => {
                 if (msg.role === 'system') {
+                    // 系统消息
                     const div = document.createElement('div');
                     div.className = 'system-message';
                     div.textContent = msg.content;
@@ -1259,6 +1243,7 @@
                 detailContactName.textContent = contact.name + (contact.blocked ? ' (已拉黑)' : '');
             }
 
+            // 处理输入框禁用（拉黑状态）
             const messageInput = document.getElementById('messageInput');
             const recordBtn = document.getElementById('recordBtn');
             if (contact.blocked) {
