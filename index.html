@@ -1541,6 +1541,11 @@
         </div>
     </div>
 
+    <!-- 全局 Toast 提示（新增） -->
+    <div id="toast" style="position: fixed; bottom: 30px; left: 20px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 12px 16px; border-radius: 8px; text-align: center; font-size: 14px; z-index: 9999; display: none; backdrop-filter: blur(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <span id="toastMessage"></span>
+    </div>
+
     <!-- 新建联系人模态框 -->
     <div class="modal-overlay" id="newContactModal">
         <div class="modal-content">
@@ -1696,6 +1701,18 @@
             { key: 'browser', name: '浏览器', defaultIcon: 'fa-globe' },
             { key: 'phone', name: '电话', defaultIcon: 'fa-phone' }
         ];
+
+        // ========== Toast 提示函数 ==========
+        function showToast(message, duration = 2000) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMessage');
+            toastMsg.textContent = message;
+            toast.style.display = 'block';
+            if (window.toastTimer) clearTimeout(window.toastTimer);
+            window.toastTimer = setTimeout(() => {
+                toast.style.display = 'none';
+            }, duration);
+        }
 
         // 加载/保存函数
         function loadConfigs() {
@@ -2272,7 +2289,7 @@
 
         function deleteContact(id) {
             if (contacts.length <= 1) {
-                alert('至少保留一个联系人');
+                showToast('至少保留一个联系人');
                 return;
             }
             contacts = contacts.filter(c => c.id !== id);
@@ -2289,7 +2306,7 @@
             const config = apiConfigs.find(c => c.id === configId);
             if (!config) return;
             if (!config.base_url || !config.api_key) {
-                alert('请先填写 Base URL 和 API Key');
+                showToast('请先填写 Base URL 和 API Key');
                 return;
             }
             const fetchBtns = document.querySelectorAll('.config-model-row button');
@@ -2309,10 +2326,10 @@
                     saveConfigs();
                     renderConfigList();
                 } else {
-                    alert('返回的模型列表格式不正确');
+                    showToast('返回的模型列表格式不正确');
                 }
             } catch (error) {
-                alert('拉取失败：' + error.message);
+                showToast('拉取失败：' + error.message);
             } finally {
                 fetchBtns.forEach(b => b.disabled = false);
             }
@@ -2346,7 +2363,7 @@
                 const newUrl = document.getElementById(`edit_url_${id}`).value.trim();
                 const newKey = document.getElementById(`edit_key_${id}`).value.trim();
                 if (!newName) {
-                    alert('请输入配置名称');
+                    showToast('请输入配置名称');
                     return;
                 }
                 config.name = newName;
@@ -2363,7 +2380,7 @@
 
         function deleteConfig(id) {
             if (apiConfigs.length <= 1) {
-                alert('至少保留一个配置');
+                showToast('至少保留一个配置');
                 return;
             }
             if (!confirm('确定删除此配置吗？')) return;
@@ -2412,7 +2429,7 @@
                 document.getElementById('newContactModal').classList.add('active');
             } catch (e) {
                 console.error('打开新建联系人模态框失败:', e);
-                alert('打开失败，请查看控制台错误');
+                showToast('打开失败，请查看控制台错误');
             }
         }
 
@@ -2489,7 +2506,7 @@
                         userProfile.avatar = compressedDataUrl;
                         saveUserProfile();
                     } catch (err) {
-                        alert('图片处理失败');
+                        showToast('图片处理失败');
                     }
                 };
                 reader.readAsDataURL(file);
@@ -2541,7 +2558,7 @@
                                     previewDiv.innerHTML = `<img src="${compressedDataUrl}" alt="icon">`;
                                 }
                             } catch (err) {
-                                alert('图片处理失败');
+                                showToast('图片处理失败');
                             }
                         };
                         reader.readAsDataURL(file);
@@ -2595,14 +2612,14 @@
                 userProfile.bio = document.getElementById('bio').value.trim();
                 userProfile.userSetting = document.getElementById('userSetting').value.trim();
                 saveUserProfile();
-                alert('保存成功');
+                showToast('保存成功');
             });
 
             // 点击个人档案图标
             document.getElementById('profileArchive').addEventListener('click', showUserArchive);
             // 点击装饰图标（现为空界面）
             document.getElementById('profileDecorate').addEventListener('click', showDecorateView);
-            document.getElementById('profileDiary').addEventListener('click', () => alert('日记功能开发中'));
+            document.getElementById('profileDiary').addEventListener('click', () => showToast('日记功能开发中'));
 
             // 点击用户头像区域跳转到个人资料页
             document.getElementById('userProfileArea').addEventListener('click', (e) => {
@@ -2782,7 +2799,7 @@
                         previewImg.style.display = 'block';
                         document.getElementById('avatarPreviewText').style.display = 'none';
                     } catch (err) {
-                        alert('图片压缩失败，使用原图');
+                        showToast('图片压缩失败，使用原图');
                         selectedAvatarData = originalDataUrl;
                         document.getElementById('avatarPreviewImg').src = originalDataUrl;
                         document.getElementById('avatarPreviewImg').style.display = 'block';
@@ -2797,7 +2814,7 @@
                 const remark = document.getElementById('contactRemark').value.trim() || '';
                 const personality = document.getElementById('contactPersonality').value.trim();
                 if (!name) {
-                    alert('请输入联系人名称');
+                    showToast('请输入联系人名称');
                     return;
                 }
                 const configId = document.getElementById('contactConfigId').value || '';
@@ -2965,7 +2982,7 @@
                         previewImg.style.display = 'block';
                         document.getElementById('editAvatarPreviewText').style.display = 'none';
                     } catch (err) {
-                        alert('图片压缩失败，使用原图');
+                        showToast('图片压缩失败，使用原图');
                         editSelectedAvatarData = originalDataUrl;
                         document.getElementById('editAvatarPreviewImg').src = originalDataUrl;
                         document.getElementById('editAvatarPreviewImg').style.display = 'block';
@@ -2979,7 +2996,7 @@
                 const name = document.getElementById('editContactName').value.trim();
                 const personality = document.getElementById('editContactPersonality').value.trim();
                 if (!name) {
-                    alert('请输入联系人名称');
+                    showToast('请输入联系人名称');
                     return;
                 }
                 const contact = getCurrentContact();
@@ -3035,7 +3052,7 @@
 
                 const contact = getCurrentContact();
                 if (contact.blocked) {
-                    alert('你已将对方拉黑，无法发送消息');
+                    showToast('你已将对方拉黑，无法发送消息');
                     return;
                 }
 
@@ -3052,7 +3069,7 @@
 
                 const contact = getCurrentContact();
                 if (contact.blocked) {
-                    alert('你已将对方拉黑，无法发送消息');
+                    showToast('你已将对方拉黑，无法发送消息');
                     return;
                 }
 
@@ -3060,7 +3077,7 @@
                 if (contact.configId) {
                     config = apiConfigs.find(c => c.id === contact.configId);
                     if (!config) {
-                        alert('联系人关联的API配置不存在，请重新选择');
+                        showToast('联系人关联的API配置不存在，请重新选择');
                         return;
                     }
                 } else {
@@ -3068,7 +3085,7 @@
                 }
 
                 if (!config.base_url || !config.api_key || !config.currentModel) {
-                    alert('请先在设置中配置并激活一个有效的API配置，并拉取模型');
+                    showToast('请先在设置中配置并激活一个有效的API配置，并拉取模型');
                     return;
                 }
 
@@ -3100,11 +3117,30 @@
                             messages
                         })
                     });
+
+                    if (!response.ok) {
+                        if (response.status === 429) {
+                            throw new Error('请求过于频繁，请稍后再试 (429)');
+                        } else if (response.status === 401 || response.status === 403) {
+                            throw new Error('API密钥无效或权限不足');
+                        } else if (response.status >= 500) {
+                            throw new Error('服务器错误，请稍后重试');
+                        } else {
+                            const errorData = await response.json().catch(() => ({}));
+                            throw new Error(errorData.message || `请求失败 (${response.status})`);
+                        }
+                    }
+
                     const data = await response.json();
                     const reply = data.choices?.[0]?.message?.content || '无回复';
                     addMessageToCurrent(reply, false);
                 } catch (error) {
-                    addMessageToCurrent('请求失败：' + error.message, false);
+                    let errorMsg = error.message;
+                    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                        errorMsg = '网络连接失败，请检查网络';
+                    }
+                    addMessageToCurrent('请求失败：' + errorMsg, false);
+                    showToast(errorMsg, 3000);
                 } finally {
                     // 恢复状态
                     messageInput.disabled = false;
