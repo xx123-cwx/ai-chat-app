@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 全屏自适应（顶部返回按钮）</title>
-    <!-- Font Awesome 6 图标库（用于底部标签） -->
+    <title>AI角色 · 全屏自适应（真实LINE风格聊天）</title>
+    <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         /* ===== 基础样式：彻底去除所有边距，全屏自适应 ===== */
@@ -26,7 +26,7 @@
             -webkit-user-select: text;
         }
 
-        /* 主屏幕容器 - 绝对全屏，无任何内边距 */
+        /* 主屏幕容器 */
         .phone-screen {
             position: fixed;
             top: 0;
@@ -471,7 +471,7 @@
             margin-left: 6px;
         }
 
-        /* 新建联系人表单模态框 */
+        /* ===== 新建联系人模态框 ===== */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -592,36 +592,36 @@
             color: #333;
         }
 
-        /* ===== 聊天详情页 ===== */
+        /* ===== 聊天详情页 - 真实LINE风格 ===== */
         .chat-detail {
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: #ebebeb;
+            background: #f5f5f5; /* LINE聊天背景 */
         }
         .detail-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 8px 16px;
-            background: #f5f5f5;
-            border-bottom: 1px solid #ddd;
+            background: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
         }
         .detail-header-left {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
         }
         .detail-avatar {
-            width: 36px;
-            height: 36px;
-            background: #07c160;
+            width: 40px;
+            height: 40px;
+            background: #06c755;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 18px;
+            font-size: 20px;
             overflow: hidden;
         }
         .detail-avatar img {
@@ -632,10 +632,11 @@
         .detail-title {
             font-size: 18px;
             font-weight: 600;
+            color: #1a1a1a;
         }
         .detail-personality {
             font-size: 12px;
-            color: #666;
+            color: #999;
             max-width: 200px;
             white-space: nowrap;
             overflow: hidden;
@@ -651,8 +652,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #333;
+            color: #555;
         }
+        /* 消息区域 */
         .message-area {
             flex: 1;
             overflow-y: auto;
@@ -660,56 +662,115 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            background: #f5f5f5;
         }
-        .message {
-            max-width: 80%;
+        /* 消息行：对方消息带头像，自己消息不带 */
+        .message-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+        .message-row.user {
+            justify-content: flex-end;
+        }
+        .message-row.ai {
+            justify-content: flex-start;
+        }
+        /* 对方头像 */
+        .ai .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: #06c755;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+        .ai .message-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .user .message-avatar {
+            display: none; /* 自己消息不显示头像 */
+        }
+        /* 消息内容容器 */
+        .message-content {
+            max-width: 70%;
+            display: flex;
+            flex-direction: column;
+        }
+        /* 气泡 */
+        .bubble {
             padding: 10px 14px;
             border-radius: 20px;
             font-size: 15px;
             line-height: 1.4;
             word-wrap: break-word;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
-        .user-message {
-            align-self: flex-end;
-            background-color: #07c160;
+        .user .bubble {
+            background-color: #06c755;
             color: white;
             border-bottom-right-radius: 4px;
         }
-        .ai-message {
-            align-self: flex-start;
+        .ai .bubble {
             background-color: white;
-            color: black;
-            border: 1px solid #d0d0d0;
+            color: #1a1a1a;
             border-bottom-left-radius: 4px;
         }
+        /* 消息底部：时间+已读 */
+        .message-meta {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+            padding: 0 4px;
+        }
+        .user .message-meta {
+            justify-content: flex-end;
+        }
+        .ai .message-meta {
+            justify-content: flex-start;
+        }
+        .read-status {
+            color: #06c755;
+            font-weight: 500;
+        }
+        /* 系统消息 */
         .system-message {
             align-self: center;
-            background-color: #f0f0f0;
-            color: #999;
-            font-size: 13px;
+            background-color: #e0e0e0;
+            color: #666;
+            font-size: 12px;
             padding: 5px 12px;
             border-radius: 20px;
             max-width: 90%;
+            margin: 8px 0;
         }
+        /* 输入区域 */
         .input-area {
-            background: #f5f5f5;
-            border-top: 1px solid #ddd;
-            padding: 8px 12px;
+            background: #ffffff;
+            border-top: 1px solid #e0e0e0;
+            padding: 10px 12px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
         .text-input {
             flex: 1;
             border: none;
-            background: white;
-            border-radius: 30px;
-            padding: 10px 15px;
+            background: #f0f0f0;
+            border-radius: 24px;
+            padding: 10px 16px;
             font-size: 15px;
             outline: none;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            user-select: text;
-            -webkit-user-select: text;
         }
         .text-input:disabled {
             background: #e0e0e0;
@@ -726,17 +787,15 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            background: white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .icon-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+            color: #555;
         }
         .send-button {
-            background: #07c160;
+            background: #06c755;
             color: white;
             font-size: 20px;
+        }
+        .send-button:disabled {
+            background: #b0b0b0;
         }
         .recording {
             background: #ff3b30 !important;
@@ -803,9 +862,8 @@
 
         <!-- 联系人应用（仿LINE界面） -->
         <div class="app-view" id="chatView">
-            <!-- 仿LINE主界面：顶部+底部tab+内容区 -->
+            <!-- 联系人列表页 -->
             <div id="contactListPage" style="display:flex; flex-direction:column; flex:1;">
-                <!-- 顶部：左侧返回按钮 + 标题“聊天” + 右侧加号 -->
                 <div class="line-header">
                     <div class="line-header-left">
                         <button class="nav-button" id="chatBackHomeBtn" title="返回主界面">←</button>
@@ -815,8 +873,6 @@
                         <span class="circle-plus" id="newContactBtn" title="新建聊天">+</span>
                     </div>
                 </div>
-
-                <!-- 底部标签栏 -->
                 <div class="tab-bar">
                     <div class="tab-item active" data-tab="chats">
                         <i class="fa-regular fa-comment-dots"></i>
@@ -831,25 +887,20 @@
                         <span>动态</span>
                     </div>
                 </div>
-
-                <!-- 标签内容区 -->
                 <div class="tab-content" id="tabContent">
-                    <!-- 聊天列表 (默认显示) -->
                     <div id="chatsTab" style="display: block;">
                         <div class="contact-list" id="contactListContainer"></div>
                     </div>
-                    <!-- 好友列表 (占位) -->
                     <div id="friendsTab" style="display: none;">
                         <div class="placeholder-page">好友列表开发中</div>
                     </div>
-                    <!-- 动态 (占位) -->
                     <div id="dynamicTab" style="display: none;">
                         <div class="placeholder-page">动态开发中</div>
                     </div>
                 </div>
             </div>
 
-            <!-- 聊天详情页 -->
+            <!-- 聊天详情页 - 真实LINE风格 -->
             <div id="chatDetailPage" style="display:none; flex-direction:column; flex:1;">
                 <div class="detail-header">
                     <div class="detail-header-left">
@@ -871,7 +922,7 @@
             </div>
         </div>
 
-        <!-- 设置应用（多API配置管理） -->
+        <!-- 设置应用 -->
         <div class="app-view" id="settingsView">
             <div class="app-header">
                 <button class="nav-button" data-back>←</button>
@@ -1217,6 +1268,73 @@
             });
         }
 
+        // ========== 渲染聊天消息（真实LINE风格） ==========
+        function renderMessages(messages) {
+            const area = document.getElementById('messageArea');
+            if (!area) return;
+            area.innerHTML = '';
+
+            const contact = getCurrentContact();
+            const avatarContent = contact.avatar && contact.avatar.startsWith('data:image') 
+                ? `<img src="${contact.avatar}" alt="avatar">` 
+                : (contact.avatar || '🤖');
+
+            messages.forEach((msg, index) => {
+                if (msg.role === 'system') {
+                    // 系统消息居中显示
+                    const div = document.createElement('div');
+                    div.className = 'system-message';
+                    div.textContent = msg.content;
+                    area.appendChild(div);
+                } else {
+                    const isUser = msg.role === 'user';
+                    const row = document.createElement('div');
+                    row.className = `message-row ${isUser ? 'user' : 'ai'}`;
+
+                    // 头像（仅对方显示）
+                    if (!isUser) {
+                        const avatarDiv = document.createElement('div');
+                        avatarDiv.className = 'message-avatar';
+                        avatarDiv.innerHTML = avatarContent;
+                        row.appendChild(avatarDiv);
+                    }
+
+                    // 消息内容容器
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'message-content';
+
+                    // 气泡
+                    const bubble = document.createElement('div');
+                    bubble.className = 'bubble';
+                    bubble.textContent = msg.content;
+                    contentDiv.appendChild(bubble);
+
+                    // 底部时间 + 已读
+                    const meta = document.createElement('div');
+                    meta.className = 'message-meta';
+                    const now = new Date();
+                    const timeStr = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes());
+                    const timeSpan = document.createElement('span');
+                    timeSpan.textContent = timeStr;
+                    meta.appendChild(timeSpan);
+
+                    if (isUser) {
+                        // 用户消息显示已读标记（用“1”表示）
+                        const readSpan = document.createElement('span');
+                        readSpan.className = 'read-status';
+                        readSpan.textContent = '1';
+                        meta.appendChild(readSpan);
+                    }
+
+                    contentDiv.appendChild(meta);
+                    row.appendChild(contentDiv);
+                    area.appendChild(row);
+                }
+            });
+
+            area.scrollTop = area.scrollHeight;
+        }
+
         function enterChatDetail(contactId) {
             currentContactId = contactId;
             const contact = getCurrentContact();
@@ -1256,31 +1374,13 @@
             renderContactList();
         }
 
-        function renderMessages(messages) {
-            const area = document.getElementById('messageArea');
-            if (!area) return;
-            area.innerHTML = '';
-            messages.forEach(msg => {
-                const div = document.createElement('div');
-                div.className = `message ${msg.role === 'user' ? 'user-message' : (msg.role === 'system' ? 'system-message' : 'ai-message')}`;
-                div.textContent = msg.content;
-                area.appendChild(div);
-            });
-            area.scrollTop = area.scrollHeight;
-        }
-
         function addMessageToCurrent(text, isUser, isSystem = false) {
             const contact = getCurrentContact();
             const role = isSystem ? 'system' : (isUser ? 'user' : 'assistant');
             contact.messages.push({ role, content: text });
             saveContacts();
             if (document.getElementById('chatDetailPage').style.display === 'flex') {
-                const area = document.getElementById('messageArea');
-                const div = document.createElement('div');
-                div.className = `message ${role === 'user' ? 'user-message' : (role === 'system' ? 'system-message' : 'ai-message')}`;
-                div.textContent = text;
-                area.appendChild(div);
-                area.scrollTop = area.scrollHeight;
+                renderMessages(contact.messages);
             }
         }
 
@@ -1500,7 +1600,6 @@
             const homeButton = document.getElementById('homeButton');
             if (homeButton) homeButton.addEventListener('click', () => hideAllAppViews());
 
-            // 信息应用顶部的返回按钮
             const chatBackHomeBtn = document.getElementById('chatBackHomeBtn');
             if (chatBackHomeBtn) chatBackHomeBtn.addEventListener('click', () => hideAllAppViews());
 
