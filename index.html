@@ -704,12 +704,13 @@
             color: #333;
         }
 
-        /* ===== 聊天详情页 - 完全采用您提供的LINE风格 ===== */
+        /* ===== 聊天详情页 - 完全采用您提供的LINE风格，时间戳位置已调整 ===== */
         .chat-detail {
             flex: 1;
             display: flex;
             flex-direction: column;
             background: #87CEFA;
+            min-height: 0; /* 确保内部flex子项可滚动 */
         }
 
         .chat-header {
@@ -811,6 +812,11 @@
             margin: 0 6px;
             white-space: nowrap;
         }
+        /* 对方消息时间戳在气泡右侧（默认位置，无需调整） */
+        /* 自己消息时间戳在气泡左侧，通过order调整 */
+        .message.me .msg-time {
+            order: -1; /* 让时间戳位于气泡之前 */
+        }
 
         .input-area {
             display: flex;
@@ -819,6 +825,7 @@
             background-color: #f7f7f7;
             border-top: 1px solid #dbdbdb;
             gap: 10px;
+            flex-shrink: 0; /* 防止被压缩 */
         }
         .input-btn {
             font-size: 20px;
@@ -1311,8 +1318,8 @@
                 </div>
             </div>
 
-            <!-- 聊天详情页 -->
-            <div id="chatDetailPage" style="display:none; flex-direction:column; flex:1;">
+            <!-- 聊天详情页（时间戳位置已调整） -->
+            <div id="chatDetailPage" style="display:none; flex-direction:column; flex:1; min-height:0;">
                 <div class="chat-header">
                     <div class="header-left">
                         <span id="backToListBtn" style="cursor:pointer;">&lt;</span>
