@@ -2742,6 +2742,14 @@
                 document.getElementById('contactListPage').style.display = 'none';
                 document.getElementById('chatDetailPage').style.display = 'flex';
                 document.getElementById('contactOptionsPage').style.display = 'none';
+
+                // --- 新增：自动滚动到底部（最新消息）---
+                requestAnimationFrame(() => {
+                    const area = document.getElementById('messageArea');
+                    if (area) {
+                        area.scrollTop = area.scrollHeight;
+                    }
+                });
             },
 
             showContactList() {
