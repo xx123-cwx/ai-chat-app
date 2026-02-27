@@ -758,7 +758,7 @@
 
         .message {
             display: flex;
-            align-items: flex-end;
+            align-items: flex-start;  /* 修改为顶部对齐，解决头像在气泡底部的问题 */
             max-width: 85%;
         }
         .message.other {
@@ -767,6 +767,7 @@
         .message.me {
             align-self: flex-end;
             flex-direction: row-reverse;
+            align-items: flex-start;  /* 同时修改自己的消息也为顶部对齐 */
         }
 
         .avatar {
@@ -1757,9 +1758,10 @@
                 return lastMsg.content || '';
             },
 
-            formatTime() {
-                const now = new Date();
-                return now.getHours() + ':' + (now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes());
+            // 修改：formatTime 可接受时间戳参数，若传入则格式化该时间，否则返回当前时间
+            formatTime(timestamp) {
+                let date = timestamp ? new Date(timestamp) : new Date();
+                return date.getHours() + ':' + (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes());
             },
 
             // ---------- IndexedDB 操作 ----------
@@ -1949,11 +1951,16 @@
                         }
                         // 迁移旧消息格式（没有type字段的设为text）
                         if (c.messages) {
-                            c.messages = c.messages.map(m => {
-                                if (!m.type) {
-                                    m.type = 'text';
+                            const now = Date.now();
+                            c.messages = c.messages.map((msg, index) => {
+                                if (!msg.type) {
+                                    msg.type = 'text';
                                 }
-                                return m;
+                                // 为没有时间戳的消息补充时间戳，按索引递减，最后一条为当前时间
+                                if (!msg.timestamp) {
+                                    msg.timestamp = now - (c.messages.length - 1 - index) * 60000; // 每条间隔1分钟
+                                }
+                                return msg;
                             });
                         }
                         c.blocked = c.blocked || false;
@@ -1965,6 +1972,7 @@
                     });
                     this.contacts = contacts;
                 } else {
+                    // 默认联系人添加时间戳
                     this.contacts = [{
                         id: Date.now().toString(),
                         avatar: '🤖',
@@ -1976,7 +1984,12 @@
                         pinned: false,
                         muted: false,
                         mutedLastMessage: '',
-                        messages: [{ role: 'assistant', type: 'text', content: '你好！我是你的AI助手，有什么可以帮你的？' }]
+                        messages: [{ 
+                            role: 'assistant', 
+                            type: 'text', 
+                            content: '你好！我是你的AI助手，有什么可以帮你的？',
+                            timestamp: Date.now()
+                        }]
                     }];
                 }
                 if (this.contacts.length > 0) this.currentContactId = this.contacts[0].id;
@@ -2101,8 +2114,9 @@
                 });
 
                 sortedContacts.forEach(contact => {
-                    const lastMsg = Utils.getLastMessageForList(contact);
-                    const timeStr = Utils.formatTime();
+                    const lastMsg = contact.messages.length ? contact.messages[contact.messages.length-1] : null;
+                    const lastMsgContent = Utils.getLastMessageForList(contact);
+                    const lastMsgTime = lastMsg ? Utils.formatTime(lastMsg.timestamp) : '';
 
                     const item = document.createElement('div');
                     item.className = 'contact-item';
@@ -2133,14 +2147,14 @@
 
                     const timeSpan = document.createElement('span');
                     timeSpan.className = 'contact-time';
-                    timeSpan.textContent = timeStr;
+                    timeSpan.textContent = lastMsgTime;
                     rowDiv.appendChild(timeSpan);
 
                     infoDiv.appendChild(rowDiv);
 
                     const msgDiv = document.createElement('div');
                     msgDiv.className = 'contact-lastmsg';
-                    msgDiv.textContent = lastMsg;
+                    msgDiv.textContent = lastMsgContent;
                     infoDiv.appendChild(msgDiv);
 
                     item.appendChild(infoDiv);
@@ -2258,8 +2272,7 @@
 
                         const timeSpan = document.createElement('span');
                         timeSpan.className = 'msg-time';
-                        const timeStr = Utils.formatTime();
-                        timeSpan.textContent = timeStr;
+                        timeSpan.textContent = Utils.formatTime(msg.timestamp); // 使用存储的时间戳
                         bubbleWrapper.appendChild(timeSpan);
 
                         row.appendChild(bubbleWrapper);
@@ -2530,10 +2543,16 @@
             longPressTimer: null,
             longPressMsgIndex: null,
 
+            // 修改：添加消息时记录时间戳
             addMessageToCurrent(text, isUser, isSystem = false, type = 'text') {
                 const contact = DataManager.getCurrentContact();
                 const role = isSystem ? 'system' : (isUser ? 'user' : 'assistant');
-                const msg = { role, type, content: text };
+                const msg = { 
+                    role, 
+                    type, 
+                    content: text,
+                    timestamp: Date.now()  // 记录发送时间
+                };
                 contact.messages.push(msg);
                 DataManager.saveContacts();
                 if (document.getElementById('chatDetailPage').style.display === 'flex') {
@@ -2776,7 +2795,7 @@
                 this.isLoadingMore = false;
             },
 
-            // 撤回消息
+            // 撤回消息（只修改type和content，保留原timestamp）
             recallMessage(index) {
                 const contact = DataManager.getCurrentContact();
                 const msg = contact.messages[index];
@@ -2785,6 +2804,7 @@
 
                 msg.type = 'recall';
                 msg.content = '您撤回了一条消息';
+                // 保留原timestamp不变
                 DataManager.saveContacts();
                 // 重新渲染当前可见范围
                 UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
@@ -3186,7 +3206,7 @@
                     pinned: false,
                     muted: false,
                     mutedLastMessage: '',
-                    messages: [{ role: 'assistant', type: 'text', content: `你好！我是${name}，很高兴认识你！` }]
+                    messages: [{ role: 'assistant', type: 'text', content: `你好！我是${name}，很高兴认识你！`, timestamp: Date.now() }]
                 });
                 DataManager.saveContacts();
                 ModalHandler.closeNewContactModal();
@@ -3255,7 +3275,7 @@
                 const contact = DataManager.getCurrentContact();
                 if (confirm('确定清空所有聊天记录吗？')) {
                     contact.messages = [];
-                    contact.messages.push({ role: 'system', type: 'text', content: '聊天记录已清空' });
+                    contact.messages.push({ role: 'system', type: 'text', content: '聊天记录已清空', timestamp: Date.now() });
                     DataManager.saveContacts();
                     document.getElementById('contactListPage').style.display = 'none';
                     document.getElementById('contactOptionsPage').style.display = 'none';
