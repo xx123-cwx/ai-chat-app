@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 黑白简约（相机话筒修复）</title>
+    <title>AI角色 · 最终完整版（朋友圈独立封面）</title>
     <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -911,23 +911,16 @@
             gap: 10px;
             flex-shrink: 0;
         }
-        /* 黑白简约风图标按钮样式 */
-        .header-right .input-btn,
-        .input-btn,
-        .input-smile {
-            color: #222; /* 深灰色，接近黑色 */
+        .input-btn {
             font-size: 20px;
+            color: #888;
             cursor: pointer;
             width: 24px;
             text-align: center;
-            transition: color 0.2s;
         }
-        .header-right .input-btn:hover,
-        .input-btn:hover,
-        .input-smile:hover {
-            color: #000; /* 纯黑，无彩色 */
+        .input-btn:hover {
+            color: #00C73C;
         }
-        /* 输入框容器 */
         .input-field-container {
             position: relative;
             flex-grow: 1;
@@ -940,14 +933,9 @@
             outline: none;
             font-size: 16px;
             background-color: #fff;
-            color: #111; /* 输入文字黑色 */
         }
         .input-field:focus {
-            border-color: #333; /* 改为深灰/黑色，不再泛绿 */
-        }
-        .input-field::placeholder {
-            color: #777; /* 深灰色placeholder，对应"Aa" */
-            font-weight: 400;
+            border-color: #00C73C;
         }
         .input-field:disabled {
             background-color: #f0f0f0;
@@ -959,11 +947,16 @@
             top: 50%;
             transform: translateY(-50%);
             font-size: 20px;
+            color: #888;
+            cursor: pointer;
             width: 24px;
             height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+        .input-smile:hover {
+            color: #00C73C;
         }
         #recordBtn {
             margin-left: 0;
@@ -1452,6 +1445,191 @@
             color: #07c160;
         }
 
+        /* ===== 朋友圈样式 ===== */
+        .profile-cover {
+            position: relative;
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            background-color: #07c160; /* fallback */
+            flex-shrink: 0;
+        }
+        .cover-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid white;
+            overflow: hidden;
+            background: #07c160;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .cover-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .post-btn {
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(2px);
+        }
+        .moments-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            background: #f5f5f5;
+        }
+        .moment-item {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .moment-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .moment-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #07c160;
+            margin-right: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .moment-avatar img, .moment-avatar span {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        .moment-info {
+            flex: 1;
+        }
+        .moment-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        .moment-time {
+            font-size: 12px;
+            color: #999;
+        }
+        .moment-content {
+            font-size: 15px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            word-break: break-word;
+        }
+        .moment-images {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+        .moment-image {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: #f0f0f0;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .moment-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .moment-actions {
+            display: flex;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 12px;
+            margin-top: 4px;
+        }
+        .moment-action-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+            padding: 8px 0;
+        }
+        .moment-action-btn.liked {
+            color: #ff3b30;
+        }
+        .moment-action-btn i {
+            font-size: 20px;
+        }
+        .comments-section {
+            margin-top: 12px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 8px 12px;
+        }
+        .comment-item {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+        .comment-name {
+            font-weight: 600;
+            color: #07c160;
+            margin-right: 8px;
+        }
+        .comment-text {
+            color: #333;
+            word-break: break-word;
+        }
+        .add-comment {
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+        }
+        .add-comment input {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 8px 12px;
+            font-size: 14px;
+            outline: none;
+        }
+        .add-comment button {
+            background: #07c160;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            margin-left: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
         /* 占位页面 */
         .placeholder-page {
             display: flex;
@@ -1541,8 +1719,25 @@
                         </div>
                         <div class="contact-list" id="friendsListContainer"></div>
                     </div>
-                    <div id="dynamicTab" style="display: none;">
-                        <div class="placeholder-page">动态开发中</div>
+                    <div id="dynamicTab" style="display: none; flex-direction: column; height: 100%;">
+                        <!-- 朋友圈个人封面（无头像网名状态，只有背景图） -->
+                        <div class="profile-cover" id="profileCover">
+                            <!-- 右下角显示用户头像、网名、个性签名 -->
+                            <div style="position: absolute; bottom: 16px; right: 16px; display: flex; flex-direction: column; align-items: flex-end; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="text-align: right;">
+                                        <div id="coverUserName" style="font-weight: 600; font-size: 18px;">我的网名</div>
+                                        <div id="coverUserBio" style="font-size: 14px;">个性签名</div>
+                                    </div>
+                                    <div class="cover-avatar" id="coverUserAvatar">
+                                        <span id="coverAvatarText">🤖</span>
+                                        <img id="coverAvatarImg" src="#" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="post-btn" id="openPostModalBtn" style="position: absolute; top: 16px; right: 16px;"><i class="fa-solid fa-camera"></i></button>
+                        </div>
+                        <div class="moments-list" id="momentsList"></div>
                     </div>
                 </div>
                 
@@ -1562,7 +1757,7 @@
                 </div>
             </div>
 
-            <!-- 聊天详情页（相机和话筒已恢复，颜色黑色） -->
+            <!-- 聊天详情页 -->
             <div id="chatDetailPage" style="display:none; flex-direction:column; flex:1; min-height:0;">
                 <div class="chat-header">
                     <div class="header-left">
@@ -1577,19 +1772,19 @@
                 </div>
                 <div class="chat-messages" id="messageArea"></div>
                 <div class="input-area">
-                    <span class="input-btn"><i class="fa-regular fa-plus"></i></span>
-                    <span class="input-btn" id="cameraBtn"><i class="fa-regular fa-camera"></i></span>   <!-- 相机图标 -->
+                    <span class="input-btn"><i class="fa-solid fa-plus"></i></span>
+                    <span class="input-btn" id="cameraBtn"><i class="fa-solid fa-camera"></i></span>
                     <span class="input-btn" id="imageBtn"><i class="fa-regular fa-image"></i></span>
                     <div class="input-field-container">
                         <input type="text" class="input-field" id="messageInput" placeholder="Aa">
                         <span class="input-smile" id="smileBtn"><i class="fa-regular fa-face-smile"></i></span>
                         <span class="input-loading" id="loadingIndicator"><i class="fa-solid fa-spinner fa-spin"></i></span>
                     </div>
-                    <span class="input-btn" id="recordBtn"><i class="fa-regular fa-microphone"></i></span> <!-- 话筒图标 -->
+                    <span class="input-btn" id="recordBtn"><i class="fa-solid fa-microphone"></i></span>
                 </div>
             </div>
 
-            <!-- 联系人选项页面（新增头像区域 & 居中开关） -->
+            <!-- 联系人选项页面（新增AI角色头像 & 居中开关） -->
             <div id="contactOptionsPage" style="display:none; flex-direction:column; flex:1;">
                 <div class="chat-header">
                     <div class="header-left">
@@ -1697,6 +1892,14 @@
                     <button class="upload-btn" id="uploadChatBgBtn">选择图片</button>
                     <button class="upload-btn" id="resetChatBgBtn" style="background:#ff3b30; margin-top:8px;">恢复默认</button>
                     <div class="preview-area" id="chatBgPreview">当前背景：默认</div>
+                </div>
+                <!-- 新增：朋友圈封面设置 -->
+                <div class="beautify-section">
+                    <h3>朋友圈封面</h3>
+                    <input type="file" id="momentCoverUpload" accept="image/*" style="display: none;">
+                    <button class="upload-btn" id="uploadMomentCoverBtn">选择图片</button>
+                    <button class="upload-btn" id="resetMomentCoverBtn" style="background:#ff3b30; margin-top:8px;">恢复默认</button>
+                    <div class="preview-area" id="momentCoverPreview">当前封面：默认</div>
                 </div>
                 <div class="beautify-section">
                     <h3>聊天气泡CSS</h3>
@@ -1951,9 +2154,34 @@
         </div>
     </div>
 
+    <!-- 发布动态模态框 -->
+    <div class="modal-overlay" id="postModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>发布新动态</h3>
+                <span class="close-modal" id="closePostModal">&times;</span>
+            </div>
+            <div class="form-group">
+                <label>文字内容</label>
+                <textarea id="postContent" rows="4" placeholder="分享你的想法..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>图片 (最多9张)</label>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;" id="postImagePreviewContainer"></div>
+                <input type="file" id="postImages" accept="image/*" multiple style="display: none;">
+                <button class="upload-btn" id="selectPostImages">选择图片</button>
+                <span style="font-size:12px; color:#999; margin-left:8px;">已选 <span id="imageCount">0</span>/9</span>
+            </div>
+            <div class="form-actions">
+                <button class="save-btn" id="savePost">发布</button>
+                <button class="cancel-btn" id="cancelPost">取消</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ==================== 常量定义 ====================
-        const BACKEND_URL = '';
+        const BACKEND_URL = ''; // 请替换为你的 Vercel 后端地址
         const TOAST_DURATION = 2000;
         const API_ERRORS = {
             429: '请求过于频繁，请稍后再试 (429)',
@@ -2192,9 +2420,11 @@
                 wallpaper: null,
                 appIcons: {},
                 bubbleCss: '',
-                chatBackground: null
+                chatBackground: null,
+                momentCover: null // 新增朋友圈封面
             },
             worldBooks: [],
+            posts: [], // 朋友圈动态
 
             async processImageForSave(imageData, prefix = 'img') {
                 if (!imageData) return null;
@@ -2329,6 +2559,11 @@
                         Utils.saveImageToDB(id, settings.chatBackground).catch(console.error);
                         settings.chatBackground = id;
                     }
+                    if (settings.momentCover && Utils.isBase64Image(settings.momentCover)) {
+                        const id = Utils.generateImageId('moment_cover');
+                        Utils.saveImageToDB(id, settings.momentCover).catch(console.error);
+                        settings.momentCover = id;
+                    }
                     if (settings.appIcons) {
                         const newIcons = {};
                         for (let [key, value] of Object.entries(settings.appIcons)) {
@@ -2344,7 +2579,7 @@
                     }
                     this.beautifySettings = settings;
                 } else {
-                    this.beautifySettings = { wallpaper: null, appIcons: {}, bubbleCss: '', chatBackground: null };
+                    this.beautifySettings = { wallpaper: null, appIcons: {}, bubbleCss: '', chatBackground: null, momentCover: null };
                 }
             },
 
@@ -2365,6 +2600,19 @@
                 localStorage.setItem('worldBooks', JSON.stringify(this.worldBooks));
             },
 
+            loadPosts() {
+                const saved = localStorage.getItem('posts');
+                if (saved) {
+                    this.posts = JSON.parse(saved);
+                } else {
+                    this.posts = [];
+                }
+            },
+
+            savePosts() {
+                localStorage.setItem('posts', JSON.stringify(this.posts));
+            },
+
             getWorldBooksForContact(contactId) {
                 const globalBooks = this.worldBooks.filter(w => w.global === true);
                 const specificBooks = this.worldBooks.filter(w => w.global === false && w.boundRoles && w.boundRoles.includes(contactId));
@@ -2377,7 +2625,7 @@
             async exportBackup() {
                 try {
                     Utils.showToast('正在打包数据...', 0);
-                    const appKeys = ['apiConfigs', 'activeConfigId', 'contacts', 'userProfile', 'beautifySettings', 'worldBooks'];
+                    const appKeys = ['apiConfigs', 'activeConfigId', 'contacts', 'userProfile', 'beautifySettings', 'worldBooks', 'posts'];
                     const localStorageData = {};
                     appKeys.forEach(key => {
                         const val = localStorage.getItem(key);
@@ -2406,7 +2654,7 @@
                     const text = await Utils.readFileAsText(file);
                     const backup = JSON.parse(text);
                     if (backup.version !== 1) throw new Error('不支持的备份版本');
-                    const appKeys = ['apiConfigs', 'activeConfigId', 'contacts', 'userProfile', 'beautifySettings', 'worldBooks'];
+                    const appKeys = ['apiConfigs', 'activeConfigId', 'contacts', 'userProfile', 'beautifySettings', 'worldBooks', 'posts'];
                     appKeys.forEach(key => localStorage.removeItem(key));
                     if (backup.localStorage) {
                         Object.entries(backup.localStorage).forEach(([key, val]) => {
@@ -2427,10 +2675,10 @@
 
             // 一键清除所有数据
             async clearAllData() {
-                if (!confirm('⚠️ 确定要一键清除所有数据吗？\n包括所有API配置、联系人、聊天记录、世界书、美化设置及图片，此操作不可恢复！')) return;
+                if (!confirm('⚠️ 确定要一键清除所有数据吗？\n包括所有API配置、联系人、聊天记录、世界书、美化设置、朋友圈及图片，此操作不可恢复！')) return;
                 Utils.showToast('正在清除所有数据...', 0);
                 try {
-                    const appKeys = ['apiConfigs', 'activeConfigId', 'contacts', 'userProfile', 'beautifySettings', 'worldBooks'];
+                    const appKeys = ['apiConfigs', 'activeConfigId', 'contacts', 'userProfile', 'beautifySettings', 'worldBooks', 'posts'];
                     appKeys.forEach(key => localStorage.removeItem(key));
                     await Utils.clearImages();
                     Utils.showToast('数据已清空，即将刷新', 1500);
@@ -2439,6 +2687,274 @@
                     console.error('清除数据失败:', err);
                     Utils.showToast('清除失败：' + err.message, 3000);
                 }
+            }
+        };
+
+        // ==================== 朋友圈模块 ====================
+        const PostManager = {
+            // 当前预览的图片数组（临时存储上传的图片 ID 或 base64）
+            tempImages: [],
+
+            // 打开发布模态框
+            openPostModal() {
+                this.tempImages = [];
+                document.getElementById('postContent').value = '';
+                document.getElementById('postImagePreviewContainer').innerHTML = '';
+                document.getElementById('imageCount').textContent = '0';
+                document.getElementById('postModal').classList.add('active');
+            },
+
+            closePostModal() {
+                document.getElementById('postModal').classList.remove('active');
+            },
+
+            // 处理图片上传（多图）
+            async handleImageUpload(files) {
+                if (this.tempImages.length + files.length > 9) {
+                    Utils.showToast('最多只能上传9张图片');
+                    return;
+                }
+                Utils.showToast('正在处理图片...', 0);
+                for (let file of files) {
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        const originalDataUrl = e.target.result;
+                        try {
+                            const compressedDataUrl = await Utils.compressImage(originalDataUrl, 800, 0.9);
+                            const imageId = Utils.generateImageId('post_img');
+                            await Utils.saveImageToDB(imageId, compressedDataUrl);
+                            this.tempImages.push(imageId);
+                            this.renderImagePreviews();
+                        } catch (err) {
+                            console.error(err);
+                            Utils.showToast('图片处理失败', 2000);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            },
+
+            // 渲染图片预览
+            renderImagePreviews() {
+                const container = document.getElementById('postImagePreviewContainer');
+                container.innerHTML = '';
+                this.tempImages.forEach((id, index) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.style.position = 'relative';
+                    wrapper.style.width = '70px';
+                    wrapper.style.height = '70px';
+                    wrapper.style.borderRadius = '8px';
+                    wrapper.style.overflow = 'hidden';
+                    const img = document.createElement('img');
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    Utils.loadImageFromDB(id).then(dataUrl => {
+                        if (dataUrl) img.src = dataUrl;
+                    });
+                    const closeBtn = document.createElement('span');
+                    closeBtn.innerHTML = '&times;';
+                    closeBtn.style.position = 'absolute';
+                    closeBtn.style.top = '2px';
+                    closeBtn.style.right = '2px';
+                    closeBtn.style.background = 'rgba(0,0,0,0.5)';
+                    closeBtn.style.color = 'white';
+                    closeBtn.style.width = '18px';
+                    closeBtn.style.height = '18px';
+                    closeBtn.style.borderRadius = '50%';
+                    closeBtn.style.display = 'flex';
+                    closeBtn.style.alignItems = 'center';
+                    closeBtn.style.justifyContent = 'center';
+                    closeBtn.style.fontSize = '14px';
+                    closeBtn.style.cursor = 'pointer';
+                    closeBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        this.tempImages.splice(index, 1);
+                        this.renderImagePreviews();
+                    };
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(closeBtn);
+                    container.appendChild(wrapper);
+                });
+                document.getElementById('imageCount').textContent = this.tempImages.length;
+            },
+
+            // 发布动态
+            async publishPost() {
+                const content = document.getElementById('postContent').value.trim();
+                if (!content && this.tempImages.length === 0) {
+                    Utils.showToast('请输入内容或选择图片');
+                    return;
+                }
+                const newPost = {
+                    id: Date.now().toString(),
+                    contactId: 'me',  // 标识为当前用户
+                    content,
+                    images: [...this.tempImages],
+                    timestamp: Date.now(),
+                    likes: [],         // 存储点赞的用户ID（这里简化，用数组长度表示）
+                    likeCount: 0,
+                    likedByMe: false,
+                    comments: []       // 存储评论 { id, contactId, text, timestamp }
+                };
+                DataManager.posts.unshift(newPost); // 最新在前
+                DataManager.savePosts();
+                this.closePostModal();
+                this.renderMomentsList();
+                Utils.showToast('发布成功');
+            },
+
+            // 渲染朋友圈列表
+            renderMomentsList() {
+                const container = document.getElementById('momentsList');
+                if (!container) return;
+                container.innerHTML = '';
+                if (DataManager.posts.length === 0) {
+                    container.innerHTML = '<div style="text-align:center; color:#999; padding:40px 0;">暂无动态，点击右上角发布</div>';
+                    return;
+                }
+                DataManager.posts.forEach(post => {
+                    const item = document.createElement('div'); item.className = 'moment-item'; item.dataset.id = post.id;
+                    // 头部
+                    const header = document.createElement('div'); header.className = 'moment-header';
+                    const avatarDiv = document.createElement('div'); avatarDiv.className = 'moment-avatar';
+                    // 头像：使用用户头像（因为发布者是“我”）
+                    Utils.setImageElement(avatarDiv, DataManager.userProfile.avatar, '🤖');
+                    header.appendChild(avatarDiv);
+                    const infoDiv = document.createElement('div'); infoDiv.className = 'moment-info';
+                    const nameSpan = document.createElement('div'); nameSpan.className = 'moment-name'; nameSpan.textContent = DataManager.userProfile.name || '我';
+                    infoDiv.appendChild(nameSpan);
+                    const timeSpan = document.createElement('div'); timeSpan.className = 'moment-time';
+                    timeSpan.textContent = this.formatTime(post.timestamp);
+                    infoDiv.appendChild(timeSpan);
+                    header.appendChild(infoDiv);
+                    item.appendChild(header);
+
+                    // 文字内容
+                    if (post.content) {
+                        const contentDiv = document.createElement('div'); contentDiv.className = 'moment-content';
+                        contentDiv.textContent = post.content;
+                        item.appendChild(contentDiv);
+                    }
+
+                    // 图片网格
+                    if (post.images && post.images.length > 0) {
+                        const imagesDiv = document.createElement('div'); imagesDiv.className = 'moment-images';
+                        post.images.forEach(imgId => {
+                            const imgWrapper = document.createElement('div'); imgWrapper.className = 'moment-image';
+                            const img = document.createElement('img');
+                            Utils.loadImageFromDB(imgId).then(dataUrl => {
+                                if (dataUrl) img.src = dataUrl;
+                            }).catch(() => {});
+                            imgWrapper.appendChild(img);
+                            imgWrapper.addEventListener('click', () => {
+                                // 简单预览：打开图片新窗口，可扩展为画廊
+                                Utils.loadImageFromDB(imgId).then(dataUrl => {
+                                    if (dataUrl) window.open(dataUrl);
+                                });
+                            });
+                            imagesDiv.appendChild(imgWrapper);
+                        });
+                        item.appendChild(imagesDiv);
+                    }
+
+                    // 点赞和评论按钮
+                    const actionsDiv = document.createElement('div'); actionsDiv.className = 'moment-actions';
+                    const likeBtn = document.createElement('button'); likeBtn.className = `moment-action-btn ${post.likedByMe ? 'liked' : ''}`;
+                    likeBtn.innerHTML = `<i class="fa-${post.likedByMe ? 'solid' : 'regular'} fa-heart"></i> 点赞 ${post.likeCount || 0}`;
+                    likeBtn.addEventListener('click', () => this.toggleLike(post.id));
+                    actionsDiv.appendChild(likeBtn);
+                    const commentBtn = document.createElement('button'); commentBtn.className = 'moment-action-btn';
+                    commentBtn.innerHTML = `<i class="fa-regular fa-comment"></i> 评论 ${post.comments ? post.comments.length : 0}`;
+                    commentBtn.addEventListener('click', () => this.showCommentInput(post.id));
+                    actionsDiv.appendChild(commentBtn);
+                    item.appendChild(actionsDiv);
+
+                    // 评论列表
+                    if (post.comments && post.comments.length > 0) {
+                        const commentsDiv = document.createElement('div'); commentsDiv.className = 'comments-section';
+                        post.comments.forEach(comment => {
+                            const commentItem = document.createElement('div'); commentItem.className = 'comment-item';
+                            const nameSpan = document.createElement('span'); nameSpan.className = 'comment-name';
+                            nameSpan.textContent = comment.contactId === 'me' ? (DataManager.userProfile.name || '我') : '好友'; // 简化，只有“我”能评论
+                            commentItem.appendChild(nameSpan);
+                            const textSpan = document.createElement('span'); textSpan.className = 'comment-text';
+                            textSpan.textContent = comment.text;
+                            commentItem.appendChild(textSpan);
+                            commentsDiv.appendChild(commentItem);
+                        });
+                        item.appendChild(commentsDiv);
+                    }
+
+                    // 临时添加评论输入框（点击评论按钮后显示）
+                    const commentInputWrapper = document.createElement('div'); commentInputWrapper.className = 'add-comment'; commentInputWrapper.style.display = 'none';
+                    commentInputWrapper.innerHTML = `
+                        <input type="text" placeholder="写评论...">
+                        <button>发送</button>
+                    `;
+                    const input = commentInputWrapper.querySelector('input');
+                    const sendBtn = commentInputWrapper.querySelector('button');
+                    sendBtn.addEventListener('click', () => {
+                        const text = input.value.trim();
+                        if (text) this.addComment(post.id, text, commentInputWrapper);
+                    });
+                    item.appendChild(commentInputWrapper);
+                    // 存储评论输入框引用，以便点击评论按钮时切换显示
+                    item.commentInputWrapper = commentInputWrapper;
+
+                    container.appendChild(item);
+                });
+            },
+
+            // 切换点赞
+            toggleLike(postId) {
+                const post = DataManager.posts.find(p => p.id === postId);
+                if (!post) return;
+                if (post.likedByMe) {
+                    post.likeCount = (post.likeCount || 1) - 1;
+                    post.likedByMe = false;
+                } else {
+                    post.likeCount = (post.likeCount || 0) + 1;
+                    post.likedByMe = true;
+                }
+                DataManager.savePosts();
+                this.renderMomentsList();
+            },
+
+            // 显示评论输入框
+            showCommentInput(postId) {
+                const postElement = document.querySelector(`.moment-item[data-id="${postId}"]`);
+                if (postElement && postElement.commentInputWrapper) {
+                    postElement.commentInputWrapper.style.display = postElement.commentInputWrapper.style.display === 'none' ? 'flex' : 'none';
+                }
+            },
+
+            // 添加评论
+            addComment(postId, text, wrapper) {
+                const post = DataManager.posts.find(p => p.id === postId);
+                if (!post) return;
+                if (!post.comments) post.comments = [];
+                post.comments.push({
+                    id: Date.now().toString(),
+                    contactId: 'me',
+                    text: text,
+                    timestamp: Date.now()
+                });
+                DataManager.savePosts();
+                wrapper.style.display = 'none';
+                wrapper.querySelector('input').value = '';
+                this.renderMomentsList();
+            },
+
+            formatTime(timestamp) {
+                const date = new Date(timestamp);
+                const now = new Date();
+                const diff = (now - date) / 1000;
+                if (diff < 60) return '刚刚';
+                if (diff < 3600) return Math.floor(diff / 60) + '分钟前';
+                if (diff < 86400) return Math.floor(diff / 3600) + '小时前';
+                if (diff < 2592000) return Math.floor(diff / 86400) + '天前';
+                return date.toLocaleDateString();
             }
         };
 
@@ -2468,6 +2984,24 @@
                 document.getElementById('lineId').value = profile.lineId || '';
                 document.getElementById('bio').value = profile.bio || '';
                 document.getElementById('userSetting').value = profile.userSetting || '';
+
+                // 更新朋友圈封面
+                await this.updateProfileCover();
+            },
+
+            async updateProfileCover() {
+                const profile = DataManager.userProfile;
+                document.getElementById('coverUserName').textContent = profile.name || '我的网名';
+                document.getElementById('coverUserBio').textContent = profile.bio || '暂无签名';
+                const coverAvatarDiv = document.getElementById('coverUserAvatar');
+                coverAvatarDiv.innerHTML = '';
+                const span = document.createElement('span'); span.id = 'coverAvatarText';
+                const img = document.createElement('img'); img.id = 'coverAvatarImg'; img.style.display = 'none';
+                coverAvatarDiv.appendChild(span); coverAvatarDiv.appendChild(img);
+                await Utils.setImageElement(coverAvatarDiv, profile.avatar, '🤖');
+                // 封面背景图：使用独立的朋友圈封面设置
+                const coverDiv = document.getElementById('profileCover');
+                await Utils.setBackgroundImage(coverDiv, DataManager.beautifySettings.momentCover, 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format&fit=crop');
             },
 
             renderContactList() {
@@ -3380,6 +3914,33 @@
                 reader.readAsDataURL(file);
             });
 
+            // 朋友圈封面设置
+            const momentCoverUpload = document.getElementById('momentCoverUpload');
+            document.getElementById('uploadMomentCoverBtn').addEventListener('click', () => { momentCoverUpload.click(); });
+            momentCoverUpload.addEventListener('change', async (e) => {
+                const file = e.target.files[0]; if (!file) return;
+                const reader = new FileReader();
+                reader.onload = async (event) => {
+                    Utils.showToast('正在处理封面...', 0);
+                    const originalDataUrl = event.target.result;
+                    try {
+                        const imageId = Utils.generateImageId('moment_cover');
+                        await Utils.saveImageToDB(imageId, originalDataUrl);
+                        DataManager.beautifySettings.momentCover = imageId; DataManager.saveBeautifySettings();
+                        document.getElementById('momentCoverPreview').textContent = '封面已更新';
+                        await UIManager.updateProfileCover();
+                        Utils.showToast('封面更新成功', 1500);
+                    } catch (err) { Utils.showToast('封面处理失败', 2000); }
+                };
+                reader.readAsDataURL(file);
+            });
+
+            document.getElementById('resetMomentCoverBtn').addEventListener('click', () => {
+                DataManager.beautifySettings.momentCover = null; DataManager.saveBeautifySettings();
+                document.getElementById('momentCoverPreview').textContent = '当前封面：默认';
+                UIManager.updateProfileCover();
+            });
+
             document.getElementById('applyBubbleCss').addEventListener('click', () => {
                 const css = document.getElementById('bubbleCssInput').value.trim();
                 DataManager.beautifySettings.bubbleCss = css; DataManager.saveBeautifySettings(); UIManager.applyBubbleCss(css);
@@ -3445,7 +4006,7 @@
                     const tab = item.dataset.tab;
                     if (tab === 'chats') { chatsTab.style.display = 'block'; friendsTab.style.display = 'none'; dynamicTab.style.display = 'none'; UIManager.renderContactList(); }
                     else if (tab === 'friends') { chatsTab.style.display = 'none'; friendsTab.style.display = 'block'; dynamicTab.style.display = 'none'; UIManager.renderFriendsList(); }
-                    else if (tab === 'dynamic') { chatsTab.style.display = 'none'; friendsTab.style.display = 'none'; dynamicTab.style.display = 'flex'; }
+                    else if (tab === 'dynamic') { chatsTab.style.display = 'none'; friendsTab.style.display = 'none'; dynamicTab.style.display = 'flex'; PostManager.renderMomentsList(); }
                 });
             });
 
@@ -3509,6 +4070,24 @@
                 });
             });
 
+            // 朋友圈
+            document.getElementById('openPostModalBtn').addEventListener('click', () => PostManager.openPostModal());
+            document.getElementById('closePostModal').addEventListener('click', () => PostManager.closePostModal());
+            document.getElementById('cancelPost').addEventListener('click', () => PostManager.closePostModal());
+            document.getElementById('postModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) PostManager.closePostModal(); });
+
+            document.getElementById('selectPostImages').addEventListener('click', () => {
+                document.getElementById('postImages').click();
+            });
+            document.getElementById('postImages').addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    PostManager.handleImageUpload(Array.from(e.target.files));
+                }
+                e.target.value = ''; // 允许重复选择同一文件
+            });
+
+            document.getElementById('savePost').addEventListener('click', () => PostManager.publishPost());
+
             // 时钟
             function updateTime() { const now = new Date(); document.getElementById('currentTime').textContent = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`; }
             updateTime(); setInterval(updateTime, 1000);
@@ -3521,6 +4100,7 @@
             DataManager.loadUserProfile();
             DataManager.loadBeautifySettings();
             DataManager.loadWorldBooks();
+            DataManager.loadPosts(); // 加载朋友圈
 
             await UIManager.updateUserProfileDisplay();
             UIManager.renderContactList();
@@ -3529,6 +4109,7 @@
             UIManager.applyAllAppIcons();
             if (DataManager.beautifySettings.bubbleCss) UIManager.applyBubbleCss(DataManager.beautifySettings.bubbleCss);
             document.getElementById('bubbleCssInput').value = DataManager.beautifySettings.bubbleCss || '';
+            document.getElementById('momentCoverPreview').textContent = DataManager.beautifySettings.momentCover ? '当前封面：自定义' : '当前封面：默认';
 
             (function setupProfileAvatar() {
                 const avatarDiv = document.getElementById('profileAvatar');
