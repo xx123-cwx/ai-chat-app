@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 最终完整版（朋友圈独立封面）</title>
+    <title>AI角色 · 完整版（朋友圈互动）</title>
     <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -977,7 +977,7 @@
             pointer-events: none;
         }
 
-        /* ===== 联系人选项页面（新增头像区域 & 居中开关） ===== */
+        /* ===== 联系人选项页面（新增头像区域 & 居中开关 & 自动发布设置） ===== */
         .options-container {
             flex: 1;
             padding: 20px 16px;
@@ -1044,24 +1044,22 @@
         .option-button:active {
             background: #f0f0f0;
         }
-        /* 开关条目样式（居中版本） */
-        .option-item {
+
+        /* 开关卡片通用样式（与自动发布一致） */
+        .auto-post-settings {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .switch-row {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            background: white;
-            padding: 12px 16px;
-            border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            font-size: 16px;
-            font-weight: 500;
-        }
-        .option-item.center-content {
             justify-content: center;
+            gap: 16px;
         }
-        .option-item.center-content span {
-            margin-right: 16px;
-        }
+
+        /* 保留原有开关样式 */
         .switch {
             position: relative;
             display: inline-block;
@@ -1585,8 +1583,23 @@
         .moment-action-btn i {
             font-size: 20px;
         }
+
+        /* 点赞区域样式（仿微信） */
+        .like-list {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+        }
+        .like-list i {
+            margin-right: 6px;
+            color: #07c160;
+        }
+
         .comments-section {
-            margin-top: 12px;
+            margin-top: 8px;
             background: #f9f9f9;
             border-radius: 8px;
             padding: 8px 12px;
@@ -1720,9 +1733,9 @@
                         <div class="contact-list" id="friendsListContainer"></div>
                     </div>
                     <div id="dynamicTab" style="display: none; flex-direction: column; height: 100%;">
-                        <!-- 朋友圈个人封面（无头像网名状态，只有背景图） -->
+                        <!-- 朋友圈个人封面（右下角显示头像、网名、个性签名，右上角相机） -->
                         <div class="profile-cover" id="profileCover">
-                            <!-- 右下角显示用户头像、网名、个性签名 -->
+                            <!-- 右下角信息 -->
                             <div style="position: absolute; bottom: 16px; right: 16px; display: flex; flex-direction: column; align-items: flex-end; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <div style="text-align: right;">
@@ -1735,6 +1748,7 @@
                                     </div>
                                 </div>
                             </div>
+                            <!-- 右上角发布按钮 -->
                             <button class="post-btn" id="openPostModalBtn" style="position: absolute; top: 16px; right: 16px;"><i class="fa-solid fa-camera"></i></button>
                         </div>
                         <div class="moments-list" id="momentsList"></div>
@@ -1784,7 +1798,7 @@
                 </div>
             </div>
 
-            <!-- 联系人选项页面（新增AI角色头像 & 居中开关） -->
+            <!-- 联系人选项页面（新增AI角色头像 & 居中开关 & 自动发布设置） -->
             <div id="contactOptionsPage" style="display:none; flex-direction:column; flex:1;">
                 <div class="chat-header">
                     <div class="header-left">
@@ -1806,14 +1820,34 @@
                     <button class="option-button" id="optionsPin">置顶联系人</button>
                     <button class="option-button" id="optionsRemark">修改备注名</button>
                     <button class="option-button" id="optionsEditPersona">编辑人设</button>
-                    <!-- 免打扰通知开关（居中，样式已确保为长条滑块） -->
-                    <div class="option-item center-content">
-                        <span>免打扰通知</span>
-                        <label class="switch">
-                            <input type="checkbox" id="optionsMuteSwitch">
-                            <span class="slider round"></span>
-                        </label>
+                    
+                    <!-- 免打扰通知开关（改为与自动发布相同的卡片样式） -->
+                    <div class="auto-post-settings">
+                        <div class="switch-row">
+                            <span>免打扰通知</span>
+                            <label class="switch">
+                                <input type="checkbox" id="optionsMuteSwitch">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
                     </div>
+
+                    <!-- 自动发布朋友圈设置 -->
+                    <div class="auto-post-settings">
+                        <div class="switch-row">
+                            <span>自动发布朋友圈</span>
+                            <label class="switch">
+                                <input type="checkbox" id="optionsAutoPostSwitch">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <div class="interval-row" id="autoPostIntervalContainer" style="display: none;">
+                            <label>间隔（小时）</label>
+                            <input type="number" id="optionsAutoPostInterval" min="0.5" step="0.5" value="1">
+                            <button id="saveAutoPostSettings">保存</button>
+                        </div>
+                    </div>
+
                     <button class="option-button danger" id="optionsDelete">删除好友</button>
                     <button class="option-button" id="optionsBlock">拉黑好友</button>
                     <button class="option-button" id="optionsClear">清除聊天记录</button>
@@ -2154,7 +2188,7 @@
         </div>
     </div>
 
-    <!-- 发布动态模态框 -->
+    <!-- 发布动态模态框（增加角色多选） -->
     <div class="modal-overlay" id="postModal">
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header">
@@ -2172,6 +2206,13 @@
                 <button class="upload-btn" id="selectPostImages">选择图片</button>
                 <span style="font-size:12px; color:#999; margin-left:8px;">已选 <span id="imageCount">0</span>/9</span>
             </div>
+            <!-- 角色多选区域 -->
+            <div class="form-group">
+                <label>让哪些AI角色看到并互动？</label>
+                <div id="postRoleCheckboxes" style="max-height: 150px; overflow-y: auto; border: 1px solid #ccc; border-radius: 8px; padding: 8px;">
+                    <!-- 动态生成复选框 -->
+                </div>
+            </div>
             <div class="form-actions">
                 <button class="save-btn" id="savePost">发布</button>
                 <button class="cancel-btn" id="cancelPost">取消</button>
@@ -2181,7 +2222,7 @@
 
     <script>
         // ==================== 常量定义 ====================
-        const BACKEND_URL = ''; // 请替换为你的 Vercel 后端地址
+        const BACKEND_URL = ''; // 如果前后端同域，留空即可。否则替换为您的Vercel后端地址
         const TOAST_DURATION = 2000;
         const API_ERRORS = {
             429: '请求过于频繁，请稍后再试 (429)',
@@ -2191,8 +2232,8 @@
         const DB_NAME = 'AIChatDB';
         const DB_VERSION = 1;
         const STORE_NAME = 'images';
-        const INITIAL_MESSAGE_COUNT = 20; // 初始加载消息数量
-        const LOAD_MORE_COUNT = 10;        // 每次加载更多数量
+        const INITIAL_MESSAGE_COUNT = 20;
+        const LOAD_MORE_COUNT = 10;
 
         // ==================== 工具函数模块 ====================
         const Utils = {
@@ -2369,7 +2410,6 @@
                 });
             },
 
-            // ---------- 备份专用 IndexedDB 批量操作 ----------
             async getAllImages() {
                 const db = await this.openDB();
                 return new Promise((resolve, reject) => {
@@ -2421,10 +2461,10 @@
                 appIcons: {},
                 bubbleCss: '',
                 chatBackground: null,
-                momentCover: null // 新增朋友圈封面
+                momentCover: null
             },
             worldBooks: [],
-            posts: [], // 朋友圈动态
+            posts: [],
 
             async processImageForSave(imageData, prefix = 'img') {
                 if (!imageData) return null;
@@ -2492,6 +2532,9 @@
                         c.pinned = c.pinned || false;
                         c.muted = c.muted || false;
                         c.mutedLastMessage = c.mutedLastMessage || '';
+                        c.autoPostEnabled = c.autoPostEnabled || false;
+                        c.autoPostInterval = c.autoPostInterval || 1;
+                        c.lastAutoPostTime = c.lastAutoPostTime || 0;
                         return c;
                     });
                     this.contacts = contacts;
@@ -2512,7 +2555,10 @@
                             type: 'text', 
                             content: '你好！我是你的AI助手，有什么可以帮你的？',
                             timestamp: Date.now()
-                        }]
+                        }],
+                        autoPostEnabled: false,
+                        autoPostInterval: 1,
+                        lastAutoPostTime: 0
                     }];
                 }
                 if (this.contacts.length > 0) this.currentContactId = this.contacts[0].id;
@@ -2620,7 +2666,7 @@
             }
         };
 
-        // ==================== 备份处理模块（含一键清除） ====================
+        // ==================== 备份处理模块 ====================
         const BackupHandler = {
             async exportBackup() {
                 try {
@@ -2673,7 +2719,6 @@
                 }
             },
 
-            // 一键清除所有数据
             async clearAllData() {
                 if (!confirm('⚠️ 确定要一键清除所有数据吗？\n包括所有API配置、联系人、聊天记录、世界书、美化设置、朋友圈及图片，此操作不可恢复！')) return;
                 Utils.showToast('正在清除所有数据...', 0);
@@ -2690,17 +2735,25 @@
             }
         };
 
-        // ==================== 朋友圈模块 ====================
+        // ==================== 朋友圈模块（核心功能） ====================
         const PostManager = {
-            // 当前预览的图片数组（临时存储上传的图片 ID 或 base64）
             tempImages: [],
 
-            // 打开发布模态框
             openPostModal() {
                 this.tempImages = [];
                 document.getElementById('postContent').value = '';
                 document.getElementById('postImagePreviewContainer').innerHTML = '';
                 document.getElementById('imageCount').textContent = '0';
+                // 填充角色复选框
+                const container = document.getElementById('postRoleCheckboxes');
+                container.innerHTML = '';
+                DataManager.contacts.forEach(contact => {
+                    const label = document.createElement('label'); label.style.display = 'block'; label.style.marginBottom = '4px';
+                    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = contact.id;
+                    label.appendChild(cb);
+                    label.appendChild(document.createTextNode(' ' + Utils.getDisplayName(contact)));
+                    container.appendChild(label);
+                });
                 document.getElementById('postModal').classList.add('active');
             },
 
@@ -2708,7 +2761,11 @@
                 document.getElementById('postModal').classList.remove('active');
             },
 
-            // 处理图片上传（多图）
+            getSelectedRoleIds() {
+                const checkboxes = document.querySelectorAll('#postRoleCheckboxes input[type="checkbox"]:checked');
+                return Array.from(checkboxes).map(cb => cb.value);
+            },
+
             async handleImageUpload(files) {
                 if (this.tempImages.length + files.length > 9) {
                     Utils.showToast('最多只能上传9张图片');
@@ -2734,7 +2791,6 @@
                 }
             },
 
-            // 渲染图片预览
             renderImagePreviews() {
                 const container = document.getElementById('postImagePreviewContainer');
                 container.innerHTML = '';
@@ -2779,32 +2835,176 @@
                 document.getElementById('imageCount').textContent = this.tempImages.length;
             },
 
-            // 发布动态
             async publishPost() {
                 const content = document.getElementById('postContent').value.trim();
                 if (!content && this.tempImages.length === 0) {
                     Utils.showToast('请输入内容或选择图片');
                     return;
                 }
+                const selectedRoleIds = this.getSelectedRoleIds();
                 const newPost = {
                     id: Date.now().toString(),
-                    contactId: 'me',  // 标识为当前用户
+                    contactId: 'me',
                     content,
                     images: [...this.tempImages],
                     timestamp: Date.now(),
-                    likes: [],         // 存储点赞的用户ID（这里简化，用数组长度表示）
+                    likedBy: [],
                     likeCount: 0,
-                    likedByMe: false,
-                    comments: []       // 存储评论 { id, contactId, text, timestamp }
+                    comments: []
                 };
-                DataManager.posts.unshift(newPost); // 最新在前
+                DataManager.posts.unshift(newPost);
                 DataManager.savePosts();
                 this.closePostModal();
                 this.renderMomentsList();
                 Utils.showToast('发布成功');
+
+                const targetRoleIds = selectedRoleIds.length > 0 ? selectedRoleIds : DataManager.contacts.map(c => c.id);
+                if (targetRoleIds.length > 0) {
+                    this.triggerInteractions(newPost, targetRoleIds);
+                }
             },
 
-            // 渲染朋友圈列表
+            async triggerInteractions(post, roleIds) {
+                const validRoleIds = roleIds.filter(id => id !== 'me');
+                if (validRoleIds.length === 0) return;
+
+                let hasUpdate = false;
+
+                for (const roleId of validRoleIds) {
+                    const contact = DataManager.contacts.find(c => c.id === roleId);
+                    if (!contact) continue;
+
+                    const action = Math.random() > 0.5 ? 'like' : 'comment';
+
+                    if (action === 'like') {
+                        if (!post.likedBy.includes(roleId)) {
+                            post.likedBy.push(roleId);
+                            hasUpdate = true;
+                        }
+                    } else {
+                        const commentText = await this.generateCommentFromAI(contact, post.content);
+                        if (commentText) {
+                            if (!post.comments) post.comments = [];
+                            post.comments.push({
+                                id: Date.now() + Math.random().toString(36).substr(2, 8),
+                                contactId: roleId,
+                                text: commentText,
+                                timestamp: Date.now()
+                            });
+                            hasUpdate = true;
+                        }
+                    }
+
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+
+                if (hasUpdate) {
+                    post.likeCount = post.likedBy.length;
+                    DataManager.savePosts();
+                    if (document.getElementById('dynamicTab').style.display === 'flex') {
+                        this.renderMomentsList();
+                    }
+                }
+            },
+
+            async generateCommentFromAI(contact, postContent) {
+                let config;
+                if (contact.configId) {
+                    config = DataManager.apiConfigs.find(c => c.id === contact.configId);
+                } else {
+                    config = DataManager.getActiveConfig();
+                }
+                if (!config || !config.base_url || !config.api_key || !config.currentModel) {
+                    console.warn('角色', Utils.getDisplayName(contact), '无有效API配置');
+                    return null;
+                }
+
+                const prompt = `你是一个AI角色，你的人设是：${contact.personality}。现在你看到好友的朋友圈动态："${postContent}"。请用一句话评论这条动态，要符合你的性格，自然简短。不要输出任何额外内容，只输出评论。`;
+                const messages = [
+                    { role: 'system', content: contact.personality },
+                    { role: 'user', content: prompt }
+                ];
+
+                try {
+                    const response = await fetch(`${BACKEND_URL}/api/chat`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            base_url: config.base_url,
+                            api_key: config.api_key,
+                            model: config.currentModel,
+                            messages
+                        })
+                    });
+                    if (!response.ok) return null;
+                    const data = await response.json();
+                    const comment = data.choices?.[0]?.message?.content?.trim();
+                    return comment || null;
+                } catch (err) {
+                    console.error('生成评论失败', err);
+                    return null;
+                }
+            },
+
+            // AI自主发朋友圈
+            async generateAIPost(contactId, customPrompt = '') {
+                const contact = DataManager.contacts.find(c => c.id === contactId);
+                if (!contact) return;
+                let config;
+                if (contact.configId) {
+                    config = DataManager.apiConfigs.find(c => c.id === contact.configId);
+                } else {
+                    config = DataManager.getActiveConfig();
+                }
+                if (!config || !config.base_url || !config.api_key || !config.currentModel) {
+                    Utils.showToast('联系人未关联有效 API 配置，无法生成朋友圈');
+                    return;
+                }
+
+                Utils.showToast('AI 正在构思朋友圈...', 0);
+                const prompt = customPrompt || `请以第一人称“我”的口吻，写一条微信朋友圈动态，内容要符合你的人设：${contact.personality}。要求：内容自然、有生活气息，长度不超过100字。`;
+                const messages = [
+                    { role: 'system', content: contact.personality },
+                    { role: 'user', content: prompt }
+                ];
+                try {
+                    const response = await fetch(`${BACKEND_URL}/api/chat`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            base_url: config.base_url,
+                            api_key: config.api_key,
+                            model: config.currentModel,
+                            messages
+                        })
+                    });
+                    if (!response.ok) throw new Error('API 请求失败');
+                    const data = await response.json();
+                    const content = data.choices?.[0]?.message?.content || '';
+                    if (!content) throw new Error('生成内容为空');
+                    const newPost = {
+                        id: Date.now().toString(),
+                        contactId: contactId,
+                        content: content,
+                        images: [],
+                        timestamp: Date.now(),
+                        likedBy: [],
+                        likeCount: 0,
+                        likedByMe: false,
+                        comments: []
+                    };
+                    DataManager.posts.unshift(newPost);
+                    DataManager.savePosts();
+                    Utils.showToast('朋友圈发布成功');
+                    if (document.getElementById('dynamicTab').style.display === 'flex') {
+                        this.renderMomentsList();
+                    }
+                } catch (err) {
+                    console.error(err);
+                    Utils.showToast('生成朋友圈失败：' + err.message, 3000);
+                }
+            },
+
             renderMomentsList() {
                 const container = document.getElementById('momentsList');
                 if (!container) return;
@@ -2815,14 +3015,25 @@
                 }
                 DataManager.posts.forEach(post => {
                     const item = document.createElement('div'); item.className = 'moment-item'; item.dataset.id = post.id;
-                    // 头部
+                    
+                    let publisherName = '我';
+                    let publisherAvatar = DataManager.userProfile.avatar;
+                    if (post.contactId !== 'me') {
+                        const contact = DataManager.contacts.find(c => c.id === post.contactId);
+                        if (contact) {
+                            publisherName = Utils.getDisplayName(contact);
+                            publisherAvatar = contact.avatar;
+                        } else {
+                            publisherName = '未知角色';
+                        }
+                    }
+
                     const header = document.createElement('div'); header.className = 'moment-header';
                     const avatarDiv = document.createElement('div'); avatarDiv.className = 'moment-avatar';
-                    // 头像：使用用户头像（因为发布者是“我”）
-                    Utils.setImageElement(avatarDiv, DataManager.userProfile.avatar, '🤖');
+                    Utils.setImageElement(avatarDiv, publisherAvatar, '🤖');
                     header.appendChild(avatarDiv);
                     const infoDiv = document.createElement('div'); infoDiv.className = 'moment-info';
-                    const nameSpan = document.createElement('div'); nameSpan.className = 'moment-name'; nameSpan.textContent = DataManager.userProfile.name || '我';
+                    const nameSpan = document.createElement('div'); nameSpan.className = 'moment-name'; nameSpan.textContent = publisherName;
                     infoDiv.appendChild(nameSpan);
                     const timeSpan = document.createElement('div'); timeSpan.className = 'moment-time';
                     timeSpan.textContent = this.formatTime(post.timestamp);
@@ -2830,14 +3041,12 @@
                     header.appendChild(infoDiv);
                     item.appendChild(header);
 
-                    // 文字内容
                     if (post.content) {
                         const contentDiv = document.createElement('div'); contentDiv.className = 'moment-content';
                         contentDiv.textContent = post.content;
                         item.appendChild(contentDiv);
                     }
 
-                    // 图片网格
                     if (post.images && post.images.length > 0) {
                         const imagesDiv = document.createElement('div'); imagesDiv.className = 'moment-images';
                         post.images.forEach(imgId => {
@@ -2848,7 +3057,6 @@
                             }).catch(() => {});
                             imgWrapper.appendChild(img);
                             imgWrapper.addEventListener('click', () => {
-                                // 简单预览：打开图片新窗口，可扩展为画廊
                                 Utils.loadImageFromDB(imgId).then(dataUrl => {
                                     if (dataUrl) window.open(dataUrl);
                                 });
@@ -2858,10 +3066,10 @@
                         item.appendChild(imagesDiv);
                     }
 
-                    // 点赞和评论按钮
                     const actionsDiv = document.createElement('div'); actionsDiv.className = 'moment-actions';
-                    const likeBtn = document.createElement('button'); likeBtn.className = `moment-action-btn ${post.likedByMe ? 'liked' : ''}`;
-                    likeBtn.innerHTML = `<i class="fa-${post.likedByMe ? 'solid' : 'regular'} fa-heart"></i> 点赞 ${post.likeCount || 0}`;
+                    const likedByMe = post.likedBy && post.likedBy.includes('me');
+                    const likeBtn = document.createElement('button'); likeBtn.className = `moment-action-btn ${likedByMe ? 'liked' : ''}`;
+                    likeBtn.innerHTML = `<i class="fa-${likedByMe ? 'solid' : 'regular'} fa-heart"></i> 点赞 ${post.likedBy ? post.likedBy.length : 0}`;
                     likeBtn.addEventListener('click', () => this.toggleLike(post.id));
                     actionsDiv.appendChild(likeBtn);
                     const commentBtn = document.createElement('button'); commentBtn.className = 'moment-action-btn';
@@ -2870,13 +3078,30 @@
                     actionsDiv.appendChild(commentBtn);
                     item.appendChild(actionsDiv);
 
-                    // 评论列表
+                    if (post.likedBy && post.likedBy.length > 0) {
+                        const likeListDiv = document.createElement('div'); likeListDiv.className = 'like-list';
+                        const likerNames = post.likedBy.map(id => {
+                            if (id === 'me') return DataManager.userProfile.name || '我';
+                            const contact = DataManager.contacts.find(c => c.id === id);
+                            return contact ? Utils.getDisplayName(contact) : '未知角色';
+                        }).join('、');
+                        likeListDiv.innerHTML = `<i class="fa-solid fa-thumbs-up"></i> ${likerNames}`;
+                        item.appendChild(likeListDiv);
+                    }
+
                     if (post.comments && post.comments.length > 0) {
                         const commentsDiv = document.createElement('div'); commentsDiv.className = 'comments-section';
                         post.comments.forEach(comment => {
                             const commentItem = document.createElement('div'); commentItem.className = 'comment-item';
+                            let commenterName = '我';
+                            if (comment.contactId !== 'me') {
+                                const contact = DataManager.contacts.find(c => c.id === comment.contactId);
+                                commenterName = contact ? Utils.getDisplayName(contact) : '好友';
+                            } else {
+                                commenterName = DataManager.userProfile.name || '我';
+                            }
                             const nameSpan = document.createElement('span'); nameSpan.className = 'comment-name';
-                            nameSpan.textContent = comment.contactId === 'me' ? (DataManager.userProfile.name || '我') : '好友'; // 简化，只有“我”能评论
+                            nameSpan.textContent = commenterName;
                             commentItem.appendChild(nameSpan);
                             const textSpan = document.createElement('span'); textSpan.className = 'comment-text';
                             textSpan.textContent = comment.text;
@@ -2886,7 +3111,6 @@
                         item.appendChild(commentsDiv);
                     }
 
-                    // 临时添加评论输入框（点击评论按钮后显示）
                     const commentInputWrapper = document.createElement('div'); commentInputWrapper.className = 'add-comment'; commentInputWrapper.style.display = 'none';
                     commentInputWrapper.innerHTML = `
                         <input type="text" placeholder="写评论...">
@@ -2899,29 +3123,26 @@
                         if (text) this.addComment(post.id, text, commentInputWrapper);
                     });
                     item.appendChild(commentInputWrapper);
-                    // 存储评论输入框引用，以便点击评论按钮时切换显示
                     item.commentInputWrapper = commentInputWrapper;
 
                     container.appendChild(item);
                 });
             },
 
-            // 切换点赞
             toggleLike(postId) {
                 const post = DataManager.posts.find(p => p.id === postId);
                 if (!post) return;
-                if (post.likedByMe) {
-                    post.likeCount = (post.likeCount || 1) - 1;
-                    post.likedByMe = false;
+                if (!post.likedBy) post.likedBy = [];
+                if (post.likedBy.includes('me')) {
+                    post.likedBy = post.likedBy.filter(id => id !== 'me');
                 } else {
-                    post.likeCount = (post.likeCount || 0) + 1;
-                    post.likedByMe = true;
+                    post.likedBy.push('me');
                 }
+                post.likeCount = post.likedBy.length;
                 DataManager.savePosts();
                 this.renderMomentsList();
             },
 
-            // 显示评论输入框
             showCommentInput(postId) {
                 const postElement = document.querySelector(`.moment-item[data-id="${postId}"]`);
                 if (postElement && postElement.commentInputWrapper) {
@@ -2929,7 +3150,6 @@
                 }
             },
 
-            // 添加评论
             addComment(postId, text, wrapper) {
                 const post = DataManager.posts.find(p => p.id === postId);
                 if (!post) return;
@@ -2985,7 +3205,6 @@
                 document.getElementById('bio').value = profile.bio || '';
                 document.getElementById('userSetting').value = profile.userSetting || '';
 
-                // 更新朋友圈封面
                 await this.updateProfileCover();
             },
 
@@ -2999,7 +3218,6 @@
                 const img = document.createElement('img'); img.id = 'coverAvatarImg'; img.style.display = 'none';
                 coverAvatarDiv.appendChild(span); coverAvatarDiv.appendChild(img);
                 await Utils.setImageElement(coverAvatarDiv, profile.avatar, '🤖');
-                // 封面背景图：使用独立的朋友圈封面设置
                 const coverDiv = document.getElementById('profileCover');
                 await Utils.setBackgroundImage(coverDiv, DataManager.beautifySettings.momentCover, 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format&fit=crop');
             },
@@ -3297,7 +3515,6 @@
                 });
             },
 
-            // 更新联系人选项页中的大头像显示
             async updateContactOptionsAvatar() {
                 const contact = DataManager.getCurrentContact();
                 const largeDiv = document.getElementById('contactAvatarLarge');
@@ -3310,7 +3527,7 @@
             }
         };
 
-        // ==================== 聊天处理模块（含虚拟滚动 + 图片发送 + 消息撤回） ====================
+        // ==================== 聊天处理模块 ====================
         const ChatHandler = {
             currentVisibleStart: 0, currentVisibleEnd: 0, isLoadingMore: false, prevStart: 0,
             longPressTimer: null,
@@ -3367,6 +3584,16 @@
                 const loadingIndicator = document.getElementById('loadingIndicator');
                 const text = messageInput.value.trim();
                 if (!text) return;
+
+                // 检测命令：让当前 AI 角色发布朋友圈
+                if (text === '发朋友圈' || text === '发布一条朋友圈' || text.startsWith('/post')) {
+                    messageInput.value = '';
+                    const contact = DataManager.getCurrentContact();
+                    const customPrompt = text.replace(/^(发朋友圈|发布一条朋友圈|\/post)/, '').trim();
+                    await PostManager.generateAIPost(contact.id, customPrompt || '');
+                    return;
+                }
+
                 const contact = DataManager.getCurrentContact();
                 if (contact.blocked) { Utils.showToast('你已将对方拉黑，无法发送消息'); return; }
                 let config;
@@ -3440,16 +3667,25 @@
                 document.getElementById('optionsPin').textContent = contact.pinned ? '取消置顶' : '置顶联系人';
                 document.getElementById('optionsBlock').textContent = contact.blocked ? '解除拉黑' : '拉黑好友';
                 document.getElementById('optionsMuteSwitch').checked = contact.muted;
-                // 更新大头像
+                const autoPostSwitch = document.getElementById('optionsAutoPostSwitch');
+                const intervalContainer = document.getElementById('autoPostIntervalContainer');
+                autoPostSwitch.checked = contact.autoPostEnabled || false;
+                intervalContainer.style.display = contact.autoPostEnabled ? 'block' : 'none';
+                document.getElementById('optionsAutoPostInterval').value = contact.autoPostInterval || 1;
                 UIManager.updateContactOptionsAvatar();
             },
 
             deleteContact(id) {
                 if (DataManager.contacts.length <= 1) { Utils.showToast('至少保留一个联系人'); return; }
                 DataManager.contacts = DataManager.contacts.filter(c => c.id !== id);
-                if (DataManager.currentContactId === id) DataManager.currentContactId = DataManager.contacts[0].id;
+                DataManager.posts = DataManager.posts.filter(p => p.contactId !== id);
+                if (DataManager.currentContactId === id) {
+                    DataManager.currentContactId = DataManager.contacts[0].id;
+                }
                 DataManager.saveContacts();
-                UIManager.renderContactList(); UIManager.renderFriendsList();
+                DataManager.savePosts();
+                UIManager.renderContactList();
+                UIManager.renderFriendsList();
                 this.showContactList();
             },
 
@@ -3667,6 +3903,25 @@
             else if (app === 'phone') document.getElementById('phoneView').classList.add('active');
         }
 
+        // ==================== 自动发布定时器 ====================
+        function startAutoPostTimer() {
+            setInterval(() => {
+                DataManager.contacts.forEach(contact => {
+                    if (contact.autoPostEnabled) {
+                        const intervalMs = (contact.autoPostInterval || 1) * 3600000;
+                        if (Date.now() - (contact.lastAutoPostTime || 0) >= intervalMs) {
+                            PostManager.generateAIPost(contact.id).then(() => {
+                                contact.lastAutoPostTime = Date.now();
+                                DataManager.saveContacts();
+                            }).catch(err => {
+                                console.error('自动发布失败', err);
+                            });
+                        }
+                    }
+                });
+            }, 60000);
+        }
+
         // ==================== 事件绑定初始化 ====================
         function bindEvents() {
             document.querySelectorAll('.app-icon[data-app]').forEach(icon => { icon.addEventListener('click', (e) => { const app = icon.getAttribute('data-app'); openApp(app); }); });
@@ -3767,7 +4022,10 @@
                 DataManager.contacts.push({
                     id: newId, avatar: avatarId || '🤖', name, remark, personality: personality || '你是一个友好的AI助手。', configId,
                     blocked: false, pinned: false, muted: false, mutedLastMessage: '',
-                    messages: [{ role: 'assistant', type: 'text', content: `你好！我是${name}，很高兴认识你！`, timestamp: Date.now() }]
+                    messages: [{ role: 'assistant', type: 'text', content: `你好！我是${name}，很高兴认识你！`, timestamp: Date.now() }],
+                    autoPostEnabled: false,
+                    autoPostInterval: 1,
+                    lastAutoPostTime: 0
                 });
                 DataManager.saveContacts();
                 ModalHandler.closeNewContactModal();
@@ -3799,6 +4057,26 @@
                     contact.mutedLastMessage = lastMsg ? (lastMsg.type === 'image' ? '[图片]' : lastMsg.content) : '';
                 } else contact.mutedLastMessage = '';
                 DataManager.saveContacts(); UIManager.renderContactList();
+            });
+
+            const autoPostSwitch = document.getElementById('optionsAutoPostSwitch');
+            const intervalContainer = document.getElementById('autoPostIntervalContainer');
+            autoPostSwitch.addEventListener('change', (e) => {
+                intervalContainer.style.display = e.target.checked ? 'block' : 'none';
+                if (!e.target.checked) {
+                    const contact = DataManager.getCurrentContact();
+                    contact.autoPostEnabled = false;
+                    DataManager.saveContacts();
+                }
+            });
+
+            document.getElementById('saveAutoPostSettings').addEventListener('click', () => {
+                const contact = DataManager.getCurrentContact();
+                contact.autoPostEnabled = autoPostSwitch.checked;
+                contact.autoPostInterval = parseFloat(document.getElementById('optionsAutoPostInterval').value) || 1;
+                if (!contact.lastAutoPostTime) contact.lastAutoPostTime = Date.now();
+                DataManager.saveContacts();
+                Utils.showToast('设置已保存');
             });
 
             document.getElementById('optionsDelete').addEventListener('click', () => { if (confirm('确定要删除该好友吗？此操作不可恢复。')) ChatHandler.deleteContact(DataManager.getCurrentContact().id); });
@@ -3914,7 +4192,6 @@
                 reader.readAsDataURL(file);
             });
 
-            // 朋友圈封面设置
             const momentCoverUpload = document.getElementById('momentCoverUpload');
             document.getElementById('uploadMomentCoverBtn').addEventListener('click', () => { momentCoverUpload.click(); });
             momentCoverUpload.addEventListener('change', async (e) => {
@@ -3977,7 +4254,6 @@
             messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); ChatHandler.sendOnlyMessage(); } });
             document.getElementById('recordBtn').addEventListener('click', () => ChatHandler.handleSendWithAI());
 
-            // 消息长按撤回（触屏和右键）
             document.getElementById('messageArea').addEventListener('touchstart', (e) => {
                 const msgRow = e.target.closest('.message');
                 if (!msgRow) return;
@@ -3997,20 +4273,39 @@
                 }
             });
 
-            // 底部标签切换
             const tabItems = document.querySelectorAll('.tab-item');
-            const chatsTab = document.getElementById('chatsTab'), friendsTab = document.getElementById('friendsTab'), dynamicTab = document.getElementById('dynamicTab');
+            const chatsTab = document.getElementById('chatsTab');
+            const friendsTab = document.getElementById('friendsTab');
+            const dynamicTab = document.getElementById('dynamicTab');
+            const userProfileArea = document.getElementById('userProfileArea');
+
             tabItems.forEach(item => {
                 item.addEventListener('click', () => {
-                    tabItems.forEach(i => i.classList.remove('active')); item.classList.add('active');
+                    tabItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
                     const tab = item.dataset.tab;
-                    if (tab === 'chats') { chatsTab.style.display = 'block'; friendsTab.style.display = 'none'; dynamicTab.style.display = 'none'; UIManager.renderContactList(); }
-                    else if (tab === 'friends') { chatsTab.style.display = 'none'; friendsTab.style.display = 'block'; dynamicTab.style.display = 'none'; UIManager.renderFriendsList(); }
-                    else if (tab === 'dynamic') { chatsTab.style.display = 'none'; friendsTab.style.display = 'none'; dynamicTab.style.display = 'flex'; PostManager.renderMomentsList(); }
+                    if (tab === 'chats') {
+                        chatsTab.style.display = 'block';
+                        friendsTab.style.display = 'none';
+                        dynamicTab.style.display = 'none';
+                        userProfileArea.style.display = 'flex';
+                        UIManager.renderContactList();
+                    } else if (tab === 'friends') {
+                        chatsTab.style.display = 'none';
+                        friendsTab.style.display = 'block';
+                        dynamicTab.style.display = 'none';
+                        userProfileArea.style.display = 'flex';
+                        UIManager.renderFriendsList();
+                    } else if (tab === 'dynamic') {
+                        chatsTab.style.display = 'none';
+                        friendsTab.style.display = 'none';
+                        dynamicTab.style.display = 'flex';
+                        userProfileArea.style.display = 'none';
+                        PostManager.renderMomentsList();
+                    }
                 });
             });
 
-            // 世界书
             document.getElementById('addWorldBookBtn').addEventListener('click', () => WorldBookHandler.openCreateModal());
             document.getElementById('importWorldBookBtn').addEventListener('click', () => WorldBookHandler.importFromFile());
             document.getElementById('closeWorldBookModal').addEventListener('click', () => WorldBookHandler.closeModal());
@@ -4027,7 +4322,6 @@
                 else if (target.classList.contains('delete-worldbook')) WorldBookHandler.deleteWorldBook(id);
             });
 
-            // 备份与一键清除
             document.getElementById('exportBackupBtn').addEventListener('click', () => BackupHandler.exportBackup());
             document.getElementById('importBackupBtn').addEventListener('click', () => document.getElementById('importBackupFile').click());
             document.getElementById('importBackupFile').addEventListener('change', (e) => {
@@ -4037,7 +4331,6 @@
             });
             document.getElementById('clearAllDataBtn').addEventListener('click', () => BackupHandler.clearAllData());
 
-            // 联系人选项页头像点击修改
             document.getElementById('contactAvatarCard').addEventListener('click', () => {
                 const fileInput = document.createElement('input');
                 fileInput.type = 'file';
@@ -4070,7 +4363,6 @@
                 });
             });
 
-            // 朋友圈
             document.getElementById('openPostModalBtn').addEventListener('click', () => PostManager.openPostModal());
             document.getElementById('closePostModal').addEventListener('click', () => PostManager.closePostModal());
             document.getElementById('cancelPost').addEventListener('click', () => PostManager.closePostModal());
@@ -4083,12 +4375,11 @@
                 if (e.target.files.length > 0) {
                     PostManager.handleImageUpload(Array.from(e.target.files));
                 }
-                e.target.value = ''; // 允许重复选择同一文件
+                e.target.value = '';
             });
 
             document.getElementById('savePost').addEventListener('click', () => PostManager.publishPost());
 
-            // 时钟
             function updateTime() { const now = new Date(); document.getElementById('currentTime').textContent = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`; }
             updateTime(); setInterval(updateTime, 1000);
         }
@@ -4100,7 +4391,7 @@
             DataManager.loadUserProfile();
             DataManager.loadBeautifySettings();
             DataManager.loadWorldBooks();
-            DataManager.loadPosts(); // 加载朋友圈
+            DataManager.loadPosts();
 
             await UIManager.updateUserProfileDisplay();
             UIManager.renderContactList();
@@ -4136,6 +4427,7 @@
             })();
 
             bindEvents();
+            startAutoPostTimer();
         });
     </script>
 </body>
