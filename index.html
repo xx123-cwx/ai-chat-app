@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 最终完整版</title>
+    <title>AI角色 · 黑白简约（相机话筒修复）</title>
     <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -911,16 +911,23 @@
             gap: 10px;
             flex-shrink: 0;
         }
-        .input-btn {
+        /* 黑白简约风图标按钮样式 */
+        .header-right .input-btn,
+        .input-btn,
+        .input-smile {
+            color: #222; /* 深灰色，接近黑色 */
             font-size: 20px;
-            color: #888;
             cursor: pointer;
             width: 24px;
             text-align: center;
+            transition: color 0.2s;
         }
-        .input-btn:hover {
-            color: #00C73C;
+        .header-right .input-btn:hover,
+        .input-btn:hover,
+        .input-smile:hover {
+            color: #000; /* 纯黑，无彩色 */
         }
+        /* 输入框容器 */
         .input-field-container {
             position: relative;
             flex-grow: 1;
@@ -933,9 +940,14 @@
             outline: none;
             font-size: 16px;
             background-color: #fff;
+            color: #111; /* 输入文字黑色 */
         }
         .input-field:focus {
-            border-color: #00C73C;
+            border-color: #333; /* 改为深灰/黑色，不再泛绿 */
+        }
+        .input-field::placeholder {
+            color: #777; /* 深灰色placeholder，对应"Aa" */
+            font-weight: 400;
         }
         .input-field:disabled {
             background-color: #f0f0f0;
@@ -947,16 +959,11 @@
             top: 50%;
             transform: translateY(-50%);
             font-size: 20px;
-            color: #888;
-            cursor: pointer;
             width: 24px;
             height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-        .input-smile:hover {
-            color: #00C73C;
         }
         #recordBtn {
             margin-left: 0;
@@ -1555,7 +1562,7 @@
                 </div>
             </div>
 
-            <!-- 聊天详情页 -->
+            <!-- 聊天详情页（相机和话筒已恢复，颜色黑色） -->
             <div id="chatDetailPage" style="display:none; flex-direction:column; flex:1; min-height:0;">
                 <div class="chat-header">
                     <div class="header-left">
@@ -1570,19 +1577,19 @@
                 </div>
                 <div class="chat-messages" id="messageArea"></div>
                 <div class="input-area">
-                    <span class="input-btn"><i class="fa-solid fa-plus"></i></span>
-                    <span class="input-btn" id="cameraBtn"><i class="fa-solid fa-camera"></i></span>
+                    <span class="input-btn"><i class="fa-regular fa-plus"></i></span>
+                    <span class="input-btn" id="cameraBtn"><i class="fa-regular fa-camera"></i></span>   <!-- 相机图标 -->
                     <span class="input-btn" id="imageBtn"><i class="fa-regular fa-image"></i></span>
                     <div class="input-field-container">
                         <input type="text" class="input-field" id="messageInput" placeholder="Aa">
                         <span class="input-smile" id="smileBtn"><i class="fa-regular fa-face-smile"></i></span>
                         <span class="input-loading" id="loadingIndicator"><i class="fa-solid fa-spinner fa-spin"></i></span>
                     </div>
-                    <span class="input-btn" id="recordBtn"><i class="fa-solid fa-microphone"></i></span>
+                    <span class="input-btn" id="recordBtn"><i class="fa-regular fa-microphone"></i></span> <!-- 话筒图标 -->
                 </div>
             </div>
 
-            <!-- 联系人选项页面（新增AI角色头像 & 居中开关） -->
+            <!-- 联系人选项页面（新增头像区域 & 居中开关） -->
             <div id="contactOptionsPage" style="display:none; flex-direction:column; flex:1;">
                 <div class="chat-header">
                     <div class="header-left">
@@ -1604,7 +1611,7 @@
                     <button class="option-button" id="optionsPin">置顶联系人</button>
                     <button class="option-button" id="optionsRemark">修改备注名</button>
                     <button class="option-button" id="optionsEditPersona">编辑人设</button>
-                    <!-- 免打扰通知开关（居中） -->
+                    <!-- 免打扰通知开关（居中，样式已确保为长条滑块） -->
                     <div class="option-item center-content">
                         <span>免打扰通知</span>
                         <label class="switch">
@@ -3471,7 +3478,6 @@
 
             // 联系人选项页头像点击修改
             document.getElementById('contactAvatarCard').addEventListener('click', () => {
-                // 触发文件选择，修改当前联系人的头像
                 const fileInput = document.createElement('input');
                 fileInput.type = 'file';
                 fileInput.accept = 'image/*';
@@ -3493,7 +3499,6 @@
                             contact.avatar = imageId;
                             DataManager.saveContacts();
                             await UIManager.updateContactOptionsAvatar();
-                            // 同时更新聊天页面的头像（下次进入时生效）
                             Utils.showToast('头像更新成功', 1500);
                         } catch (err) {
                             Utils.showToast('图片处理失败', 2000);
