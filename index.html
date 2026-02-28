@@ -683,26 +683,37 @@
             display: inline-block;
             margin-top: 5px;
         }
-        .form-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .form-actions button {
+
+        /* ===== 统一保存/取消按钮样式（适用于模态框） ===== */
+        .save-btn, .cancel-btn, .form-actions button {
             flex: 1;
-            padding: 10px;  /* 调整为10px，使按钮更紧凑，与旁边按钮大小一致 */
+            padding: 14px;
             border: none;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: 500;
             cursor: pointer;
         }
-        .form-actions .save-btn {
+        .save-btn {
             background: #07c160;
             color: white;
         }
-        .form-actions .cancel-btn {
+        .cancel-btn {
             background: #f0f0f0;
             color: #333;
+        }
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        /* 个人资料页保存按钮恢复原始样式：宽度100%、上边距20px、字体16px，并重置flex */
+        #saveProfileDetails {
+            width: 100%;
+            margin-top: 20px;
+            font-size: 16px;
+            flex: none;
         }
 
         /* ===== 聊天详情页 - 圆润气泡（无尖角），撤回消息采用系统消息样式 ===== */
@@ -1221,21 +1232,6 @@
         .archive-field textarea {
             min-height: 80px;
             resize: vertical;
-        }
-        .save-btn {
-            background: #07c160;
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 20px;
-        }
-        .save-btn:active {
-            background: #059e4c;
         }
 
         /* ===== 装饰设置界面（现为空） ===== */
