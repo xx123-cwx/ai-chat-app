@@ -164,11 +164,11 @@
             background: rgba(255,255,255,0.3);
         }
 
-        /* 状态详情区域 */
+        /* 状态详情区域（竖向排列） */
         .ai-status-details {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             margin-top: 8px;
             font-size: 14px;
             line-height: 1.5;
@@ -191,8 +191,14 @@
         .ai-status-water {
             color: #a8e6ff;
         }
-        .ai-status-meal {
-            color: #ffeaa8;
+        .ai-status-breakfast {
+            color: #ffd966;
+        }
+        .ai-status-lunch {
+            color: #b6d7a8;
+        }
+        .ai-status-dinner {
+            color: #d5a6bd;
         }
         .ai-status-location {
             color: #c5a8ff;
@@ -1970,18 +1976,26 @@
                         </div>
                     </div>
                     <div class="ai-status-details" id="aiStatusDetails">
-                        <!-- 动态填充饮水、饮食、位置信息 -->
-                        <div class="ai-status-detail-item">
+                        <!-- 动态填充饮水、三餐、位置信息（竖向排列） -->
+                        <div class="ai-status-detail-item" id="aiStatusWater">
                             <i class="fa-solid fa-droplet ai-status-water"></i>
-                            <span class="ai-status-detail-text" id="aiStatusWater">加载中...</span>
+                            <span class="ai-status-detail-text">加载中...</span>
                         </div>
-                        <div class="ai-status-detail-item">
-                            <i class="fa-solid fa-utensils ai-status-meal"></i>
-                            <span class="ai-status-detail-text" id="aiStatusMeal">加载中...</span>
+                        <div class="ai-status-detail-item" id="aiStatusBreakfast">
+                            <i class="fa-solid fa-sun ai-status-breakfast"></i>
+                            <span class="ai-status-detail-text">加载中...</span>
                         </div>
-                        <div class="ai-status-detail-item">
+                        <div class="ai-status-detail-item" id="aiStatusLunch">
+                            <i class="fa-solid fa-cloud-sun ai-status-lunch"></i>
+                            <span class="ai-status-detail-text">加载中...</span>
+                        </div>
+                        <div class="ai-status-detail-item" id="aiStatusDinner">
+                            <i class="fa-solid fa-moon ai-status-dinner"></i>
+                            <span class="ai-status-detail-text">加载中...</span>
+                        </div>
+                        <div class="ai-status-detail-item" id="aiStatusLocation">
                             <i class="fa-solid fa-location-dot ai-status-location"></i>
-                            <span class="ai-status-detail-text" id="aiStatusLocation">加载中...</span>
+                            <span class="ai-status-detail-text">加载中...</span>
                         </div>
                     </div>
                 </div>
@@ -2044,7 +2058,8 @@
                 <div class="app-icon" data-app="chat"><div class="icon-bg" id="icon-chat-dock"><i class="fa-solid fa-comment-dots"></i></div><span class="app-label">信息</span></div>
             </div>
             <div class="home-button" id="homeButton"></div>
-        </div>    <!-- ===== 联系人应用视图 ===== -->
+        </div>
+            <!-- ===== 联系人应用视图 ===== -->
     <div class="app-view" id="chatView">
         <!-- 联系人列表页 -->
         <div id="contactListPage">
@@ -2571,12 +2586,18 @@
 
     <script>
         // ==================== 常量定义 ====================
-        const BACKEND_URL = '';
-        const TOAST_DURATION = 2000;
+        const BACKEND_URL = ''; // 如果前后端同域，留空即可。否则替换为您的后端地址
+        const TOAST_DURATION = 3000; // 延长提示时间
         const API_ERRORS = {
+            400: '请求格式错误 (400)，请检查API配置',
+            401: 'API密钥无效或权限不足 (401)',
+            403: 'API密钥无效或权限不足 (403)',
+            404: 'API地址不存在 (404)，请检查Base URL',
             429: '请求过于频繁，请稍后再试 (429)',
-            401: 'API密钥无效或权限不足',
-            403: 'API密钥无效或权限不足',
+            500: '服务器内部错误 (500)',
+            502: '网关错误 (502)',
+            503: '服务不可用 (503)',
+            504: '网关超时 (504)'
         };
         const DB_NAME = 'AIChatDB';
         const DB_VERSION = 1;
@@ -3108,9 +3129,7 @@
                     Utils.showToast('清除失败：' + err.message, 3000);
                 }
             }
-        };
-
-        // ==================== 朋友圈模块 ====================
+        };        // ==================== 朋友圈模块 ====================
         const PostManager = {
             tempImages: [],
 
@@ -3310,7 +3329,11 @@
                             messages
                         })
                     });
-                    if (!response.ok) return null;
+                    if (!response.ok) {
+                        const statusText = API_ERRORS[response.status] || `HTTP错误 ${response.status}`;
+                        console.warn('API返回错误:', statusText);
+                        return null;
+                    }
                     const data = await response.json();
                     const comment = data.choices?.[0]?.message?.content?.trim();
                     return comment || null;
@@ -3351,10 +3374,13 @@
                             messages
                         })
                     });
-                    if (!response.ok) throw new Error('API 请求失败');
+                    if (!response.ok) {
+                        const statusText = API_ERRORS[response.status] || `HTTP错误 ${response.status}`;
+                        throw new Error(statusText);
+                    }
                     const data = await response.json();
                     const content = data.choices?.[0]?.message?.content || '';
-                    if (!content) throw new Error('生成内容为空');
+                    if (!content) throw new Error('AI返回内容为空');
                     const newPost = {
                         id: Date.now().toString(),
                         contactId: contactId,
@@ -3743,8 +3769,14 @@
                     const select = document.createElement('select'); select.id = `modelSelect_${config.id}`;
                     if (config.models && config.models.length > 0) {
                         config.models.forEach(m => { const option = document.createElement('option'); option.value = m.id; option.textContent = m.name || m.id; if (m.id === config.currentModel) option.selected = true; select.appendChild(option); });
-                    } else select.innerHTML = '<option value="">暂无模型</option>';
-                    const fetchBtn = document.createElement('button'); fetchBtn.textContent = '拉取'; fetchBtn.dataset.id = config.id;
+                    } else {
+                        // 允许用户手动输入任何模型名称
+                        const option = document.createElement('option'); option.value = config.currentModel || ''; option.textContent = config.currentModel || '请输入模型名称';
+                        select.appendChild(option);
+                    }
+                    // 添加可编辑属性，让用户可以输入任意模型
+                    select.setAttribute('contenteditable', 'true');
+                    const fetchBtn = document.createElement('button'); fetchBtn.textContent = '拉取模型列表'; fetchBtn.dataset.id = config.id;
                     modelRow.appendChild(select); modelRow.appendChild(fetchBtn);
                     item.appendChild(modelRow);
                     if (config.id !== DataManager.activeConfigId) {
@@ -3754,7 +3786,9 @@
                     }
                     container.appendChild(item);
                     fetchBtn.addEventListener('click', () => ConfigHandler.fetchModelsForConfig(config.id));
+                    // 监听select变化，允许手动输入
                     select.addEventListener('change', (e) => { config.currentModel = e.target.value; DataManager.saveConfigs(); });
+                    select.addEventListener('input', (e) => { config.currentModel = e.target.innerText; DataManager.saveConfigs(); });
                 });
                 document.querySelectorAll('.edit-config').forEach(btn => { btn.addEventListener('click', (e) => { e.stopPropagation(); ConfigHandler.editConfig(btn.dataset.id); }); });
                 document.querySelectorAll('.delete-config').forEach(btn => { btn.addEventListener('click', (e) => { e.stopPropagation(); ConfigHandler.deleteConfig(btn.dataset.id); }); });
@@ -3922,14 +3956,16 @@
                 }
             },
 
-            // AI状态小部件更新（增强版）
+            // AI状态小部件更新（基于人设的模拟生成，竖向排列三餐）
             async updateAIStatusWidget() {
                 const contacts = DataManager.contacts;
                 if (contacts.length === 0) {
                     document.getElementById('aiStatusName').textContent = '暂无AI角色';
-                    document.getElementById('aiStatusWater').textContent = '--';
-                    document.getElementById('aiStatusMeal').textContent = '--';
-                    document.getElementById('aiStatusLocation').textContent = '--';
+                    document.getElementById('aiStatusWater').innerHTML = '';
+                    document.getElementById('aiStatusBreakfast').innerHTML = '';
+                    document.getElementById('aiStatusLunch').innerHTML = '';
+                    document.getElementById('aiStatusDinner').innerHTML = '';
+                    document.getElementById('aiStatusLocation').innerHTML = '';
                     return;
                 }
                 if (DataManager.currentStatusIndex >= contacts.length) {
@@ -3954,106 +3990,93 @@
                 const badge = document.getElementById('aiStatusBadge');
                 badge.className = `ai-status-badge ${online ? '' : 'offline'}`;
 
-                // 生成今日饮水、三餐、位置详情
-                const details = await this.generateAIDailyDetails(contact);
-                document.getElementById('aiStatusWater').textContent = details.water;
-                document.getElementById('aiStatusMeal').textContent = details.meal;
-                document.getElementById('aiStatusLocation').textContent = details.location;
+                // 生成今日详细数据（基于人设模拟）
+                const details = this.generateAIDailyDetails(contact);
+                document.getElementById('aiStatusWater').innerHTML = `<i class="fa-solid fa-droplet ai-status-water"></i> ${details.water}`;
+                document.getElementById('aiStatusBreakfast').innerHTML = `<i class="fa-solid fa-sun ai-status-breakfast"></i> 早餐：${details.breakfast}`;
+                document.getElementById('aiStatusLunch').innerHTML = `<i class="fa-solid fa-cloud-sun ai-status-lunch"></i> 午餐：${details.lunch}`;
+                document.getElementById('aiStatusDinner').innerHTML = `<i class="fa-solid fa-moon ai-status-dinner"></i> 晚餐：${details.dinner}`;
+                document.getElementById('aiStatusLocation').innerHTML = `<i class="fa-solid fa-location-dot ai-status-location"></i> ${details.location}`;
             },
 
-            async generateAIDailyDetails(contact) {
-                // 模拟详细数据
+            // 基于人设的模拟生成（无API调用）
+            generateAIDailyDetails(contact) {
                 const now = new Date();
                 const hour = now.getHours();
                 
                 // 根据时间确定餐饮状态
-                let breakfast = '', lunch = '', dinner = '', extra = '';
+                let breakfastStatus = '', lunchStatus = '', dinnerStatus = '';
                 if (hour < 10) {
-                    breakfast = '准备吃：豆浆+油条';
+                    breakfastStatus = '准备吃';
+                    lunchStatus = '计划午餐';
+                    dinnerStatus = '计划晚餐';
                 } else if (hour < 14) {
-                    breakfast = '已吃：包子+粥';
-                    lunch = '准备吃：牛肉面';
+                    breakfastStatus = '已吃';
+                    lunchStatus = '准备吃';
+                    dinnerStatus = '计划晚餐';
                 } else if (hour < 18) {
-                    breakfast = '已吃：包子+粥';
-                    lunch = '已吃：牛肉面';
-                    dinner = '准备吃：米饭+炒菜';
+                    breakfastStatus = '已吃';
+                    lunchStatus = '已吃';
+                    dinnerStatus = '准备吃';
                 } else {
-                    breakfast = '已吃：包子+粥';
-                    lunch = '已吃：牛肉面';
-                    dinner = '已吃：米饭+炒菜';
-                    extra = '夜宵：水果';
+                    breakfastStatus = '已吃';
+                    lunchStatus = '已吃';
+                    dinnerStatus = '已吃';
                 }
 
-                // 构建三餐描述
-                let mealDesc = '';
-                if (breakfast) mealDesc += `早餐：${breakfast}；`;
-                if (lunch) mealDesc += `午餐：${lunch}；`;
-                if (dinner) mealDesc += `晚餐：${dinner}；`;
-                if (extra) mealDesc += extra;
-
-                // 饮水（ml）
-                const waterAmount = Math.floor(Math.random() * 800 + 500); // 500-1300ml
+                // 根据人设关键词选择食物池
+                const personality = (contact.personality || '').toLowerCase();
                 
-                // 位置
-                const places = ['书房', '咖啡馆', '公园', '办公室', '家里', '图书馆', '健身房', '超市'];
-                const place = places[Math.floor(Math.random() * places.length)];
-                const activity = ['工作', '学习', '休息', '散步', '看书', '运动'][Math.floor(Math.random() * 6)];
+                // 默认食物池
+                let breakfastPool = ['豆浆+油条', '包子+粥', '三明治+牛奶', '煎蛋+吐司', '燕麦+水果', '馄饨', '肠粉'];
+                let lunchPool = ['牛肉面', '红烧肉+米饭', '鱼香肉丝+米饭', '炸鸡+薯条', '沙拉+意面', '饺子', '炒饭'];
+                let dinnerPool = ['米饭+炒菜', '火锅', '寿司', '牛排+红酒', '披萨', '烤鱼', '麻辣香锅'];
+                let placePool = ['书房', '咖啡馆', '公园', '办公室', '家里', '图书馆', '健身房', '超市', '餐厅', '电影院'];
+                let activityPool = ['工作', '学习', '休息', '散步', '看书', '运动', '看电影', '听音乐'];
 
-                // 如果有API配置，尝试生成更生动的描述，否则用模拟
-                let config;
-                if (contact.configId) {
-                    config = DataManager.apiConfigs.find(c => c.id === contact.configId);
-                } else {
-                    config = DataManager.getActiveConfig();
-                }
-                if (config && config.base_url && config.api_key && config.currentModel) {
-                    const prompt = `你是一个AI角色，你的人设是：${contact.personality}。请用一句话描述你今天的饮水情况（比如喝了多少毫升水）、三餐详情（早餐、午餐、晚餐吃了什么，如果还没吃就说准备吃什么）以及你现在在哪里做什么。要求具体详细，符合人设，不要输出任何额外内容。`;
-                    const messages = [
-                        { role: 'system', content: contact.personality },
-                        { role: 'user', content: prompt }
-                    ];
-                    try {
-                        const response = await fetch(`${BACKEND_URL}/api/chat`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                base_url: config.base_url,
-                                api_key: config.api_key,
-                                model: config.currentModel,
-                                messages
-                            })
-                        });
-                        if (response.ok) {
-                            const data = await response.json();
-                            const content = data.choices?.[0]?.message?.content?.trim();
-                            if (content) {
-                                // 尝试解析成三个部分，如果不行就全部放入meal
-                                const parts = content.split('；');
-                                if (parts.length >= 3) {
-                                    return {
-                                        water: parts[0] || waterAmount + 'ml',
-                                        meal: parts[1] || mealDesc,
-                                        location: parts[2] || `在${place}${activity}`
-                                    };
-                                } else {
-                                    return {
-                                        water: waterAmount + 'ml',
-                                        meal: content,
-                                        location: `在${place}${activity}`
-                                    };
-                                }
-                            }
-                        }
-                    } catch (err) {
-                        console.error('生成AI日常详情失败', err);
-                    }
+                // 根据人设调整
+                if (personality.includes('健康') || personality.includes('健身') || personality.includes('减肥')) {
+                    breakfastPool = ['燕麦+水果', '水煮蛋+牛奶', '全麦面包+酸奶', '蔬菜沙拉'];
+                    lunchPool = ['鸡胸肉沙拉', '糙米+蔬菜', '三文鱼+西兰花', '藜麦碗'];
+                    dinnerPool = ['蒸鱼+蔬菜', '豆腐汤', '蔬菜沙拉', '水果拼盘'];
+                    placePool = ['健身房', '瑜伽馆', '公园', '家里'];
+                    activityPool = ['健身', '跑步', '冥想', '拉伸'];
+                } else if (personality.includes('美食') || personality.includes('吃货')) {
+                    breakfastPool = ['灌汤包+豆浆', '煎饼果子', '肠粉+粥', '班尼迪克蛋'];
+                    lunchPool = ['红烧肉+米饭', '麻辣香锅', '日式拉面', '牛排+薯条'];
+                    dinnerPool = ['火锅', '自助餐', '烤肉', '海鲜大餐'];
+                    placePool = ['餐厅', '美食街', '咖啡馆', '家里'];
+                    activityPool = ['品尝美食', '研究菜谱', '探店', '做饭'];
+                } else if (personality.includes('宅') || personality.includes('家里蹲')) {
+                    breakfastPool = ['泡面', '外卖', '饼干+牛奶', '速冻水饺'];
+                    lunchPool = ['外卖', '泡面', '剩菜', '速食'];
+                    dinnerPool = ['外卖', '泡面', '零食', '速冻食品'];
+                    placePool = ['家里', '床上', '沙发', '电脑前'];
+                    activityPool = ['打游戏', '看番', '刷剧', '睡觉'];
+                } else if (personality.includes('运动') || personality.includes('户外')) {
+                    breakfastPool = ['能量棒+香蕉', '燕麦+牛奶', '全麦面包+鸡蛋'];
+                    lunchPool = ['鸡胸肉+糙米', '意面+蔬菜', '三明治+水果'];
+                    dinnerPool = ['鱼+蔬菜', '沙拉+鸡胸肉', '蛋白粉+牛奶'];
+                    placePool = ['操场', '健身房', '公园', '山脚下'];
+                    activityPool = ['跑步', '打球', '徒步', '骑行'];
+                } else if (personality.includes('优雅') || personality.includes('贵族')) {
+                    breakfastPool = ['英式早餐', '法式吐司+香槟', '鱼子酱+薄饼'];
+                    lunchPool = ['牛排+红酒', '龙虾+意面', '鹅肝+松露'];
+                    dinnerPool = ['法式大餐', '日式怀石料理', '意式晚宴'];
+                    placePool = ['高级餐厅', '私人会所', '别墅', '游艇'];
+                    activityPool = ['品酒', '听音乐会', '看歌剧', '社交'];
                 }
 
-                return {
-                    water: waterAmount + 'ml',
-                    meal: mealDesc,
-                    location: `在${place}${activity}`
-                };
+                // 随机选择
+                const breakfast = breakfastStatus + '：' + breakfastPool[Math.floor(Math.random() * breakfastPool.length)];
+                const lunch = lunchStatus + '：' + lunchPool[Math.floor(Math.random() * lunchPool.length)];
+                const dinner = dinnerStatus + '：' + dinnerPool[Math.floor(Math.random() * dinnerPool.length)];
+                const place = placePool[Math.floor(Math.random() * placePool.length)];
+                const activity = activityPool[Math.floor(Math.random() * activityPool.length)];
+                const location = `在${place}${activity}`;
+                const water = Math.floor(Math.random() * 800 + 500) + 'ml';
+
+                return { water, breakfast, lunch, dinner, location };
             }
         };
 
@@ -4125,6 +4148,7 @@
                     messageInput.value = '';
                     const customPrompt = text.replace(/^(发朋友圈|发布一条朋友圈|\/post)/, '').trim();
                     await PostManager.generateAIPost(contact.id, customPrompt || '');
+                    return;
                 }
 
                 if (text) {
@@ -4139,7 +4163,7 @@
                     config = DataManager.getActiveConfig();
                 }
                 if (!config.base_url || !config.api_key || !config.currentModel) {
-                    Utils.showToast('请先在设置中配置并激活一个有效的API配置，并拉取模型');
+                    Utils.showToast('请先在设置中配置并激活一个有效的API配置，并填写模型名称');
                     return;
                 }
 
@@ -4177,17 +4201,16 @@
                         })
                     });
                     if (!response.ok) {
-                        if (response.status === 429) throw new Error(API_ERRORS[429]);
-                        else if (response.status === 401 || response.status === 403) throw new Error(API_ERRORS[401]);
-                        else if (response.status >= 500) throw new Error('服务器错误，请稍后重试');
-                        else { const errorData = await response.json().catch(() => ({})); throw new Error(errorData.message || `请求失败 (${response.status})`); }
+                        const statusText = API_ERRORS[response.status] || `HTTP错误 ${response.status}`;
+                        throw new Error(statusText);
                     }
                     const data = await response.json();
-                    const reply = data.choices?.[0]?.message?.content || '无回复';
+                    const reply = data.choices?.[0]?.message?.content;
+                    if (!reply) throw new Error('AI返回内容为空');
                     this.addMessageToCurrent(reply, false, false, 'text');
                 } catch (error) {
                     let errorMsg = error.message;
-                    if (error.name === 'TypeError' && error.message.includes('fetch')) errorMsg = '网络连接失败，请检查网络';
+                    if (error.name === 'TypeError' && error.message.includes('fetch')) errorMsg = '网络连接失败，请检查网络或API地址';
                     this.addMessageToCurrent('请求失败：' + errorMsg, false, false, 'text');
                     Utils.showToast(errorMsg, 3000);
                 } finally {
@@ -4305,11 +4328,16 @@
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ base_url: config.base_url, api_key: config.api_key })
                     });
+                    if (!response.ok) {
+                        const statusText = API_ERRORS[response.status] || `HTTP错误 ${response.status}`;
+                        throw new Error(statusText);
+                    }
                     const data = await response.json();
                     if (data.models && Array.isArray(data.models)) {
                         config.models = data.models;
                         if (!config.currentModel || !config.models.some(m => m.id === config.currentModel)) config.currentModel = config.models[0]?.id || '';
                         DataManager.saveConfigs(); UIManager.renderConfigList();
+                        Utils.showToast('模型列表拉取成功');
                     } else Utils.showToast('返回的模型列表格式不正确');
                 } catch (error) { Utils.showToast('拉取失败：' + error.message); }
                 finally { fetchBtns.forEach(b => b.disabled = false); }
@@ -4724,10 +4752,32 @@
             const messageArea = document.getElementById('messageArea');
             messageArea.addEventListener('scroll', () => { if (messageArea.scrollTop < 100 && !ChatHandler.isLoadingMore) ChatHandler.loadMoreMessages(); });
 
+            // 图片选择按钮（从相册）
             document.getElementById('imageBtn').addEventListener('click', () => {
                 const fileInput = document.createElement('input'); fileInput.type = 'file'; fileInput.accept = 'image/*'; fileInput.style.display = 'none'; document.body.appendChild(fileInput);
                 fileInput.click();
                 fileInput.addEventListener('change', (e) => { const file = e.target.files[0]; if (file) ChatHandler.sendImage(file); document.body.removeChild(fileInput); });
+            });
+
+            // ========== 新增：相机拍照按钮（适配移动端/桌面） ==========
+            document.getElementById('cameraBtn').addEventListener('click', () => {
+                const cameraInput = document.createElement('input');
+                cameraInput.type = 'file';
+                cameraInput.accept = 'image/*';
+                // 添加 capture 属性：移动设备上直接打开相机；桌面设备仍显示文件选择（合理降级）
+                cameraInput.capture = 'environment'; // 后置摄像头，如需前置可改为 'user'
+                cameraInput.style.display = 'none';
+                document.body.appendChild(cameraInput);
+
+                cameraInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        ChatHandler.sendImage(file); // 复用现有的图片发送逻辑
+                    }
+                    document.body.removeChild(cameraInput);
+                });
+
+                cameraInput.click();
             });
 
             document.getElementById('homeButton').addEventListener('click', hideAllAppViews);
