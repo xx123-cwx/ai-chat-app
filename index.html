@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 完整版（左右分栏+小部件）</title>
+    <title>AI角色 · 完整版（AI日常状态增强）</title>
     <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -73,6 +73,129 @@
             font-size: 14px;
             color: white;
             text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        /* ===== AI状态小部件（增强版，全宽）===== */
+        .ai-status-wide {
+            width: calc(100% - 32px);
+            margin: 8px 16px 0;
+            flex-shrink: 0;
+        }
+        .ai-status-card {
+            width: 100%;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 16px;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .ai-status-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .ai-status-avatar-large {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #07c160;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 30px;
+            overflow: hidden;
+            cursor: pointer;
+            flex-shrink: 0;
+            border: 2px solid rgba(255,255,255,0.5);
+        }
+        .ai-status-avatar-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .ai-status-header-info {
+            flex: 1;
+            margin-left: 12px;
+        }
+        .ai-status-name {
+            font-weight: 600;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ai-status-badge {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4cd964;
+            box-shadow: 0 0 5px #4cd964;
+            display: inline-block;
+        }
+        .ai-status-badge.offline {
+            background: #999;
+            box-shadow: none;
+        }
+        .ai-status-switch {
+            display: flex;
+            gap: 12px;
+            margin-left: 8px;
+        }
+        .ai-status-switch span {
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            background: rgba(255,255,255,0.2);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ai-status-switch span:hover {
+            opacity: 1;
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* 状态详情区域 */
+        .ai-status-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .ai-status-detail-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .ai-status-detail-item i {
+            width: 20px;
+            font-size: 16px;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+        .ai-status-detail-text {
+            flex: 1;
+            word-break: break-word;
+        }
+        .ai-status-water {
+            color: #a8e6ff;
+        }
+        .ai-status-meal {
+            color: #ffeaa8;
+        }
+        .ai-status-location {
+            color: #c5a8ff;
         }
 
         /* ===== 桌面两列布局 ===== */
@@ -153,64 +276,6 @@
         .calendar-day {
             font-size: 14px;
             opacity: 0.9;
-        }
-
-        /* AI状态小部件（全宽） */
-        .ai-status-wide {
-            width: calc(100% - 32px);
-            margin: 0 16px 16px;
-            flex-shrink: 0;
-        }
-        .ai-status-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            max-height: 80px;
-            overflow-y: auto;
-        }
-        .ai-status-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 30px;
-            padding: 4px 10px;
-        }
-        .ai-status-avatar {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #07c160;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            color: white;
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-        .ai-status-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .ai-status-name {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 60px;
-        }
-        .ai-status-badge {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #4cd964;
-            box-shadow: 0 0 5px #4cd964;
-        }
-        .ai-status-badge.offline {
-            background: #999;
-            box-shadow: none;
         }
 
         /* 应用图标样式（适配小网格） */
@@ -1885,6 +1950,43 @@
                 </span>
             </div>
 
+            <!-- AI状态小部件（全宽，位于状态栏下方，增强版） -->
+            <div class="ai-status-wide" id="aiStatusWidget">
+                <div class="ai-status-card">
+                    <div class="ai-status-header">
+                        <div class="ai-status-avatar-large" id="aiStatusAvatar">
+                            <span id="aiStatusAvatarText">🤖</span>
+                            <img id="aiStatusAvatarImg" src="#" style="display: none;">
+                        </div>
+                        <div class="ai-status-header-info">
+                            <div class="ai-status-name">
+                                <span id="aiStatusName">加载中...</span>
+                                <span class="ai-status-badge" id="aiStatusBadge"></span>
+                            </div>
+                        </div>
+                        <div class="ai-status-switch">
+                            <span id="aiStatusPrev"><i class="fa-solid fa-chevron-left"></i></span>
+                            <span id="aiStatusNext"><i class="fa-solid fa-chevron-right"></i></span>
+                        </div>
+                    </div>
+                    <div class="ai-status-details" id="aiStatusDetails">
+                        <!-- 动态填充饮水、饮食、位置信息 -->
+                        <div class="ai-status-detail-item">
+                            <i class="fa-solid fa-droplet ai-status-water"></i>
+                            <span class="ai-status-detail-text" id="aiStatusWater">加载中...</span>
+                        </div>
+                        <div class="ai-status-detail-item">
+                            <i class="fa-solid fa-utensils ai-status-meal"></i>
+                            <span class="ai-status-detail-text" id="aiStatusMeal">加载中...</span>
+                        </div>
+                        <div class="ai-status-detail-item">
+                            <i class="fa-solid fa-location-dot ai-status-location"></i>
+                            <span class="ai-status-detail-text" id="aiStatusLocation">加载中...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 两列布局容器 -->
             <div class="desktop-columns">
                 <!-- 左侧列 -->
@@ -1932,16 +2034,6 @@
                             <div id="calendarLunar">三月初一</div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- AI角色状态小部件（全宽） -->
-            <div class="widget-card ai-status-wide" id="aiStatusWidget">
-                <div class="title">
-                    <span><i class="fa-regular fa-face-smile"></i> AI状态</span>
-                </div>
-                <div class="content ai-status-list" id="aiStatusList">
-                    <!-- 动态生成 -->
                 </div>
             </div>
 
@@ -2703,6 +2795,7 @@
             activeConfigId: null,
             contacts: [],
             currentContactId: null,
+            currentStatusIndex: 0,
             userProfile: {
                 name: '我的网名',
                 status: '在线',
@@ -3827,6 +3920,140 @@
                 if (input) {
                     input.value = contact.bubbleCss || '';
                 }
+            },
+
+            // AI状态小部件更新（增强版）
+            async updateAIStatusWidget() {
+                const contacts = DataManager.contacts;
+                if (contacts.length === 0) {
+                    document.getElementById('aiStatusName').textContent = '暂无AI角色';
+                    document.getElementById('aiStatusWater').textContent = '--';
+                    document.getElementById('aiStatusMeal').textContent = '--';
+                    document.getElementById('aiStatusLocation').textContent = '--';
+                    return;
+                }
+                if (DataManager.currentStatusIndex >= contacts.length) {
+                    DataManager.currentStatusIndex = 0;
+                }
+                const contact = contacts[DataManager.currentStatusIndex];
+                if (!contact) return;
+
+                // 更新头像
+                const avatarDiv = document.getElementById('aiStatusAvatar');
+                avatarDiv.innerHTML = '';
+                const span = document.createElement('span'); span.id = 'aiStatusAvatarText';
+                const img = document.createElement('img'); img.id = 'aiStatusAvatarImg'; img.style.display = 'none';
+                avatarDiv.appendChild(span); avatarDiv.appendChild(img);
+                await Utils.setImageElement(avatarDiv, contact.avatar, '🤖');
+
+                // 更新名称
+                document.getElementById('aiStatusName').textContent = Utils.getDisplayName(contact);
+
+                // 随机在线状态
+                const online = Math.random() > 0.3;
+                const badge = document.getElementById('aiStatusBadge');
+                badge.className = `ai-status-badge ${online ? '' : 'offline'}`;
+
+                // 生成今日饮水、三餐、位置详情
+                const details = await this.generateAIDailyDetails(contact);
+                document.getElementById('aiStatusWater').textContent = details.water;
+                document.getElementById('aiStatusMeal').textContent = details.meal;
+                document.getElementById('aiStatusLocation').textContent = details.location;
+            },
+
+            async generateAIDailyDetails(contact) {
+                // 模拟详细数据
+                const now = new Date();
+                const hour = now.getHours();
+                
+                // 根据时间确定餐饮状态
+                let breakfast = '', lunch = '', dinner = '', extra = '';
+                if (hour < 10) {
+                    breakfast = '准备吃：豆浆+油条';
+                } else if (hour < 14) {
+                    breakfast = '已吃：包子+粥';
+                    lunch = '准备吃：牛肉面';
+                } else if (hour < 18) {
+                    breakfast = '已吃：包子+粥';
+                    lunch = '已吃：牛肉面';
+                    dinner = '准备吃：米饭+炒菜';
+                } else {
+                    breakfast = '已吃：包子+粥';
+                    lunch = '已吃：牛肉面';
+                    dinner = '已吃：米饭+炒菜';
+                    extra = '夜宵：水果';
+                }
+
+                // 构建三餐描述
+                let mealDesc = '';
+                if (breakfast) mealDesc += `早餐：${breakfast}；`;
+                if (lunch) mealDesc += `午餐：${lunch}；`;
+                if (dinner) mealDesc += `晚餐：${dinner}；`;
+                if (extra) mealDesc += extra;
+
+                // 饮水（ml）
+                const waterAmount = Math.floor(Math.random() * 800 + 500); // 500-1300ml
+                
+                // 位置
+                const places = ['书房', '咖啡馆', '公园', '办公室', '家里', '图书馆', '健身房', '超市'];
+                const place = places[Math.floor(Math.random() * places.length)];
+                const activity = ['工作', '学习', '休息', '散步', '看书', '运动'][Math.floor(Math.random() * 6)];
+
+                // 如果有API配置，尝试生成更生动的描述，否则用模拟
+                let config;
+                if (contact.configId) {
+                    config = DataManager.apiConfigs.find(c => c.id === contact.configId);
+                } else {
+                    config = DataManager.getActiveConfig();
+                }
+                if (config && config.base_url && config.api_key && config.currentModel) {
+                    const prompt = `你是一个AI角色，你的人设是：${contact.personality}。请用一句话描述你今天的饮水情况（比如喝了多少毫升水）、三餐详情（早餐、午餐、晚餐吃了什么，如果还没吃就说准备吃什么）以及你现在在哪里做什么。要求具体详细，符合人设，不要输出任何额外内容。`;
+                    const messages = [
+                        { role: 'system', content: contact.personality },
+                        { role: 'user', content: prompt }
+                    ];
+                    try {
+                        const response = await fetch(`${BACKEND_URL}/api/chat`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                base_url: config.base_url,
+                                api_key: config.api_key,
+                                model: config.currentModel,
+                                messages
+                            })
+                        });
+                        if (response.ok) {
+                            const data = await response.json();
+                            const content = data.choices?.[0]?.message?.content?.trim();
+                            if (content) {
+                                // 尝试解析成三个部分，如果不行就全部放入meal
+                                const parts = content.split('；');
+                                if (parts.length >= 3) {
+                                    return {
+                                        water: parts[0] || waterAmount + 'ml',
+                                        meal: parts[1] || mealDesc,
+                                        location: parts[2] || `在${place}${activity}`
+                                    };
+                                } else {
+                                    return {
+                                        water: waterAmount + 'ml',
+                                        meal: content,
+                                        location: `在${place}${activity}`
+                                    };
+                                }
+                            }
+                        }
+                    } catch (err) {
+                        console.error('生成AI日常详情失败', err);
+                    }
+                }
+
+                return {
+                    water: waterAmount + 'ml',
+                    meal: mealDesc,
+                    location: `在${place}${activity}`
+                };
             }
         };
 
@@ -4021,6 +4248,10 @@
                 UIManager.renderContactList();
                 UIManager.renderFriendsList();
                 this.showContactList();
+                if (DataManager.currentStatusIndex >= DataManager.contacts.length) {
+                    DataManager.currentStatusIndex = 0;
+                }
+                UIManager.updateAIStatusWidget();
             },
 
             async loadMoreMessages() {
@@ -4256,7 +4487,7 @@
             }, 60000);
         }
 
-        // ==================== 小部件管理器 ====================
+        // ==================== 天气和日历小部件管理器 ====================
         const WidgetManager = {
             weatherData: {
                 city: '北京',
@@ -4267,11 +4498,9 @@
             init() {
                 this.updateWeather();
                 this.updateCalendar();
-                this.updateAIStatus();
                 this.bindEvents();
 
                 setInterval(() => this.updateWeather(), 3600000);
-                setInterval(() => this.updateAIStatus(), 60000);
                 setInterval(() => this.updateCalendar(), 60000);
             },
 
@@ -4306,47 +4535,6 @@
                 const day = date.getDate();
                 const lunarMonth = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊'][month-1];
                 return lunarMonth + '月' + day + '日';
-            },
-
-            updateAIStatus() {
-                const listContainer = document.getElementById('aiStatusList');
-                if (!listContainer) return;
-                const contacts = DataManager.contacts.slice(0, 8);
-                let html = '';
-                contacts.forEach(contact => {
-                    const lastMsg = contact.messages[contact.messages.length-1];
-                    const lastTime = lastMsg ? this.formatLastTime(lastMsg.timestamp) : '刚刚';
-                    const online = Math.random() > 0.3;
-                    const avatarHtml = contact.avatar && !Utils.isBase64Image(contact.avatar) 
-                        ? `<img src="${contact.avatar}" onerror="this.style.display='none';this.parentElement.textContent='🤖'">` 
-                        : '🤖';
-                    html += `
-                        <div class="ai-status-item" data-id="${contact.id}">
-                            <div class="ai-status-avatar">${avatarHtml}</div>
-                            <span class="ai-status-name">${Utils.getDisplayName(contact)}</span>
-                            <span class="ai-status-badge ${online ? '' : 'offline'}"></span>
-                            <span style="font-size:10px; opacity:0.7;">${lastTime}</span>
-                        </div>
-                    `;
-                });
-                listContainer.innerHTML = html;
-                listContainer.querySelectorAll('.ai-status-item').forEach(item => {
-                    item.addEventListener('click', () => {
-                        const contactId = item.dataset.id;
-                        if (contactId) {
-                            DataManager.currentContactId = contactId;
-                            ChatHandler.enterChatDetail(contactId);
-                        }
-                    });
-                });
-            },
-
-            formatLastTime(timestamp) {
-                const diff = (Date.now() - timestamp) / 1000;
-                if (diff < 60) return '刚刚';
-                if (diff < 3600) return Math.floor(diff/60) + '分钟前';
-                if (diff < 86400) return Math.floor(diff/3600) + '小时前';
-                return Math.floor(diff/86400) + '天前';
             },
 
             bindEvents() {
@@ -4406,7 +4594,6 @@
                 icon.addEventListener('drop', (e) => {
                     e.preventDefault();
                     if (!isEditMode || !draggedIcon || !dragOverIcon || draggedIcon === dragOverIcon) return;
-                    // 只允许在同一个网格内交换
                     const parentGrid = draggedIcon.parentNode;
                     if (parentGrid !== dragOverIcon.parentNode) return;
                     
@@ -4482,7 +4669,6 @@
 
             icons.forEach(icon => {
                 icon.addEventListener('touchstart', (e) => {
-                    // 注意：不要使用 preventDefault，否则会阻止点击
                     startLongPress(icon);
                 });
                 icon.addEventListener('touchend', cancelLongPress);
@@ -4504,10 +4690,9 @@
 
         // ==================== 事件绑定初始化 ====================
         function bindEvents() {
-            // 修改图标点击监听，增加编辑模式判断
             document.querySelectorAll('.app-icon[data-app]').forEach(icon => { 
                 icon.addEventListener('click', (e) => { 
-                    if (isEditMode) return; // 编辑模式下不打开应用
+                    if (isEditMode) return;
                     const app = icon.getAttribute('data-app'); 
                     openApp(app); 
                 }); 
@@ -4621,6 +4806,8 @@
                 UIManager.renderContactList(); UIManager.renderFriendsList();
                 DataManager.currentContactId = newId;
                 ChatHandler.enterChatDetail(newId);
+                DataManager.currentStatusIndex = 0;
+                UIManager.updateAIStatusWidget();
             });
 
             document.getElementById('backToListBtn').addEventListener('click', ChatHandler.showContactList);
@@ -4735,6 +4922,7 @@
                 ModalHandler.closeRemarkModal();
                 document.getElementById('contactListPage').style.display = 'none'; document.getElementById('contactOptionsPage').style.display = 'none'; document.getElementById('chatDetailPage').style.display = 'flex';
                 UIManager.renderContactList(); UIManager.renderFriendsList(); ChatHandler.enterChatDetail(contact.id);
+                UIManager.updateAIStatusWidget();
             });
 
             document.getElementById('closeEditModal').addEventListener('click', ModalHandler.closeEditPersonaModal);
@@ -4791,6 +4979,7 @@
                 DataManager.saveContacts(); ModalHandler.closeEditPersonaModal();
                 document.getElementById('contactListPage').style.display = 'none'; document.getElementById('contactOptionsPage').style.display = 'none'; document.getElementById('chatDetailPage').style.display = 'flex';
                 UIManager.renderContactList(); UIManager.renderFriendsList(); ChatHandler.enterChatDetail(contact.id);
+                UIManager.updateAIStatusWidget();
             });
 
             document.getElementById('userName').addEventListener('input', (e) => { DataManager.userProfile.name = e.target.value; DataManager.saveUserProfile(); });
@@ -4990,6 +5179,54 @@
 
             document.getElementById('savePost').addEventListener('click', () => PostManager.publishPost());
 
+            // AI状态小部件事件
+            document.getElementById('aiStatusPrev').addEventListener('click', () => {
+                if (DataManager.contacts.length === 0) return;
+                DataManager.currentStatusIndex--;
+                if (DataManager.currentStatusIndex < 0) DataManager.currentStatusIndex = DataManager.contacts.length - 1;
+                UIManager.updateAIStatusWidget();
+            });
+            document.getElementById('aiStatusNext').addEventListener('click', () => {
+                if (DataManager.contacts.length === 0) return;
+                DataManager.currentStatusIndex++;
+                if (DataManager.currentStatusIndex >= DataManager.contacts.length) DataManager.currentStatusIndex = 0;
+                UIManager.updateAIStatusWidget();
+            });
+            document.getElementById('aiStatusAvatar').addEventListener('click', () => {
+                if (DataManager.contacts.length === 0) return;
+                const contact = DataManager.contacts[DataManager.currentStatusIndex];
+                if (!contact) return;
+
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = 'image/*';
+                fileInput.style.display = 'none';
+                document.body.appendChild(fileInput);
+                fileInput.click();
+                fileInput.addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = async (event) => {
+                        Utils.showToast('正在处理头像...', 0);
+                        const originalDataUrl = event.target.result;
+                        try {
+                            const compressedDataUrl = await Utils.compressImage(originalDataUrl, 200, 0.8);
+                            const imageId = Utils.generateImageId('contact_avatar');
+                            await Utils.saveImageToDB(imageId, compressedDataUrl);
+                            contact.avatar = imageId;
+                            DataManager.saveContacts();
+                            await UIManager.updateAIStatusWidget();
+                            Utils.showToast('头像更新成功', 1500);
+                        } catch (err) {
+                            Utils.showToast('图片处理失败', 2000);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                    document.body.removeChild(fileInput);
+                });
+            });
+
             function updateTime() { const now = new Date(); document.getElementById('currentTime').textContent = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`; }
             updateTime(); setInterval(updateTime, 1000);
         }
@@ -5039,11 +5276,14 @@
             bindEvents();
             startAutoPostTimer();
 
-            // 初始化小部件和拖拽
             WidgetManager.init();
             loadIconOrder();
             initDragAndDrop();
             initLongPressEffect();
+            if (DataManager.contacts.length > 0) {
+                DataManager.currentStatusIndex = 0;
+                UIManager.updateAIStatusWidget();
+            }
         });
     </script>
 </body>
