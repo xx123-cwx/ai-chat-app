@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 完整版（朋友圈互动）</title>
+    <title>AI角色 · 完整版（左右分栏+小部件）</title>
     <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ===== 基础样式：彻底去除所有边距，全屏自适应 ===== */
+        /* ===== 基础样式 ===== */
         * {
             margin: 0;
             padding: 0;
@@ -74,14 +74,146 @@
             color: white;
             text-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
-        .app-grid {
+
+        /* ===== 桌面两列布局 ===== */
+        .desktop-columns {
+            display: flex;
+            gap: 16px;
+            padding: 12px 16px;
             flex: 1;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            padding: 20px 16px;
-            align-content: start;
         }
+
+        .left-column, .right-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* 左侧应用网格（两行两列） */
+        .app-grid-left {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        /* 右侧应用网格（两行两列） */
+        .app-grid-right {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        /* 小部件卡片（通用） */
+        .widget-card {
+            width: 100%;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .widget-card .title {
+            font-size: 13px;
+            opacity: 0.8;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .widget-card .title i {
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .widget-card .content {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        /* 天气小部件 */
+        .weather-temp {
+            font-size: 24px;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+        .weather-desc {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* 日历小部件 */
+        .calendar-date {
+            font-size: 22px;
+            font-weight: 600;
+        }
+        .calendar-day {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* AI状态小部件（全宽） */
+        .ai-status-wide {
+            width: calc(100% - 32px);
+            margin: 0 16px 16px;
+            flex-shrink: 0;
+        }
+        .ai-status-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+        .ai-status-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 30px;
+            padding: 4px 10px;
+        }
+        .ai-status-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #07c160;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: white;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .ai-status-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .ai-status-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 60px;
+        }
+        .ai-status-badge {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4cd964;
+            box-shadow: 0 0 5px #4cd964;
+        }
+        .ai-status-badge.offline {
+            background: #999;
+            box-shadow: none;
+        }
+
+        /* 应用图标样式（适配小网格） */
         .app-icon {
             display: flex;
             flex-direction: column;
@@ -93,16 +225,32 @@
         .app-icon:active {
             transform: scale(0.95);
         }
+        /* 长按抖动动画 */
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(2deg); }
+            75% { transform: rotate(-2deg); }
+        }
+        .app-icon.long-press {
+            animation: wiggle 0.2s infinite;
+        }
+        /* 拖拽样式 */
+        .app-icon[draggable="true"] {
+            cursor: grab;
+        }
+        .app-icon[draggable="true"]:active {
+            cursor: grabbing;
+        }
         .icon-bg {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             background: rgba(255,255,255,0.85);
             backdrop-filter: blur(5px);
-            border-radius: 18px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
+            font-size: 26px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             border: 1px solid rgba(255,255,255,0.3);
             color: #333;
@@ -115,12 +263,14 @@
         }
         .app-label {
             color: white;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 500;
             text-shadow: 0 1px 3px black;
             max-width: 70px;
             text-align: center;
         }
+
+        /* Dock 样式 */
         .dock {
             background: rgba(255,255,255,0.2);
             backdrop-filter: blur(20px);
@@ -220,6 +370,7 @@
             padding: 16px;
             background: #f5f5f5;
             overflow-y: auto;
+            min-height: 0;
         }
         .config-header {
             display: flex;
@@ -402,29 +553,27 @@
             padding-bottom: 16px;
         }
 
-        /* ===== 联系人列表页布局（重要：确保滚动正确）===== */
+        /* ===== 联系人列表页布局 ===== */
         #contactListPage {
             display: flex;
             flex-direction: column;
             height: 100%;
-            min-height: 0; /* 允许flex子项收缩 */
+            min-height: 0;
         }
 
         .tab-content {
             flex: 1;
-            min-height: 0; /* 关键：防止内容撑开 */
+            min-height: 0;
             position: relative;
         }
 
-        /* 每个标签页容器 */
         #chatsTab, #friendsTab, #dynamicTab {
             height: 100%;
-            overflow: hidden; /* 内部滚动由子元素控制 */
+            overflow: hidden;
             display: flex;
             flex-direction: column;
         }
 
-        /* 聊天和好友列表滚动区域 */
         .contact-list {
             flex: 1;
             overflow-y: auto;
@@ -432,7 +581,6 @@
             background: #fff;
         }
 
-        /* 动态页滚动区域 */
         .moments-list {
             flex: 1;
             overflow-y: auto;
@@ -441,9 +589,8 @@
             background: #f5f5f5;
         }
 
-        /* 用户个人资料区域 */
         .user-profile {
-            flex-shrink: 0; /* 防止被压缩 */
+            flex-shrink: 0;
             display: flex;
             align-items: center;
             padding: 16px;
@@ -493,7 +640,6 @@
             height: 100%;
             object-fit: cover;
         }
-        /* 聊天列表头部（保留返回和新建） */
         .chats-header {
             display: flex;
             align-items: center;
@@ -535,7 +681,6 @@
         .circle-plus:hover {
             background: #e0e0e0;
         }
-        /* 好友界面搜索框 */
         .search-container {
             display: flex;
             align-items: center;
@@ -560,7 +705,6 @@
         .search-container input::placeholder {
             color: #aaa;
         }
-        /* 底部导航栏 */
         .tab-bar {
             display: flex;
             align-items: center;
@@ -764,7 +908,6 @@
             margin-top: 5px;
         }
 
-        /* ===== 统一保存/取消按钮样式（适用于模态框） ===== */
         .save-btn, .cancel-btn, .form-actions button {
             flex: 1;
             padding: 14px;
@@ -788,7 +931,6 @@
             margin-top: 20px;
         }
 
-        /* 个人资料页保存按钮恢复原始样式：宽度100%、上边距20px、字体16px，并重置flex */
         #saveProfileDetails {
             width: 100%;
             margin-top: 20px;
@@ -796,7 +938,7 @@
             flex: none;
         }
 
-        /* ===== 聊天详情页 - 圆润气泡（无尖角），撤回消息采用系统消息样式 ===== */
+        /* ===== 聊天详情页 ===== */
         .chat-detail {
             flex: 1;
             display: flex;
@@ -884,7 +1026,6 @@
             align-items: center;
         }
 
-        /* ----- 圆润气泡样式（无尖角）----- */
         .msg-bubble {
             padding: 10px 14px;
             font-size: 16px;
@@ -905,7 +1046,6 @@
             color: #fff;
         }
 
-        /* 图片消息样式 */
         .message .msg-bubble img {
             max-width: 200px;
             max-height: 200px;
@@ -919,13 +1059,11 @@
             margin: 0 6px;
             white-space: nowrap;
         }
-        /* 自己消息的时间戳：移到绿色气泡前方（左侧），并调整间距使其更贴近气泡 */
         .message.me .msg-time {
             order: -1;
             margin: 0 2px 0 6px;
         }
 
-        /* 系统消息样式（用于聊天记录清空和撤回消息） */
         .system-message {
             align-self: center;
             background-color: #e0e0e0;
@@ -996,7 +1134,6 @@
         #recordBtn {
             margin-left: 0;
         }
-        /* 加载指示器样式 */
         .input-loading {
             position: absolute;
             right: 40px;
@@ -1012,15 +1149,23 @@
             pointer-events: none;
         }
 
-        /* ===== 联系人选项页面（新增头像区域 & 居中开关 & 自动发布设置） ===== */
+        /* ===== 联系人选项页面 ===== */
+        #contactOptionsPage {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
+
         .options-container {
             flex: 1;
-            padding: 20px 16px;
-            background: #f5f5f5;
             overflow-y: auto;
             min-height: 0;
+            padding: 20px 16px;
+            background: #f5f5f5;
         }
-        /* AI角色头像卡片（可点击） */
+
         .ai-avatar-card {
             background: white;
             border-radius: 12px;
@@ -1079,7 +1224,6 @@
             background: #f0f0f0;
         }
 
-        /* 开关卡片通用样式（与自动发布一致） */
         .auto-post-settings {
             background: white;
             border-radius: 12px;
@@ -1093,7 +1237,49 @@
             gap: 16px;
         }
 
-        /* 保留原有开关样式 */
+        .chat-bg-settings {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .chat-bg-settings .preview-area {
+            margin-top: 12px;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .bubble-css-settings {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .bubble-css-settings .css-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+            margin-top: 8px;
+        }
+        .bubble-css-settings .apply-btn {
+            background: #07c160;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 12px;
+            width: 100%;
+        }
+
         .switch {
             position: relative;
             display: inline-block;
@@ -1204,30 +1390,6 @@
         }
         .icon-item button:active {
             opacity: 0.8;
-        }
-        .css-input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 14px;
-            resize: vertical;
-        }
-        .apply-btn {
-            background: #07c160;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            margin-top: 12px;
-            width: 100%;
-        }
-        .apply-btn:active {
-            background: #059e4c;
         }
 
         /* 应用头部通用样式 */
@@ -1359,7 +1521,7 @@
             resize: vertical;
         }
 
-        /* ===== 装饰设置界面（现为空） ===== */
+        /* ===== 装饰设置界面 ===== */
         .decorate-container {
             flex: 1;
             padding: 20px 16px;
@@ -1489,7 +1651,7 @@
             height: 200px;
             background-size: cover;
             background-position: center;
-            background-color: #07c160; /* fallback */
+            background-color: #07c160;
             flex-shrink: 0;
         }
         .cover-avatar {
@@ -1526,7 +1688,6 @@
             backdrop-filter: blur(2px);
         }
 
-        /* 确保动态列表可滚动 */
         #dynamicTab {
             overflow: hidden;
             min-height: 0;
@@ -1632,7 +1793,6 @@
             font-size: 20px;
         }
 
-        /* 点赞区域样式（仿微信） */
         .like-list {
             margin-top: 8px;
             padding: 8px 12px;
@@ -1691,7 +1851,6 @@
             cursor: pointer;
         }
 
-        /* 占位页面 */
         .placeholder-page {
             display: flex;
             align-items: center;
@@ -1701,7 +1860,6 @@
             font-size: 16px;
         }
 
-        /* 加载更多指示器 */
         .loading-more {
             text-align: center;
             padding: 10px;
@@ -1716,7 +1874,7 @@
 </head>
 <body>
     <div class="phone-screen">
-        <!-- 桌面 -->
+        <!-- 桌面（新布局） -->
         <div class="desktop" id="desktop">
             <div class="status-bar">
                 <span id="currentTime">9:41</span>
@@ -1726,16 +1884,68 @@
                     <i class="fa-solid fa-battery-full"></i>
                 </span>
             </div>
-            <div class="app-grid">
-                <div class="app-icon" data-app="chat"><div class="icon-bg" id="icon-chat"><i class="fa-solid fa-comment-dots"></i></div><span class="app-label">信息</span></div>
-                <div class="app-icon" data-app="settings"><div class="icon-bg" id="icon-settings"><i class="fa-solid fa-gear"></i></div><span class="app-label">设置</span></div>
-                <div class="app-icon" data-app="worldbook"><div class="icon-bg" id="icon-worldbook"><i class="fa-solid fa-book-open"></i></div><span class="app-label">世界书</span></div>
-                <div class="app-icon" data-app="beautify"><div class="icon-bg" id="icon-beautify"><i class="fa-solid fa-palette"></i></div><span class="app-label">美化</span></div>
-                <div class="app-icon" data-app="app4"><div class="icon-bg" id="icon-app4"><i class="fa-solid fa-mobile-screen"></i></div><span class="app-label">应用4</span></div>
-                <div class="app-icon" data-app="music"><div class="icon-bg" id="icon-music"><i class="fa-solid fa-music"></i></div><span class="app-label">音乐</span></div>
-                <div class="app-icon" data-app="video"><div class="icon-bg" id="icon-video"><i class="fa-solid fa-video"></i></div><span class="app-label">视频</span></div>
-                <div class="app-icon" data-app="calculator"><div class="icon-bg" id="icon-calculator"><i class="fa-solid fa-calculator"></i></div><span class="app-label">计算器</span></div>
+
+            <!-- 两列布局容器 -->
+            <div class="desktop-columns">
+                <!-- 左侧列 -->
+                <div class="left-column">
+                    <!-- 天气小部件 -->
+                    <div class="widget-card" id="weatherWidget">
+                        <div class="title">
+                            <span><i class="fa-solid fa-cloud-sun"></i> 天气</span>
+                            <i class="fa-solid fa-rotate-right" id="refreshWeather"></i>
+                        </div>
+                        <div class="content">
+                            <div class="weather-temp" id="weatherTemp">23°C</div>
+                            <div class="weather-desc" id="weatherDesc">晴</div>
+                            <div id="weatherCity">北京</div>
+                        </div>
+                    </div>
+
+                    <!-- 左侧应用网格（两行两列） -->
+                    <div class="app-grid-left">
+                        <div class="app-icon" data-app="app4" draggable="false"><div class="icon-bg" id="icon-app4"><i class="fa-solid fa-mobile-screen"></i></div><span class="app-label">应用4</span></div>
+                        <div class="app-icon" data-app="music" draggable="false"><div class="icon-bg" id="icon-music"><i class="fa-solid fa-music"></i></div><span class="app-label">音乐</span></div>
+                        <div class="app-icon" data-app="video" draggable="false"><div class="icon-bg" id="icon-video"><i class="fa-solid fa-video"></i></div><span class="app-label">视频</span></div>
+                        <div class="app-icon" data-app="calculator" draggable="false"><div class="icon-bg" id="icon-calculator"><i class="fa-solid fa-calculator"></i></div><span class="app-label">计算器</span></div>
+                    </div>
+                </div>
+
+                <!-- 右侧列 -->
+                <div class="right-column">
+                    <!-- 右侧应用网格（两行两列） -->
+                    <div class="app-grid-right">
+                        <div class="app-icon" data-app="chat" draggable="false"><div class="icon-bg" id="icon-chat"><i class="fa-solid fa-comment-dots"></i></div><span class="app-label">信息</span></div>
+                        <div class="app-icon" data-app="settings" draggable="false"><div class="icon-bg" id="icon-settings"><i class="fa-solid fa-gear"></i></div><span class="app-label">设置</span></div>
+                        <div class="app-icon" data-app="worldbook" draggable="false"><div class="icon-bg" id="icon-worldbook"><i class="fa-solid fa-book-open"></i></div><span class="app-label">世界书</span></div>
+                        <div class="app-icon" data-app="beautify" draggable="false"><div class="icon-bg" id="icon-beautify"><i class="fa-solid fa-palette"></i></div><span class="app-label">美化</span></div>
+                    </div>
+
+                    <!-- 日历小部件 -->
+                    <div class="widget-card" id="calendarWidget">
+                        <div class="title">
+                            <span><i class="fa-regular fa-calendar"></i> 日历</span>
+                        </div>
+                        <div class="content">
+                            <div class="calendar-date" id="calendarDate">10</div>
+                            <div class="calendar-day" id="calendarDay">星期二</div>
+                            <div id="calendarLunar">三月初一</div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <!-- AI角色状态小部件（全宽） -->
+            <div class="widget-card ai-status-wide" id="aiStatusWidget">
+                <div class="title">
+                    <span><i class="fa-regular fa-face-smile"></i> AI状态</span>
+                </div>
+                <div class="content ai-status-list" id="aiStatusList">
+                    <!-- 动态生成 -->
+                </div>
+            </div>
+
+            <!-- Dock -->
             <div class="dock">
                 <div class="app-icon" data-app="browser"><div class="icon-bg" id="icon-browser"><i class="fa-solid fa-globe"></i></div><span class="app-label">浏览器</span></div>
                 <div class="app-icon" data-app="phone"><div class="icon-bg" id="icon-phone"><i class="fa-solid fa-phone"></i></div><span class="app-label">电话</span></div>
@@ -1743,343 +1953,344 @@
             </div>
             <div class="home-button" id="homeButton"></div>
         </div>
-
-        <!-- 联系人应用 -->
-        <div class="app-view" id="chatView">
-            <!-- 联系人列表页 -->
-            <div id="contactListPage">
-                <!-- 用户个人资料区域 -->
-                <div class="user-profile" id="userProfileArea">
-                    <div class="user-info">
-                        <input type="text" class="user-name-input" id="userName" placeholder="网名" value="我的网名">
-                        <input type="text" class="user-status-input" id="userStatus" placeholder="状态" value="在线">
-                    </div>
-                    <div class="user-avatar" id="userAvatar">
-                        <span id="userAvatarText">🤖</span>
-                        <img id="userAvatarImg" src="#" style="display: none;">
-                    </div>
+    <!-- ===== 联系人应用视图 ===== -->
+    <div class="app-view" id="chatView">
+        <!-- 联系人列表页 -->
+        <div id="contactListPage">
+            <!-- 用户个人资料区域 -->
+            <div class="user-profile" id="userProfileArea">
+                <div class="user-info">
+                    <input type="text" class="user-name-input" id="userName" placeholder="网名" value="我的网名">
+                    <input type="text" class="user-status-input" id="userStatus" placeholder="状态" value="在线">
                 </div>
-                
-                <div class="tab-content" id="tabContent">
-                    <div id="chatsTab" style="display: block;">
-                        <div class="chats-header">
-                            <div class="chats-header-left">
-                                <span class="back-btn" id="chatBackHomeBtn" data-back><i class="fa-solid fa-arrow-left"></i></span>
-                                <h2>聊天</h2>
-                            </div>
-                            <div class="chats-header-right">
-                                <span class="circle-plus" id="newContactBtn" title="新建聊天">+</span>
-                            </div>
+                <div class="user-avatar" id="userAvatar">
+                    <span id="userAvatarText">🤖</span>
+                    <img id="userAvatarImg" src="#" style="display: none;">
+                </div>
+            </div>
+            
+            <div class="tab-content" id="tabContent">
+                <div id="chatsTab" style="display: block;">
+                    <div class="chats-header">
+                        <div class="chats-header-left">
+                            <span class="back-btn" id="chatBackHomeBtn" data-back><i class="fa-solid fa-arrow-left"></i></span>
+                            <h2>聊天</h2>
                         </div>
-                        <div class="contact-list" id="contactListContainer"></div>
-                    </div>
-                    <div id="friendsTab" style="display: none;">
-                        <div class="search-container">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                            <input type="text" placeholder="搜索好友">
+                        <div class="chats-header-right">
+                            <span class="circle-plus" id="newContactBtn" title="新建聊天">+</span>
                         </div>
-                        <div class="contact-list" id="friendsListContainer"></div>
                     </div>
-                    <div id="dynamicTab" style="display: none; flex-direction: column; height: 100%;">
-                        <!-- 朋友圈个人封面（右下角显示头像、网名、个性签名，右上角相机） -->
-                        <div class="profile-cover" id="profileCover">
-                            <!-- 右下角信息 -->
-                            <div style="position: absolute; bottom: 16px; right: 16px; display: flex; flex-direction: column; align-items: flex-end; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div style="text-align: right;">
-                                        <div id="coverUserName" style="font-weight: 600; font-size: 18px;">我的网名</div>
-                                        <div id="coverUserBio" style="font-size: 14px;">个性签名</div>
-                                    </div>
-                                    <div class="cover-avatar" id="coverUserAvatar">
-                                        <span id="coverAvatarText">🤖</span>
-                                        <img id="coverAvatarImg" src="#" style="display: none; width: 100%; height: 100%; object-fit: cover;">
-                                    </div>
+                    <div class="contact-list" id="contactListContainer"></div>
+                </div>
+                <div id="friendsTab" style="display: none;">
+                    <div class="search-container">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" placeholder="搜索好友">
+                    </div>
+                    <div class="contact-list" id="friendsListContainer"></div>
+                </div>
+                <div id="dynamicTab" style="display: none; flex-direction: column; height: 100%;">
+                    <!-- 朋友圈个人封面（右下角显示头像、网名、个性签名，右上角相机） -->
+                    <div class="profile-cover" id="profileCover">
+                        <!-- 右下角信息 -->
+                        <div style="position: absolute; bottom: 16px; right: 16px; display: flex; flex-direction: column; align-items: flex-end; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="text-align: right;">
+                                    <div id="coverUserName" style="font-weight: 600; font-size: 18px;">我的网名</div>
+                                    <div id="coverUserBio" style="font-size: 14px;">个性签名</div>
+                                </div>
+                                <div class="cover-avatar" id="coverUserAvatar">
+                                    <span id="coverAvatarText">🤖</span>
+                                    <img id="coverAvatarImg" src="#" style="display: none; width: 100%; height: 100%; object-fit: cover;">
                                 </div>
                             </div>
-                            <!-- 右上角发布按钮 -->
-                            <button class="post-btn" id="openPostModalBtn" style="position: absolute; top: 16px; right: 16px;"><i class="fa-solid fa-camera"></i></button>
                         </div>
-                        <div class="moments-list" id="momentsList"></div>
+                        <!-- 右上角发布按钮 -->
+                        <button class="post-btn" id="openPostModalBtn" style="position: absolute; top: 16px; right: 16px;"><i class="fa-solid fa-camera"></i></button>
                     </div>
-                </div>
-                
-                <div class="tab-bar">
-                    <div class="tab-item active" data-tab="chats">
-                        <i class="fa-regular fa-comment-dots"></i>
-                        <span>聊天</span>
-                    </div>
-                    <div class="tab-item" data-tab="friends">
-                        <i class="fa-regular fa-user"></i>
-                        <span>好友</span>
-                    </div>
-                    <div class="tab-item" data-tab="dynamic">
-                        <i class="fa-regular fa-clock"></i>
-                        <span>动态</span>
-                    </div>
+                    <div class="moments-list" id="momentsList"></div>
                 </div>
             </div>
-
-            <!-- 聊天详情页 -->
-            <div id="chatDetailPage" style="display:none; flex-direction:column; flex:1; min-height:0;">
-                <div class="chat-header">
-                    <div class="header-left">
-                        <span id="backToListBtn" style="cursor:pointer;">&lt;</span>
-                        <span id="detailContactName">Ezmjl</span>
-                    </div>
-                    <div class="header-right">
-                        <span class="input-btn"><i class="fa-solid fa-magnifying-glass"></i></span>
-                        <span class="input-btn"><i class="fa-solid fa-phone"></i></span>
-                        <span class="input-btn" id="moreMenuBtn"><i class="fa-solid fa-ellipsis-v"></i></span>
-                    </div>
+            
+            <div class="tab-bar">
+                <div class="tab-item active" data-tab="chats">
+                    <i class="fa-regular fa-comment-dots"></i>
+                    <span>聊天</span>
                 </div>
-                <div class="chat-messages" id="messageArea"></div>
-                <div class="input-area">
-                    <span class="input-btn"><i class="fa-solid fa-plus"></i></span>
-                    <span class="input-btn" id="cameraBtn"><i class="fa-solid fa-camera"></i></span>
-                    <span class="input-btn" id="imageBtn"><i class="fa-regular fa-image"></i></span>
-                    <div class="input-field-container">
-                        <input type="text" class="input-field" id="messageInput" placeholder="Aa">
-                        <span class="input-smile" id="smileBtn"><i class="fa-regular fa-face-smile"></i></span>
-                        <span class="input-loading" id="loadingIndicator"><i class="fa-solid fa-spinner fa-spin"></i></span>
-                    </div>
-                    <span class="input-btn" id="recordBtn"><i class="fa-solid fa-microphone"></i></span>
+                <div class="tab-item" data-tab="friends">
+                    <i class="fa-regular fa-user"></i>
+                    <span>好友</span>
                 </div>
-            </div>
-
-            <!-- 联系人选项页面（新增AI角色头像 & 居中开关 & 自动发布设置） -->
-            <div id="contactOptionsPage" style="display:none; flex-direction:column; flex:1;">
-                <div class="chat-header">
-                    <div class="header-left">
-                        <span id="backToChatBtn" style="cursor:pointer;">&lt;</span>
-                        <span>联系人选项</span>
-                    </div>
-                    <div class="header-right"></div>
-                </div>
-                <div class="options-container">
-                    <!-- AI角色头像区域（可点击修改） -->
-                    <div class="ai-avatar-card" id="contactAvatarCard">
-                        <div class="avatar-large" id="contactAvatarLarge">
-                            <span id="contactAvatarLargeText">🤖</span>
-                            <img id="contactAvatarLargeImg" src="#" style="display: none;">
-                        </div>
-                        <div class="hint-text">点击修改AI角色头像</div>
-                    </div>
-
-                    <button class="option-button" id="optionsPin">置顶联系人</button>
-                    <button class="option-button" id="optionsRemark">修改备注名</button>
-                    <button class="option-button" id="optionsEditPersona">编辑人设</button>
-                    
-                    <!-- 免打扰通知开关（改为与自动发布相同的卡片样式） -->
-                    <div class="auto-post-settings">
-                        <div class="switch-row">
-                            <span>免打扰通知</span>
-                            <label class="switch">
-                                <input type="checkbox" id="optionsMuteSwitch">
-                                <span class="slider round"></span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- 自动发布朋友圈设置 -->
-                    <div class="auto-post-settings">
-                        <div class="switch-row">
-                            <span>自动发布朋友圈</span>
-                            <label class="switch">
-                                <input type="checkbox" id="optionsAutoPostSwitch">
-                                <span class="slider round"></span>
-                            </label>
-                        </div>
-                        <div class="interval-row" id="autoPostIntervalContainer" style="display: none;">
-                            <label>间隔（小时）</label>
-                            <input type="number" id="optionsAutoPostInterval" min="0.5" step="0.5" value="1">
-                            <button id="saveAutoPostSettings">保存</button>
-                        </div>
-                    </div>
-
-                    <button class="option-button danger" id="optionsDelete">删除好友</button>
-                    <button class="option-button" id="optionsBlock">拉黑好友</button>
-                    <button class="option-button" id="optionsClear">清除聊天记录</button>
+                <div class="tab-item" data-tab="dynamic">
+                    <i class="fa-regular fa-clock"></i>
+                    <span>动态</span>
                 </div>
             </div>
         </div>
 
-        <!-- 设置应用（一键清除移至顶部） -->
-        <div class="app-view" id="settingsView">
-            <div class="app-header">
-                <span class="back-btn" data-back><i class="fa-solid fa-arrow-left"></i></span>
-                <span class="app-title">设置</span>
+        <!-- 聊天详情页 -->
+        <div id="chatDetailPage" style="display:none; flex-direction:column; flex:1; min-height:0;">
+            <div class="chat-header">
+                <div class="header-left">
+                    <span id="backToListBtn" style="cursor:pointer;">&lt;</span>
+                    <span id="detailContactName">Ezmjl</span>
+                </div>
+                <div class="header-right">
+                    <span class="input-btn"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <span class="input-btn"><i class="fa-solid fa-phone"></i></span>
+                    <span class="input-btn" id="moreMenuBtn"><i class="fa-solid fa-ellipsis-v"></i></span>
+                </div>
             </div>
-            <div class="settings-container" id="settingsContainer">
-                <div class="config-header">
-                    <h3>API 配置</h3>
-                    <button class="add-config-btn" id="addConfigBtn">+</button>
+            <div class="chat-messages" id="messageArea"></div>
+            <div class="input-area">
+                <span class="input-btn"><i class="fa-solid fa-plus"></i></span>
+                <span class="input-btn" id="cameraBtn"><i class="fa-solid fa-camera"></i></span>
+                <span class="input-btn" id="imageBtn"><i class="fa-regular fa-image"></i></span>
+                <div class="input-field-container">
+                    <input type="text" class="input-field" id="messageInput" placeholder="Aa">
+                    <span class="input-smile" id="smileBtn"><i class="fa-regular fa-face-smile"></i></span>
+                    <span class="input-loading" id="loadingIndicator"><i class="fa-solid fa-spinner fa-spin"></i></span>
                 </div>
-                <div id="configList"></div>
-
-                <!-- 备份与恢复区域（一键清除移至顶部） -->
-                <div class="backup-section">
-                    <h3>备份与恢复</h3>
-                    <!-- 一键清除按钮置于最上 -->
-                    <div class="clear-all-top">
-                        <button class="backup-btn danger" id="clearAllDataBtn">一键清除所有数据</button>
-                    </div>
-                    <div class="backup-actions">
-                        <button class="backup-btn" id="exportBackupBtn">导出备份</button>
-                        <button class="backup-btn import" id="importBackupBtn">导入备份</button>
-                    </div>
-                    <input type="file" id="importBackupFile" accept=".json,.backup" style="display: none;">
-                    <div class="backup-hint">导入将覆盖当前所有数据，建议先导出备份。</div>
-                </div>
+                <span class="input-btn" id="recordBtn"><i class="fa-solid fa-microphone"></i></span>
             </div>
         </div>
 
-        <!-- 世界书应用 -->
-        <div class="app-view" id="worldBookView">
-            <div class="app-header">
-                <span class="back-btn" data-back><i class="fa-solid fa-arrow-left"></i></span>
-                <span class="app-title">世界书</span>
+        <!-- 联系人选项页面 -->
+        <div id="contactOptionsPage" style="display:none;">
+            <div class="chat-header">
+                <div class="header-left">
+                    <span id="backToChatBtn" style="cursor:pointer;">&lt;</span>
+                    <span>联系人选项</span>
+                </div>
+                <div class="header-right"></div>
             </div>
-            <div class="worldbook-container" id="worldbookContainer">
-                <div class="worldbook-header">
-                    <h3>我的世界书</h3>
-                    <div class="worldbook-actions">
-                        <button class="import-btn" id="importWorldBookBtn" title="导入世界书"><i class="fa-solid fa-upload"></i></button>
-                        <button id="addWorldBookBtn" title="新建世界书"><i class="fa-solid fa-plus"></i></button>
+            <div class="options-container">
+                <!-- AI角色头像区域（可点击修改） -->
+                <div class="ai-avatar-card" id="contactAvatarCard">
+                    <div class="avatar-large" id="contactAvatarLarge">
+                        <span id="contactAvatarLargeText">🤖</span>
+                        <img id="contactAvatarLargeImg" src="#" style="display: none;">
                     </div>
+                    <div class="hint-text">点击修改AI角色头像</div>
                 </div>
-                <div class="worldbook-list" id="worldbookList"></div>
-            </div>
-        </div>
 
-        <!-- 美化应用 -->
-        <div class="app-view" id="beautifyView">
-            <div class="app-header">
-                <span class="back-btn" data-back><i class="fa-solid fa-arrow-left"></i></span>
-                <span class="app-title">美化</span>
-            </div>
-            <div class="beautify-container" id="beautifyContainer">
-                <div class="beautify-section">
-                    <h3>桌面壁纸</h3>
-                    <input type="file" id="wallpaperUpload" accept="image/*" style="display: none;">
-                    <button class="upload-btn" id="uploadWallpaperBtn">选择图片</button>
-                    <div class="preview-area" id="wallpaperPreview">当前壁纸：默认</div>
-                </div>
-                <div class="beautify-section">
-                    <h3>应用图标</h3>
-                    <div class="icon-grid" id="iconGrid"></div>
-                </div>
-                <div class="beautify-section">
-                    <h3>聊天背景</h3>
-                    <input type="file" id="chatBgUpload" accept="image/*" style="display: none;">
-                    <button class="upload-btn" id="uploadChatBgBtn">选择图片</button>
-                    <button class="upload-btn" id="resetChatBgBtn" style="background:#ff3b30; margin-top:8px;">恢复默认</button>
-                    <div class="preview-area" id="chatBgPreview">当前背景：默认</div>
-                </div>
-                <!-- 新增：朋友圈封面设置 -->
-                <div class="beautify-section">
-                    <h3>朋友圈封面</h3>
-                    <input type="file" id="momentCoverUpload" accept="image/*" style="display: none;">
-                    <button class="upload-btn" id="uploadMomentCoverBtn">选择图片</button>
-                    <button class="upload-btn" id="resetMomentCoverBtn" style="background:#ff3b30; margin-top:8px;">恢复默认</button>
-                    <div class="preview-area" id="momentCoverPreview">当前封面：默认</div>
-                </div>
-                <div class="beautify-section">
-                    <h3>聊天气泡CSS</h3>
-                    <textarea class="css-input" id="bubbleCssInput" rows="4" placeholder="例如：background-color: #ff0000; color: #fff; border-radius: 10px;"></textarea>
-                    <button class="apply-btn" id="applyBubbleCss">应用</button>
-                </div>
-            </div>
-        </div>
+                <button class="option-button" id="optionsPin">置顶联系人</button>
+                <button class="option-button" id="optionsRemark">修改备注名</button>
+                <button class="option-button" id="optionsEditPersona">编辑人设</button>
 
-        <!-- 浏览器应用占位 -->
-        <div class="app-view" id="browserView">
-            <div class="app-header">
-                <span class="back-btn" data-back><i class="fa-solid fa-arrow-left"></i></span>
-                <span class="app-title">浏览器</span>
-            </div>
-            <div style="padding:20px; text-align:center;">浏览器开发中</div>
-        </div>
-
-        <!-- 电话应用占位 -->
-        <div class="app-view" id="phoneView">
-            <div class="app-header">
-                <span class="back-btn" data-back><i class="fa-solid fa-arrow-left"></i></span>
-                <span class="app-title">电话</span>
-            </div>
-            <div style="padding:20px; text-align:center;">电话开发中</div>
-        </div>
-
-        <!-- 个人资料界面 -->
-        <div class="app-view" id="userProfileView">
-            <div class="app-header">
-                <span class="back-btn" id="profileBackBtn" data-back><i class="fa-solid fa-arrow-left"></i></span>
-                <span class="app-title">个人资料</span>
-            </div>
-            <div class="profile-container">
-                <div class="profile-avatar" id="profileAvatar">
-                    <span id="profileAvatarText">🤖</span>
-                    <img id="profileAvatarImg" src="#" style="display: none;">
+                <!-- 聊天背景设置 -->
+                <div class="chat-bg-settings">
+                    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">聊天背景</h3>
+                    <input type="file" id="contactChatBgUpload" accept="image/*" style="display: none;">
+                    <button class="upload-btn" id="uploadContactChatBgBtn">选择图片</button>
+                    <button class="upload-btn" id="resetContactChatBgBtn" style="background:#ff3b30; margin-top:8px;">恢复默认</button>
+                    <div class="preview-area" id="contactChatBgPreview">当前背景：默认</div>
                 </div>
-                <div class="profile-name" id="profileName">我的网名</div>
-                <div class="profile-status" id="profileStatus">在线</div>
-                <div class="profile-bio" id="profileBio"></div>
-                <div class="profile-icons">
-                    <div class="profile-icon-item" id="profileArchive">
-                        <div class="icon-bg"><i class="fa-solid fa-address-card"></i></div>
-                        <span>个人档案</span>
-                    </div>
-                    <div class="profile-icon-item" id="profileDecorate">
-                        <div class="icon-bg"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-                        <span>装饰</span>
-                    </div>
-                    <div class="profile-icon-item" id="profileDiary">
-                        <div class="icon-bg"><i class="fa-solid fa-book-open"></i></div>
-                        <span>日记</span>
+
+                <!-- 聊天气泡CSS设置 -->
+                <div class="bubble-css-settings">
+                    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">聊天气泡CSS</h3>
+                    <textarea class="css-input" id="contactBubbleCssInput" rows="4" placeholder="例如：background-color: #ff0000; color: #fff; border-radius: 10px;"></textarea>
+                    <button class="apply-btn" id="applyContactBubbleCss">应用</button>
+                </div>
+
+                <!-- 免打扰通知开关 -->
+                <div class="auto-post-settings">
+                    <div class="switch-row">
+                        <span>免打扰通知</span>
+                        <label class="switch">
+                            <input type="checkbox" id="optionsMuteSwitch">
+                            <span class="slider round"></span>
+                        </label>
                     </div>
                 </div>
+
+                <!-- 自动发布朋友圈设置 -->
+                <div class="auto-post-settings">
+                    <div class="switch-row">
+                        <span>自动发布朋友圈</span>
+                        <label class="switch">
+                            <input type="checkbox" id="optionsAutoPostSwitch">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="interval-row" id="autoPostIntervalContainer" style="display: none;">
+                        <label>间隔（小时）</label>
+                        <input type="number" id="optionsAutoPostInterval" min="0.5" step="0.5" value="1">
+                        <button id="saveAutoPostSettings">保存</button>
+                    </div>
+                </div>
+
+                <button class="option-button danger" id="optionsDelete">删除好友</button>
+                <button class="option-button" id="optionsBlock">拉黑好友</button>
+                <button class="option-button" id="optionsClear">清除聊天记录</button>
             </div>
         </div>
+    </div>
 
-        <!-- 个人档案界面 -->
-        <div class="app-view" id="userArchiveView">
-            <div class="app-header">
-                <span class="back-btn" id="archiveBackBtn" data-back><i class="fa-solid fa-arrow-left"></i></span>
-                <span class="app-title">个人档案</span>
+    <!-- 设置应用 -->
+    <div class="app-view" id="settingsView">
+        <div class="app-header">
+            <span class="back-btn" data-back><i class="fa-solid fa-arrow-left"></i></span>
+            <span class="app-title">设置</span>
+        </div>
+        <div class="settings-container" id="settingsContainer">
+            <div class="config-header">
+                <h3>API 配置</h3>
+                <button class="add-config-btn" id="addConfigBtn">+</button>
             </div>
-            <div class="archive-container">
-                <div class="archive-field">
-                    <label>真名</label>
-                    <input type="text" id="realName" placeholder="请输入真名" value="">
+            <div id="configList"></div>
+
+            <!-- 备份与恢复区域 -->
+            <div class="backup-section">
+                <h3>备份与恢复</h3>
+                <div class="clear-all-top">
+                    <button class="backup-btn danger" id="clearAllDataBtn">一键清除所有数据</button>
                 </div>
-                <div class="archive-field">
-                    <label>地址</label>
-                    <input type="text" id="address" placeholder="请输入地址" value="">
+                <div class="backup-actions">
+                    <button class="backup-btn" id="exportBackupBtn">导出备份</button>
+                    <button class="backup-btn import" id="importBackupBtn">导入备份</button>
                 </div>
-                <div class="archive-field">
-                    <label>LINE号码</label>
-                    <input type="text" id="lineId" placeholder="请输入LINE号码" value="">
-                </div>
-                <div class="archive-field">
-                    <label>个性签名</label>
-                    <textarea id="bio" placeholder="请输入个性签名"></textarea>
-                </div>
-                <div class="archive-field">
-                    <label>用户设定</label>
-                    <textarea id="userSetting" placeholder="请输入用户设定，例如：我是一个喜欢幽默对话的用户"></textarea>
-                </div>
-                <button class="save-btn" id="saveProfileDetails">保存</button>
+                <input type="file" id="importBackupFile" accept=".json,.backup" style="display: none;">
+                <div class="backup-hint">导入将覆盖当前所有数据，建议先导出备份。</div>
             </div>
         </div>
+    </div>
 
-        <!-- 装饰设置界面（现为空） -->
-        <div class="app-view" id="decorateView">
-            <div class="app-header">
-                <span class="back-btn" id="decorateBackBtn" data-back><i class="fa-solid fa-arrow-left"></i></span>
-                <span class="app-title">装饰</span>
+    <!-- 世界书应用 -->
+    <div class="app-view" id="worldBookView">
+        <div class="app-header">
+            <span class="back-btn" data-back><i class="fa-solid fa-arrow-left"></i></span>
+            <span class="app-title">世界书</span>
+        </div>
+        <div class="worldbook-container" id="worldbookContainer">
+            <div class="worldbook-header">
+                <h3>我的世界书</h3>
+                <div class="worldbook-actions">
+                    <button class="import-btn" id="importWorldBookBtn" title="导入世界书"><i class="fa-solid fa-upload"></i></button>
+                    <button id="addWorldBookBtn" title="新建世界书"><i class="fa-solid fa-plus"></i></button>
+                </div>
             </div>
-            <div class="decorate-container">
-                <div class="decorate-placeholder">功能开发中</div>
+            <div class="worldbook-list" id="worldbookList"></div>
+        </div>
+    </div>
+
+    <!-- 美化应用 -->
+    <div class="app-view" id="beautifyView">
+        <div class="app-header">
+            <span class="back-btn" data-back><i class="fa-solid fa-arrow-left"></i></span>
+            <span class="app-title">美化</span>
+        </div>
+        <div class="beautify-container" id="beautifyContainer">
+            <div class="beautify-section">
+                <h3>桌面壁纸</h3>
+                <input type="file" id="wallpaperUpload" accept="image/*" style="display: none;">
+                <button class="upload-btn" id="uploadWallpaperBtn">选择图片</button>
+                <div class="preview-area" id="wallpaperPreview">当前壁纸：默认</div>
             </div>
+            <div class="beautify-section">
+                <h3>应用图标</h3>
+                <div class="icon-grid" id="iconGrid"></div>
+            </div>
+            <!-- 朋友圈封面设置 -->
+            <div class="beautify-section">
+                <h3>朋友圈封面</h3>
+                <input type="file" id="momentCoverUpload" accept="image/*" style="display: none;">
+                <button class="upload-btn" id="uploadMomentCoverBtn">选择图片</button>
+                <button class="upload-btn" id="resetMomentCoverBtn" style="background:#ff3b30; margin-top:8px;">恢复默认</button>
+                <div class="preview-area" id="momentCoverPreview">当前封面：默认</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 浏览器应用占位 -->
+    <div class="app-view" id="browserView">
+        <div class="app-header">
+            <span class="back-btn" data-back><i class="fa-solid fa-arrow-left"></i></span>
+            <span class="app-title">浏览器</span>
+        </div>
+        <div style="padding:20px; text-align:center;">浏览器开发中</div>
+    </div>
+
+    <!-- 电话应用占位 -->
+    <div class="app-view" id="phoneView">
+        <div class="app-header">
+            <span class="back-btn" data-back><i class="fa-solid fa-arrow-left"></i></span>
+            <span class="app-title">电话</span>
+        </div>
+        <div style="padding:20px; text-align:center;">电话开发中</div>
+    </div>
+
+    <!-- 个人资料界面 -->
+    <div class="app-view" id="userProfileView">
+        <div class="app-header">
+            <span class="back-btn" id="profileBackBtn" data-back><i class="fa-solid fa-arrow-left"></i></span>
+            <span class="app-title">个人资料</span>
+        </div>
+        <div class="profile-container">
+            <div class="profile-avatar" id="profileAvatar">
+                <span id="profileAvatarText">🤖</span>
+                <img id="profileAvatarImg" src="#" style="display: none;">
+            </div>
+            <div class="profile-name" id="profileName">我的网名</div>
+            <div class="profile-status" id="profileStatus">在线</div>
+            <div class="profile-bio" id="profileBio"></div>
+            <div class="profile-icons">
+                <div class="profile-icon-item" id="profileArchive">
+                    <div class="icon-bg"><i class="fa-solid fa-address-card"></i></div>
+                    <span>个人档案</span>
+                </div>
+                <div class="profile-icon-item" id="profileDecorate">
+                    <div class="icon-bg"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                    <span>装饰</span>
+                </div>
+                <div class="profile-icon-item" id="profileDiary">
+                    <div class="icon-bg"><i class="fa-solid fa-book-open"></i></div>
+                    <span>日记</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 个人档案界面 -->
+    <div class="app-view" id="userArchiveView">
+        <div class="app-header">
+            <span class="back-btn" id="archiveBackBtn" data-back><i class="fa-solid fa-arrow-left"></i></span>
+            <span class="app-title">个人档案</span>
+        </div>
+        <div class="archive-container">
+            <div class="archive-field">
+                <label>真名</label>
+                <input type="text" id="realName" placeholder="请输入真名" value="">
+            </div>
+            <div class="archive-field">
+                <label>地址</label>
+                <input type="text" id="address" placeholder="请输入地址" value="">
+            </div>
+            <div class="archive-field">
+                <label>LINE号码</label>
+                <input type="text" id="lineId" placeholder="请输入LINE号码" value="">
+            </div>
+            <div class="archive-field">
+                <label>个性签名</label>
+                <textarea id="bio" placeholder="请输入个性签名"></textarea>
+            </div>
+            <div class="archive-field">
+                <label>用户设定</label>
+                <textarea id="userSetting" placeholder="请输入用户设定，例如：我是一个喜欢幽默对话的用户"></textarea>
+            </div>
+            <button class="save-btn" id="saveProfileDetails">保存</button>
+        </div>
+    </div>
+
+    <!-- 装饰设置界面 -->
+    <div class="app-view" id="decorateView">
+        <div class="app-header">
+            <span class="back-btn" id="decorateBackBtn" data-back><i class="fa-solid fa-arrow-left"></i></span>
+            <span class="app-title">装饰</span>
+        </div>
+        <div class="decorate-container">
+            <div class="decorate-placeholder">功能开发中</div>
         </div>
     </div>
 
@@ -2236,7 +2447,7 @@
         </div>
     </div>
 
-    <!-- 发布动态模态框（增加角色多选） -->
+    <!-- 发布动态模态框 -->
     <div class="modal-overlay" id="postModal">
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header">
@@ -2254,7 +2465,6 @@
                 <button class="upload-btn" id="selectPostImages">选择图片</button>
                 <span style="font-size:12px; color:#999; margin-left:8px;">已选 <span id="imageCount">0</span>/9</span>
             </div>
-            <!-- 角色多选区域 -->
             <div class="form-group">
                 <label>让哪些AI角色看到并互动？</label>
                 <div id="postRoleCheckboxes" style="max-height: 150px; overflow-y: auto; border: 1px solid #ccc; border-radius: 8px; padding: 8px;">
@@ -2270,7 +2480,7 @@
 
     <script>
         // ==================== 常量定义 ====================
-        const BACKEND_URL = ''; // 如果前后端同域，留空即可。否则替换为您的Vercel后端地址
+        const BACKEND_URL = '';
         const TOAST_DURATION = 2000;
         const API_ERRORS = {
             429: '请求过于频繁，请稍后再试 (429)',
@@ -2507,8 +2717,6 @@
             beautifySettings: {
                 wallpaper: null,
                 appIcons: {},
-                bubbleCss: '',
-                chatBackground: null,
                 momentCover: null
             },
             worldBooks: [],
@@ -2583,6 +2791,8 @@
                         c.autoPostEnabled = c.autoPostEnabled || false;
                         c.autoPostInterval = c.autoPostInterval || 1;
                         c.lastAutoPostTime = c.lastAutoPostTime || 0;
+                        c.bubbleCss = c.bubbleCss || '';
+                        c.chatBackground = c.chatBackground || null;
                         return c;
                     });
                     this.contacts = contacts;
@@ -2606,7 +2816,9 @@
                         }],
                         autoPostEnabled: false,
                         autoPostInterval: 1,
-                        lastAutoPostTime: 0
+                        lastAutoPostTime: 0,
+                        bubbleCss: '',
+                        chatBackground: null
                     }];
                 }
                 if (this.contacts.length > 0) this.currentContactId = this.contacts[0].id;
@@ -2648,11 +2860,6 @@
                         Utils.saveImageToDB(id, settings.wallpaper).catch(console.error);
                         settings.wallpaper = id;
                     }
-                    if (settings.chatBackground && Utils.isBase64Image(settings.chatBackground)) {
-                        const id = Utils.generateImageId('chat_bg');
-                        Utils.saveImageToDB(id, settings.chatBackground).catch(console.error);
-                        settings.chatBackground = id;
-                    }
                     if (settings.momentCover && Utils.isBase64Image(settings.momentCover)) {
                         const id = Utils.generateImageId('moment_cover');
                         Utils.saveImageToDB(id, settings.momentCover).catch(console.error);
@@ -2671,9 +2878,11 @@
                         }
                         settings.appIcons = newIcons;
                     }
+                    delete settings.bubbleCss;
+                    delete settings.chatBackground;
                     this.beautifySettings = settings;
                 } else {
-                    this.beautifySettings = { wallpaper: null, appIcons: {}, bubbleCss: '', chatBackground: null, momentCover: null };
+                    this.beautifySettings = { wallpaper: null, appIcons: {}, momentCover: null };
                 }
             },
 
@@ -2714,7 +2923,7 @@
             }
         };
 
-        // ==================== 备份处理模块（增强版，导出JSON） ====================
+        // ==================== 备份处理模块 ====================
         const BackupHandler = {
             async exportBackup() {
                 try {
@@ -2754,18 +2963,15 @@
                     }
                     if (backup.version !== 1) throw new Error('不支持的备份版本，请确认文件正确。');
                     
-                    // 清除当前所有数据
                     const appKeys = ['apiConfigs', 'activeConfigId', 'contacts', 'userProfile', 'beautifySettings', 'worldBooks', 'posts'];
                     appKeys.forEach(key => localStorage.removeItem(key));
                     
-                    // 写入 localStorage 数据
                     if (backup.localStorage) {
                         Object.entries(backup.localStorage).forEach(([key, val]) => {
                             localStorage.setItem(key, JSON.stringify(val));
                         });
                     }
                     
-                    // 清除并重建 IndexedDB 图片
                     await Utils.clearImages();
                     if (backup.images && backup.images.length > 0) {
                         const db = await Utils.openDB();
@@ -2812,7 +3018,7 @@
             }
         };
 
-        // ==================== 朋友圈模块（核心功能） ====================
+        // ==================== 朋友圈模块 ====================
         const PostManager = {
             tempImages: [],
 
@@ -2821,7 +3027,6 @@
                 document.getElementById('postContent').value = '';
                 document.getElementById('postImagePreviewContainer').innerHTML = '';
                 document.getElementById('imageCount').textContent = '0';
-                // 填充角色复选框
                 const container = document.getElementById('postRoleCheckboxes');
                 container.innerHTML = '';
                 DataManager.contacts.forEach(contact => {
@@ -3023,7 +3228,6 @@
                 }
             },
 
-            // AI自主发朋友圈
             async generateAIPost(contactId, customPrompt = '') {
                 const contact = DataManager.contacts.find(c => c.id === contactId);
                 if (!contact) return;
@@ -3299,6 +3503,27 @@
                 await Utils.setBackgroundImage(coverDiv, DataManager.beautifySettings.momentCover, 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format&fit=crop');
             },
 
+            applyCurrentContactBubbleCss() {
+                const contact = DataManager.getCurrentContact();
+                const css = contact.bubbleCss || '';
+                const styleId = 'custom-bubble-style';
+                let styleEl = document.getElementById(styleId);
+                if (!styleEl) {
+                    styleEl = document.createElement('style');
+                    styleEl.id = styleId;
+                    document.head.appendChild(styleEl);
+                }
+                styleEl.innerHTML = `.msg-bubble { ${css} }`;
+            },
+
+            async updateCurrentChatBackground() {
+                const contact = DataManager.getCurrentContact();
+                const chatMessages = document.getElementById('messageArea');
+                if (chatMessages) {
+                    await Utils.setBackgroundImage(chatMessages, contact.chatBackground, 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%2387CEFA"/><circle cx="20" cy="20" r="15" fill="%23fff" opacity="0.1"/><circle cx="80" cy="80" r="20" fill="%23fff" opacity="0.1"/></svg>');
+                }
+            },
+
             renderContactList() {
                 const container = document.getElementById('contactListContainer');
                 if (!container) return;
@@ -3539,20 +3764,6 @@
                 });
             },
 
-            applyBubbleCss(css) {
-                const styleId = 'custom-bubble-style';
-                let styleEl = document.getElementById(styleId);
-                if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = styleId; document.head.appendChild(styleEl); }
-                styleEl.innerHTML = `.msg-bubble { ${css} }`;
-            },
-
-            updateChatBackground() {
-                const chatMessages = document.getElementById('messageArea');
-                if (chatMessages) {
-                    Utils.setBackgroundImage(chatMessages, DataManager.beautifySettings.chatBackground, 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%2387CEFA"/><circle cx="20" cy="20" r="15" fill="%23fff" opacity="0.1"/><circle cx="80" cy="80" r="20" fill="%23fff" opacity="0.1"/></svg>');
-                }
-            },
-
             renderWorldBookList() {
                 const container = document.getElementById('worldbookList');
                 if (!container) return;
@@ -3601,10 +3812,26 @@
                 const img = document.createElement('img'); img.id = 'contactAvatarLargeImg'; img.style.display = 'none';
                 largeDiv.appendChild(span); largeDiv.appendChild(img);
                 await Utils.setImageElement(largeDiv, contact.avatar, '🤖');
+            },
+
+            updateContactChatBgPreview() {
+                const contact = DataManager.getCurrentContact();
+                const preview = document.getElementById('contactChatBgPreview');
+                if (preview) {
+                    preview.textContent = contact.chatBackground ? '当前背景：自定义' : '当前背景：默认';
+                }
+            },
+
+            updateContactBubbleCssInput() {
+                const contact = DataManager.getCurrentContact();
+                const input = document.getElementById('contactBubbleCssInput');
+                if (input) {
+                    input.value = contact.bubbleCss || '';
+                }
             }
         };
 
-        // ==================== 聊天处理模块（重要修改：回车不触发AI，话筒触发AI） ====================
+        // ==================== 聊天处理模块 ====================
         const ChatHandler = {
             currentVisibleStart: 0, currentVisibleEnd: 0, isLoadingMore: false, prevStart: 0,
             longPressTimer: null,
@@ -3623,6 +3850,10 @@
                         if (area && area.scrollTop + area.clientHeight >= area.scrollHeight - 50) this.currentVisibleEnd = total;
                     }
                     UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
+                    setTimeout(() => {
+                        const area = document.getElementById('messageArea');
+                        if (area) area.scrollTop = area.scrollHeight;
+                    }, 0);
                 }
                 UIManager.renderContactList();
             },
@@ -3655,7 +3886,6 @@
                 reader.readAsDataURL(file);
             },
 
-            // 话筒点击时触发：发送输入框消息（如果有）并请求AI回复，同时支持朋友圈命令
             async handleSendWithAI() {
                 const messageInput = document.getElementById('messageInput');
                 const recordBtn = document.getElementById('recordBtn');
@@ -3665,22 +3895,16 @@
                 const contact = DataManager.getCurrentContact();
                 if (contact.blocked) { Utils.showToast('你已将对方拉黑，无法发送消息'); return; }
 
-                // 检测命令：让当前 AI 角色发布朋友圈（无论输入框是否有内容，只要匹配就执行）
                 if (text && (text === '发朋友圈' || text === '发布一条朋友圈' || text.startsWith('/post'))) {
                     messageInput.value = '';
                     const customPrompt = text.replace(/^(发朋友圈|发布一条朋友圈|\/post)/, '').trim();
-                    // 先执行发朋友圈
                     await PostManager.generateAIPost(contact.id, customPrompt || '');
-                    // 注意：这里不return，继续触发普通回复，但不会添加命令消息
                 }
 
-                // 如果输入框有内容，先发送用户消息（不请求AI）
                 if (text) {
-                    // 复用已有方法发送消息，它会清空输入框
                     this.sendOnlyMessage();
                 }
 
-                // 准备请求 AI 回复
                 let config;
                 if (contact.configId) {
                     config = DataManager.apiConfigs.find(c => c.id === contact.configId);
@@ -3693,7 +3917,6 @@
                     return;
                 }
 
-                // 显示加载状态
                 messageInput.disabled = true;
                 recordBtn.style.pointerEvents = 'none';
                 recordBtn.style.opacity = '0.5';
@@ -3706,7 +3929,6 @@
                 const worldBookContent = worldBooks.map(w => `【${w.name}】\n${w.content}`).join('\n\n');
                 const worldBookInfo = worldBookContent ? `世界书规则：\n${worldBookContent}` : '';
 
-                // 构建系统消息
                 const systemMessages = [
                     { role: 'system', content: timeInfo },
                     { role: 'system', content: userInfo },
@@ -3714,7 +3936,6 @@
                 ];
                 if (worldBookInfo) systemMessages.push({ role: 'system', content: worldBookInfo });
 
-                // 从联系人历史中提取所有非系统消息（用户和助手）
                 const historyMessages = contact.messages.filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.content }));
                 const messages = [...systemMessages, ...historyMessages];
 
@@ -3761,7 +3982,8 @@
                 const total = contact.messages.length;
                 this.currentVisibleStart = Math.max(0, total - INITIAL_MESSAGE_COUNT); this.currentVisibleEnd = total;
                 this.isLoadingMore = false; this.prevStart = this.currentVisibleStart;
-                UIManager.updateChatBackground();
+                UIManager.applyCurrentContactBubbleCss();
+                UIManager.updateCurrentChatBackground();
                 UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
                 document.getElementById('contactListPage').style.display = 'none'; document.getElementById('chatDetailPage').style.display = 'flex'; document.getElementById('contactOptionsPage').style.display = 'none';
                 requestAnimationFrame(() => { const area = document.getElementById('messageArea'); if (area) area.scrollTop = area.scrollHeight; });
@@ -3783,6 +4005,8 @@
                 autoPostSwitch.checked = contact.autoPostEnabled || false;
                 intervalContainer.style.display = contact.autoPostEnabled ? 'block' : 'none';
                 document.getElementById('optionsAutoPostInterval').value = contact.autoPostInterval || 1;
+                UIManager.updateContactChatBgPreview();
+                UIManager.updateContactBubbleCssInput();
                 UIManager.updateContactOptionsAvatar();
             },
 
@@ -4033,6 +4257,253 @@
             }, 60000);
         }
 
+        // ==================== 小部件管理器 ====================
+        const WidgetManager = {
+            weatherData: {
+                city: '北京',
+                temp: 23,
+                desc: '晴',
+            },
+
+            init() {
+                this.updateWeather();
+                this.updateCalendar();
+                this.updateAIStatus();
+                this.bindEvents();
+
+                setInterval(() => this.updateWeather(), 3600000);
+                setInterval(() => this.updateAIStatus(), 60000);
+                setInterval(() => this.updateCalendar(), 60000);
+            },
+
+            updateWeather() {
+                const cities = ['北京', '上海', '广州', '深圳', '杭州'];
+                const descs = ['晴', '多云', '阴', '小雨', '大雨', '雪'];
+                this.weatherData.city = cities[Math.floor(Math.random() * cities.length)];
+                this.weatherData.temp = Math.floor(Math.random() * 15 + 15);
+                this.weatherData.desc = descs[Math.floor(Math.random() * descs.length)];
+                this.renderWeather();
+            },
+
+            renderWeather() {
+                document.getElementById('weatherTemp').textContent = this.weatherData.temp + '°C';
+                document.getElementById('weatherDesc').textContent = this.weatherData.desc;
+                document.getElementById('weatherCity').textContent = this.weatherData.city;
+            },
+
+            updateCalendar() {
+                const now = new Date();
+                const date = now.getDate();
+                const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+                const day = days[now.getDay()];
+                const lunar = this.getLunar(now);
+                document.getElementById('calendarDate').textContent = date;
+                document.getElementById('calendarDay').textContent = day;
+                document.getElementById('calendarLunar').textContent = lunar;
+            },
+
+            getLunar(date) {
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                const lunarMonth = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊'][month-1];
+                return lunarMonth + '月' + day + '日';
+            },
+
+            updateAIStatus() {
+                const listContainer = document.getElementById('aiStatusList');
+                if (!listContainer) return;
+                const contacts = DataManager.contacts.slice(0, 8); // 显示更多
+                let html = '';
+                contacts.forEach(contact => {
+                    const lastMsg = contact.messages[contact.messages.length-1];
+                    const lastTime = lastMsg ? this.formatLastTime(lastMsg.timestamp) : '刚刚';
+                    const online = Math.random() > 0.3;
+                    const avatarHtml = contact.avatar && !Utils.isBase64Image(contact.avatar) 
+                        ? `<img src="${contact.avatar}" onerror="this.style.display='none';this.parentElement.textContent='🤖'">` 
+                        : '🤖';
+                    html += `
+                        <div class="ai-status-item" data-id="${contact.id}">
+                            <div class="ai-status-avatar">${avatarHtml}</div>
+                            <span class="ai-status-name">${Utils.getDisplayName(contact)}</span>
+                            <span class="ai-status-badge ${online ? '' : 'offline'}"></span>
+                            <span style="font-size:10px; opacity:0.7;">${lastTime}</span>
+                        </div>
+                    `;
+                });
+                listContainer.innerHTML = html;
+                listContainer.querySelectorAll('.ai-status-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const contactId = item.dataset.id;
+                        if (contactId) {
+                            DataManager.currentContactId = contactId;
+                            ChatHandler.enterChatDetail(contactId);
+                        }
+                    });
+                });
+            },
+
+            formatLastTime(timestamp) {
+                const diff = (Date.now() - timestamp) / 1000;
+                if (diff < 60) return '刚刚';
+                if (diff < 3600) return Math.floor(diff/60) + '分钟前';
+                if (diff < 86400) return Math.floor(diff/3600) + '小时前';
+                return Math.floor(diff/86400) + '天前';
+            },
+
+            bindEvents() {
+                document.getElementById('refreshWeather').addEventListener('click', () => {
+                    this.updateWeather();
+                    Utils.showToast('天气已刷新');
+                });
+            }
+        };
+
+        // ==================== 图标拖拽排序功能 ====================
+        let isEditMode = false;
+        let draggedIcon = null;
+        let dragOverIcon = null;
+
+        function enterEditMode() {
+            if (isEditMode) return;
+            isEditMode = true;
+            document.querySelectorAll('.app-icon').forEach(icon => {
+                icon.classList.add('long-press');
+                icon.setAttribute('draggable', 'true');
+            });
+            Utils.showToast('长按图标可拖动排序', 2000);
+        }
+
+        function exitEditMode() {
+            if (!isEditMode) return;
+            isEditMode = false;
+            document.querySelectorAll('.app-icon').forEach(icon => {
+                icon.classList.remove('long-press');
+                icon.setAttribute('draggable', 'false');
+            });
+        }
+
+        function initDragAndDrop() {
+            const icons = document.querySelectorAll('.app-icon');
+            icons.forEach(icon => {
+                icon.addEventListener('dragstart', (e) => {
+                    if (!isEditMode) {
+                        e.preventDefault();
+                        return;
+                    }
+                    draggedIcon = icon;
+                    e.dataTransfer.setData('text/plain', icon.dataset.app);
+                    icon.style.opacity = '0.5';
+                });
+                icon.addEventListener('dragend', (e) => {
+                    icon.style.opacity = '1';
+                    draggedIcon = null;
+                    dragOverIcon = null;
+                });
+                icon.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if (!isEditMode || !draggedIcon) return;
+                    dragOverIcon = icon;
+                });
+                icon.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (!isEditMode || !draggedIcon || !dragOverIcon || draggedIcon === dragOverIcon) return;
+                    // 只允许在同一个网格内交换
+                    const parentGrid = draggedIcon.parentNode;
+                    if (parentGrid !== dragOverIcon.parentNode) return;
+                    
+                    const children = Array.from(parentGrid.children);
+                    const fromIndex = children.indexOf(draggedIcon);
+                    const toIndex = children.indexOf(dragOverIcon);
+                    if (fromIndex < toIndex) {
+                        parentGrid.insertBefore(dragOverIcon, draggedIcon);
+                    } else {
+                        parentGrid.insertBefore(draggedIcon, dragOverIcon);
+                    }
+                    draggedIcon.style.opacity = '1';
+                    dragOverIcon.style.opacity = '1';
+                    draggedIcon = null;
+                    dragOverIcon = null;
+                    saveIconOrder();
+                });
+            });
+        }
+
+        function saveIconOrder() {
+            const leftGrid = document.querySelector('.app-grid-left');
+            const rightGrid = document.querySelector('.app-grid-right');
+            const order = {
+                left: Array.from(leftGrid.children).map(icon => icon.dataset.app),
+                right: Array.from(rightGrid.children).map(icon => icon.dataset.app)
+            };
+            localStorage.setItem('iconOrder', JSON.stringify(order));
+        }
+
+        function loadIconOrder() {
+            const saved = localStorage.getItem('iconOrder');
+            if (!saved) return;
+            try {
+                const order = JSON.parse(saved);
+                const leftGrid = document.querySelector('.app-grid-left');
+                const rightGrid = document.querySelector('.app-grid-right');
+                if (order.left) {
+                    const leftIcons = Array.from(leftGrid.children);
+                    order.left.reverse().forEach(app => {
+                        const icon = leftIcons.find(i => i.dataset.app === app);
+                        if (icon) leftGrid.prepend(icon);
+                    });
+                }
+                if (order.right) {
+                    const rightIcons = Array.from(rightGrid.children);
+                    order.right.reverse().forEach(app => {
+                        const icon = rightIcons.find(i => i.dataset.app === app);
+                        if (icon) rightGrid.prepend(icon);
+                    });
+                }
+            } catch (e) {}
+        }
+
+        function initLongPressEffect() {
+            const icons = document.querySelectorAll('.app-icon');
+            let longPressTimer = null;
+
+            const startLongPress = (icon) => {
+                if (longPressTimer) clearTimeout(longPressTimer);
+                longPressTimer = setTimeout(() => {
+                    enterEditMode();
+                    longPressTimer = null;
+                }, 500);
+            };
+
+            const cancelLongPress = () => {
+                if (longPressTimer) {
+                    clearTimeout(longPressTimer);
+                    longPressTimer = null;
+                }
+            };
+
+            icons.forEach(icon => {
+                icon.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    startLongPress(icon);
+                });
+                icon.addEventListener('touchend', cancelLongPress);
+                icon.addEventListener('touchcancel', cancelLongPress);
+                icon.addEventListener('touchmove', cancelLongPress);
+                icon.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    startLongPress(icon);
+                });
+                icon.addEventListener('mouseup', cancelLongPress);
+                icon.addEventListener('mouseleave', cancelLongPress);
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.app-icon') && isEditMode) {
+                    exitEditMode();
+                }
+            });
+        }
+
         // ==================== 事件绑定初始化 ====================
         function bindEvents() {
             document.querySelectorAll('.app-icon[data-app]').forEach(icon => { icon.addEventListener('click', (e) => { const app = icon.getAttribute('data-app'); openApp(app); }); });
@@ -4136,7 +4607,9 @@
                     messages: [{ role: 'assistant', type: 'text', content: `你好！我是${name}，很高兴认识你！`, timestamp: Date.now() }],
                     autoPostEnabled: false,
                     autoPostInterval: 1,
-                    lastAutoPostTime: 0
+                    lastAutoPostTime: 0,
+                    bubbleCss: '',
+                    chatBackground: null
                 });
                 DataManager.saveContacts();
                 ModalHandler.closeNewContactModal();
@@ -4178,6 +4651,9 @@
                     const contact = DataManager.getCurrentContact();
                     contact.autoPostEnabled = false;
                     DataManager.saveContacts();
+                } else {
+                    contact.autoPostEnabled = true;
+                    DataManager.saveContacts();
                 }
             });
 
@@ -4188,6 +4664,56 @@
                 if (!contact.lastAutoPostTime) contact.lastAutoPostTime = Date.now();
                 DataManager.saveContacts();
                 Utils.showToast('设置已保存');
+            });
+
+            const contactChatBgUpload = document.getElementById('contactChatBgUpload');
+            document.getElementById('uploadContactChatBgBtn').addEventListener('click', () => { contactChatBgUpload.click(); });
+            contactChatBgUpload.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = async (event) => {
+                    Utils.showToast('正在处理背景...', 0);
+                    const originalDataUrl = event.target.result;
+                    try {
+                        const compressedDataUrl = await Utils.compressImage(originalDataUrl, 800, 0.9);
+                        const imageId = Utils.generateImageId('chat_bg');
+                        await Utils.saveImageToDB(imageId, compressedDataUrl);
+                        const contact = DataManager.getCurrentContact();
+                        contact.chatBackground = imageId;
+                        DataManager.saveContacts();
+                        UIManager.updateContactChatBgPreview();
+                        if (document.getElementById('chatDetailPage').style.display === 'flex') {
+                            UIManager.updateCurrentChatBackground();
+                        }
+                        Utils.showToast('背景更新成功', 1500);
+                    } catch (err) {
+                        Utils.showToast('背景处理失败', 2000);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+
+            document.getElementById('resetContactChatBgBtn').addEventListener('click', () => {
+                const contact = DataManager.getCurrentContact();
+                contact.chatBackground = null;
+                DataManager.saveContacts();
+                UIManager.updateContactChatBgPreview();
+                if (document.getElementById('chatDetailPage').style.display === 'flex') {
+                    UIManager.updateCurrentChatBackground();
+                }
+                Utils.showToast('已恢复默认背景');
+            });
+
+            document.getElementById('applyContactBubbleCss').addEventListener('click', () => {
+                const css = document.getElementById('contactBubbleCssInput').value.trim();
+                const contact = DataManager.getCurrentContact();
+                contact.bubbleCss = css;
+                DataManager.saveContacts();
+                if (document.getElementById('chatDetailPage').style.display === 'flex') {
+                    UIManager.applyCurrentContactBubbleCss();
+                }
+                Utils.showToast('气泡样式已应用');
             });
 
             document.getElementById('optionsDelete').addEventListener('click', () => { if (confirm('确定要删除该好友吗？此操作不可恢复。')) ChatHandler.deleteContact(DataManager.getCurrentContact().id); });
@@ -4329,47 +4855,13 @@
                 UIManager.updateProfileCover();
             });
 
-            document.getElementById('applyBubbleCss').addEventListener('click', () => {
-                const css = document.getElementById('bubbleCssInput').value.trim();
-                DataManager.beautifySettings.bubbleCss = css; DataManager.saveBeautifySettings(); UIManager.applyBubbleCss(css);
-            });
-            document.getElementById('bubbleCssInput').value = DataManager.beautifySettings.bubbleCss || '';
-
-            const chatBgUpload = document.getElementById('chatBgUpload');
-            document.getElementById('uploadChatBgBtn').addEventListener('click', () => { chatBgUpload.click(); });
-            chatBgUpload.addEventListener('change', async (e) => {
-                const file = e.target.files[0]; if (!file) return;
-                const reader = new FileReader();
-                reader.onload = async (event) => {
-                    Utils.showToast('正在处理背景...', 0);
-                    const originalDataUrl = event.target.result;
-                    try {
-                        const imageId = Utils.generateImageId('chat_bg');
-                        await Utils.saveImageToDB(imageId, originalDataUrl);
-                        DataManager.beautifySettings.chatBackground = imageId; DataManager.saveBeautifySettings();
-                        document.getElementById('chatBgPreview').textContent = '当前背景：自定义';
-                        if (document.getElementById('chatDetailPage').style.display === 'flex') UIManager.updateChatBackground();
-                        Utils.showToast('背景更新成功', 1500);
-                    } catch (err) { Utils.showToast('背景处理失败', 2000); }
-                };
-                reader.readAsDataURL(file);
-            });
-
-            document.getElementById('resetChatBgBtn').addEventListener('click', () => {
-                DataManager.beautifySettings.chatBackground = null; DataManager.saveBeautifySettings();
-                document.getElementById('chatBgPreview').textContent = '当前背景：默认';
-                if (document.getElementById('chatDetailPage').style.display === 'flex') UIManager.updateChatBackground();
-            });
-
             const messageInput = document.getElementById('messageInput');
-            // 回车只发送消息，不触发AI
             messageInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     ChatHandler.sendOnlyMessage();
                 }
             });
-            // 话筒点击触发AI回复
             document.getElementById('recordBtn').addEventListener('click', () => ChatHandler.handleSendWithAI());
 
             document.getElementById('messageArea').addEventListener('touchstart', (e) => {
@@ -4516,12 +5008,8 @@
             UIManager.renderFriendsList();
             UIManager.renderIconGrid();
             UIManager.applyAllAppIcons();
-            if (DataManager.beautifySettings.bubbleCss) UIManager.applyBubbleCss(DataManager.beautifySettings.bubbleCss);
-            document.getElementById('bubbleCssInput').value = DataManager.beautifySettings.bubbleCss || '';
             document.getElementById('momentCoverPreview').textContent = DataManager.beautifySettings.momentCover ? '当前封面：自定义' : '当前封面：默认';
-            // 初始化壁纸预览文本
             document.getElementById('wallpaperPreview').textContent = DataManager.beautifySettings.wallpaper ? '当前壁纸：自定义' : '当前壁纸：默认';
-            // 应用桌面壁纸
             await Utils.setBackgroundImage(document.querySelector('.desktop'), DataManager.beautifySettings.wallpaper, 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format&fit=crop');
 
             (function setupProfileAvatar() {
@@ -4550,6 +5038,12 @@
 
             bindEvents();
             startAutoPostTimer();
+
+            // 初始化小部件和拖拽
+            WidgetManager.init();
+            loadIconOrder();
+            initDragAndDrop();
+            initLongPressEffect();
         });
     </script>
 </body>
