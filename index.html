@@ -1952,8 +1952,7 @@
                 <div class="app-icon" data-app="chat"><div class="icon-bg" id="icon-chat-dock"><i class="fa-solid fa-comment-dots"></i></div><span class="app-label">信息</span></div>
             </div>
             <div class="home-button" id="homeButton"></div>
-        </div>
-    <!-- ===== 联系人应用视图 ===== -->
+        </div>    <!-- ===== 联系人应用视图 ===== -->
     <div class="app-view" id="chatView">
         <!-- 联系人列表页 -->
         <div id="contactListPage">
@@ -4312,7 +4311,7 @@
             updateAIStatus() {
                 const listContainer = document.getElementById('aiStatusList');
                 if (!listContainer) return;
-                const contacts = DataManager.contacts.slice(0, 8); // 显示更多
+                const contacts = DataManager.contacts.slice(0, 8);
                 let html = '';
                 contacts.forEach(contact => {
                     const lastMsg = contact.messages[contact.messages.length-1];
@@ -4483,14 +4482,13 @@
 
             icons.forEach(icon => {
                 icon.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
+                    // 注意：不要使用 preventDefault，否则会阻止点击
                     startLongPress(icon);
                 });
                 icon.addEventListener('touchend', cancelLongPress);
                 icon.addEventListener('touchcancel', cancelLongPress);
                 icon.addEventListener('touchmove', cancelLongPress);
                 icon.addEventListener('mousedown', (e) => {
-                    e.preventDefault();
                     startLongPress(icon);
                 });
                 icon.addEventListener('mouseup', cancelLongPress);
@@ -4506,7 +4504,14 @@
 
         // ==================== 事件绑定初始化 ====================
         function bindEvents() {
-            document.querySelectorAll('.app-icon[data-app]').forEach(icon => { icon.addEventListener('click', (e) => { const app = icon.getAttribute('data-app'); openApp(app); }); });
+            // 修改图标点击监听，增加编辑模式判断
+            document.querySelectorAll('.app-icon[data-app]').forEach(icon => { 
+                icon.addEventListener('click', (e) => { 
+                    if (isEditMode) return; // 编辑模式下不打开应用
+                    const app = icon.getAttribute('data-app'); 
+                    openApp(app); 
+                }); 
+            });
 
             document.querySelectorAll('[data-back]').forEach(btn => {
                 btn.addEventListener('click', (e) => {
@@ -4647,14 +4652,9 @@
             const intervalContainer = document.getElementById('autoPostIntervalContainer');
             autoPostSwitch.addEventListener('change', (e) => {
                 intervalContainer.style.display = e.target.checked ? 'block' : 'none';
-                if (!e.target.checked) {
-                    const contact = DataManager.getCurrentContact();
-                    contact.autoPostEnabled = false;
-                    DataManager.saveContacts();
-                } else {
-                    contact.autoPostEnabled = true;
-                    DataManager.saveContacts();
-                }
+                const contact = DataManager.getCurrentContact();
+                contact.autoPostEnabled = e.target.checked;
+                DataManager.saveContacts();
             });
 
             document.getElementById('saveAutoPostSettings').addEventListener('click', () => {
