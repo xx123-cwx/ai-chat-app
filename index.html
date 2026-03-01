@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>小手机</title>
+    <title>AI角色 · 完整版（朋友圈互动）</title>
     <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -2666,7 +2666,7 @@
             }
         };
 
-        // ==================== 备份处理模块 ====================
+        // ==================== 备份处理模块（增强版，导出JSON） ====================
         const BackupHandler = {
             async exportBackup() {
                 try {
@@ -2684,7 +2684,7 @@
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `ai-chat-backup-${new Date().toISOString().slice(0,10)}.backup`;
+                    a.download = `ai-chat-backup-${new Date().toISOString().slice(0,10)}.json`;
                     a.click();
                     URL.revokeObjectURL(url);
                     Utils.showToast('备份导出成功', 1500);
@@ -2698,19 +2698,48 @@
                 try {
                     Utils.showToast('正在恢复数据...', 0);
                     const text = await Utils.readFileAsText(file);
-                    const backup = JSON.parse(text);
-                    if (backup.version !== 1) throw new Error('不支持的备份版本');
+                    let backup;
+                    try {
+                        backup = JSON.parse(text);
+                    } catch (e) {
+                        throw new Error('备份文件格式错误，不是有效的 JSON 文件。');
+                    }
+                    if (backup.version !== 1) throw new Error('不支持的备份版本，请确认文件正确。');
+                    
+                    // 清除当前所有数据
                     const appKeys = ['apiConfigs', 'activeConfigId', 'contacts', 'userProfile', 'beautifySettings', 'worldBooks', 'posts'];
                     appKeys.forEach(key => localStorage.removeItem(key));
+                    
+                    // 写入 localStorage 数据
                     if (backup.localStorage) {
                         Object.entries(backup.localStorage).forEach(([key, val]) => {
                             localStorage.setItem(key, JSON.stringify(val));
                         });
                     }
+                    
+                    // 清除并重建 IndexedDB 图片
                     await Utils.clearImages();
                     if (backup.images && backup.images.length > 0) {
-                        await Utils.saveImagesBatch(backup.images);
+                        const db = await Utils.openDB();
+                        const tx = db.transaction('images', 'readwrite');
+                        const store = tx.objectStore('images');
+                        let successCount = 0;
+                        let failCount = 0;
+                        for (const img of backup.images) {
+                            try {
+                                await store.put(img);
+                                successCount++;
+                            } catch (imgErr) {
+                                console.error('图片保存失败:', img.id, imgErr);
+                                failCount++;
+                            }
+                        }
+                        await tx.complete;
+                        if (failCount > 0) {
+                            Utils.showToast(`部分图片恢复失败 (${failCount} 张)，请检查控制台`, 3000);
+                        }
                     }
+                    
                     Utils.showToast('恢复成功，页面即将刷新', 1500);
                     setTimeout(() => location.reload(), 1500);
                 } catch (err) {
@@ -4401,6 +4430,10 @@
             if (DataManager.beautifySettings.bubbleCss) UIManager.applyBubbleCss(DataManager.beautifySettings.bubbleCss);
             document.getElementById('bubbleCssInput').value = DataManager.beautifySettings.bubbleCss || '';
             document.getElementById('momentCoverPreview').textContent = DataManager.beautifySettings.momentCover ? '当前封面：自定义' : '当前封面：默认';
+            // 初始化壁纸预览文本
+            document.getElementById('wallpaperPreview').textContent = DataManager.beautifySettings.wallpaper ? '当前壁纸：自定义' : '当前壁纸：默认';
+            // 应用桌面壁纸
+            await Utils.setBackgroundImage(document.querySelector('.desktop'), DataManager.beautifySettings.wallpaper, 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format&fit=crop');
 
             (function setupProfileAvatar() {
                 const avatarDiv = document.getElementById('profileAvatar');
