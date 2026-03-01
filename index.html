@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 完整版（AI日常状态增强）</title>
+    <title>phone</title>
     <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -1066,6 +1066,7 @@
             display: flex;
             align-items: flex-start;
             max-width: 85%;
+            position: relative;
         }
         .message.other {
             align-self: flex-start;
@@ -1074,6 +1075,11 @@
             align-self: flex-end;
             flex-direction: row-reverse;
             align-items: flex-start;
+        }
+        /* 多选模式下的选中样式 */
+        .message.selected {
+            background-color: rgba(0, 199, 60, 0.1);
+            border-radius: 8px;
         }
 
         .avatar {
@@ -1941,6 +1947,168 @@
         .loading-more.show {
             display: block;
         }
+
+        /* ===== 加号功能模态框 - 卡片样式（仿桌面小组件，从底部弹出） ===== */
+        #plusActionModal .modal-content {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            color: white;
+            max-width: 400px;
+            width: 90%;
+            border-radius: 20px;
+            padding: 0;
+            overflow: hidden;
+            /* 从底部弹出 */
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .action-card-header {
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 16px 0;
+        }
+        .close-icon {
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        .close-icon:hover {
+            opacity: 1;
+        }
+        .action-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 16px;
+            justify-content: center;
+        }
+        .action-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+            padding: 10px;
+            transition: background 0.2s;
+            border-radius: 8px;
+            width: calc(25% - 12px); /* 一行四个 */
+            min-width: 70px;
+        }
+        .action-item:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .action-item i {
+            font-size: 28px;
+            color: white;
+        }
+
+        /* ===== 长按消息操作菜单 ===== */
+        #messageActionModal .modal-content {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            color: white;
+            max-width: 400px;
+            width: 90%;
+            border-radius: 20px;
+            padding: 0;
+            overflow: hidden;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .action-card {
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+        }
+        .action-row {
+            display: flex;
+            justify-content: space-around;
+            margin: 8px 0;
+        }
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+            padding: 10px;
+            transition: background 0.2s;
+            border-radius: 8px;
+            flex: 1;
+        }
+        .action-btn i {
+            font-size: 24px;
+            color: white;
+        }
+        .action-btn span {
+            font-size: 12px;
+        }
+        .action-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .cancel-btn {
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .cancel-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* ===== 多选操作栏 ===== */
+        .multi-select-bar {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: #f7f7f7;
+            border-top: 1px solid #dbdbdb;
+            flex-shrink: 0;
+        }
+        .multi-select-bar.active {
+            display: flex;
+        }
+        .select-info {
+            font-size: 16px;
+            color: #333;
+        }
+        .select-actions {
+            display: flex;
+            gap: 16px;
+        }
+        .select-actions button {
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: #007aff;
+            cursor: pointer;
+            padding: 8px;
+        }
+        .select-actions button.danger {
+            color: #ff3b30;
+        }
     </style>
 </head>
 <body>
@@ -2148,8 +2316,17 @@
                 </div>
             </div>
             <div class="chat-messages" id="messageArea"></div>
+            <!-- 多选操作栏 -->
+            <div class="multi-select-bar" id="multiSelectBar">
+                <span class="select-info" id="selectCount">已选择 0 条</span>
+                <div class="select-actions">
+                    <button class="danger" id="deleteSelectedBtn">删除</button>
+                    <button id="cancelMultiSelectBtn">取消</button>
+                </div>
+            </div>
             <div class="input-area">
-                <span class="input-btn"><i class="fa-solid fa-plus"></i></span>
+                <!-- 为加号图标添加 id -->
+                <span class="input-btn" id="plusActionBtn"><i class="fa-solid fa-plus"></i></span>
                 <span class="input-btn" id="cameraBtn"><i class="fa-solid fa-camera"></i></span>
                 <span class="input-btn" id="imageBtn"><i class="fa-regular fa-image"></i></span>
                 <div class="input-field-container">
@@ -2584,7 +2761,55 @@
         </div>
     </div>
 
-    <script>
+    <!-- 加号功能模态框（从底部弹出） -->
+    <div class="modal-overlay" id="plusActionModal">
+        <div class="modal-content">
+            <div class="action-card-header">
+                <span class="close-icon" id="closePlusModal"><i class="fa-solid fa-times"></i></span>
+            </div>
+            <div class="action-grid">
+                <div class="action-item" data-action="voice">
+                    <i class="fa-solid fa-microphone"></i>
+                    <span>语音</span>
+                </div>
+                <div class="action-item" data-action="transfer">
+                    <i class="fa-solid fa-money-bill"></i>
+                    <span>转账</span>
+                </div>
+                <div class="action-item" data-action="intimate">
+                    <i class="fa-solid fa-heart"></i>
+                    <span>亲密付</span>
+                </div>
+                <div class="action-item" data-action="voiceCall">
+                    <i class="fa-solid fa-phone"></i>
+                    <span>语音通话</span>
+                </div>
+                <div class="action-item" data-action="replay">
+                    <i class="fa-solid fa-undo-alt"></i>
+                    <span>重回</span>
+                </div>
+                <div class="action-item" data-action="location">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span>定位</span>
+                </div>
+                <div class="action-item" data-action="theater">
+                    <i class="fa-solid fa-masks-theater"></i>
+                    <span>小剧场模式</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 长按消息操作菜单 -->
+    <div class="modal-overlay" id="messageActionModal">
+        <div class="modal-content">
+            <div class="action-card">
+                <div class="action-row" id="messageActionsRow1"></div>
+                <div class="action-row" id="messageActionsRow2"></div>
+                <div class="cancel-btn" id="cancelMessageAction">取消</div>
+            </div>
+        </div>
+    </div>    <script>
         // ==================== 常量定义 ====================
         const BACKEND_URL = ''; // 如果前后端同域，留空即可。否则替换为您的后端地址
         const TOAST_DURATION = 3000; // 延长提示时间
@@ -3129,7 +3354,9 @@
                     Utils.showToast('清除失败：' + err.message, 3000);
                 }
             }
-        };        // ==================== 朋友圈模块 ====================
+        };
+
+        // ==================== 朋友圈模块 ====================
         const PostManager = {
             tempImages: [],
 
@@ -4084,6 +4311,8 @@
         const ChatHandler = {
             currentVisibleStart: 0, currentVisibleEnd: 0, isLoadingMore: false, prevStart: 0,
             longPressTimer: null,
+            isMultiSelectMode: false,
+            selectedMessages: new Set(),
 
             addMessageToCurrent(text, isUser, isSystem = false, type = 'text') {
                 const contact = DataManager.getCurrentContact();
@@ -4236,11 +4465,14 @@
                 UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
                 document.getElementById('contactListPage').style.display = 'none'; document.getElementById('chatDetailPage').style.display = 'flex'; document.getElementById('contactOptionsPage').style.display = 'none';
                 requestAnimationFrame(() => { const area = document.getElementById('messageArea'); if (area) area.scrollTop = area.scrollHeight; });
+                // 退出多选模式
+                this.exitMultiSelectMode();
             },
 
             showContactList() {
                 document.getElementById('contactListPage').style.display = 'flex'; document.getElementById('chatDetailPage').style.display = 'none'; document.getElementById('contactOptionsPage').style.display = 'none';
                 UIManager.renderContactList();
+                this.exitMultiSelectMode();
             },
 
             showContactOptions() {
@@ -4257,6 +4489,7 @@
                 UIManager.updateContactChatBgPreview();
                 UIManager.updateContactBubbleCssInput();
                 UIManager.updateContactOptionsAvatar();
+                this.exitMultiSelectMode();
             },
 
             deleteContact(id) {
@@ -4302,18 +4535,149 @@
                 Utils.showToast('已撤回', 1500);
             },
 
+            deleteMessage(index) {
+                const contact = DataManager.getCurrentContact();
+                contact.messages.splice(index, 1);
+                DataManager.saveContacts();
+                UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
+                Utils.showToast('已删除', 1500);
+            },
+
+            quoteMessage(content) {
+                const messageInput = document.getElementById('messageInput');
+                messageInput.value = `[引用] ${content}`;
+                messageInput.focus();
+            },
+
+            // 长按处理
             handleLongPressStart(e, index) {
                 if (this.longPressTimer) clearTimeout(this.longPressTimer);
-                const row = e.currentTarget;
+                if (this.isMultiSelectMode) return; // 多选模式不触发长按
                 const msg = DataManager.getCurrentContact().messages[index];
-                if (!msg || msg.role !== 'user' || Utils.isRecallMessage(msg)) return;
+                if (!msg || Utils.isRecallMessage(msg)) return;
                 this.longPressTimer = setTimeout(() => {
-                    if (confirm('确定要撤回这条消息吗？')) this.recallMessage(index);
+                    this.showMessageActionModal(index);
                     this.longPressTimer = null;
                 }, 500);
             },
 
-            handleLongPressEnd() { if (this.longPressTimer) { clearTimeout(this.longPressTimer); this.longPressTimer = null; } }
+            handleLongPressEnd() {
+                if (this.longPressTimer) {
+                    clearTimeout(this.longPressTimer);
+                    this.longPressTimer = null;
+                }
+            },
+
+            showMessageActionModal(index) {
+                const msg = DataManager.getCurrentContact().messages[index];
+                if (!msg) return;
+                const isUser = msg.role === 'user';
+                const row1 = document.getElementById('messageActionsRow1');
+                const row2 = document.getElementById('messageActionsRow2');
+                row1.innerHTML = '';
+                row2.innerHTML = '';
+
+                // 第一行
+                if (isUser) {
+                    row1.innerHTML += `<div class="action-btn" data-action="recall" data-index="${index}"><i class="fa-solid fa-undo"></i><span>撤回</span></div>`;
+                } else {
+                    row1.innerHTML += `<div class="action-btn" data-action="quote" data-index="${index}"><i class="fa-solid fa-quote-right"></i><span>引用</span></div>`;
+                }
+                row1.innerHTML += `<div class="action-btn" data-action="delete" data-index="${index}"><i class="fa-solid fa-trash-can"></i><span>删除</span></div>`;
+                // 第二行
+                row2.innerHTML = `<div class="action-btn" data-action="multiselect" data-index="${index}"><i class="fa-solid fa-check-double"></i><span>多选</span></div>`;
+
+                // 绑定事件
+                row1.querySelectorAll('.action-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const action = btn.dataset.action;
+                        const idx = parseInt(btn.dataset.index);
+                        document.getElementById('messageActionModal').classList.remove('active');
+                        if (action === 'recall') {
+                            if (confirm('确定要撤回这条消息吗？')) this.recallMessage(idx);
+                        } else if (action === 'delete') {
+                            if (confirm('确定要删除这条消息吗？')) this.deleteMessage(idx);
+                        } else if (action === 'quote') {
+                            const content = DataManager.getCurrentContact().messages[idx].content;
+                            this.quoteMessage(content);
+                        }
+                    });
+                });
+                row2.querySelectorAll('.action-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const idx = parseInt(btn.dataset.index);
+                        document.getElementById('messageActionModal').classList.remove('active');
+                        this.enterMultiSelectMode(idx);
+                    });
+                });
+
+                document.getElementById('messageActionModal').classList.add('active');
+            },
+
+            // 多选模式
+            enterMultiSelectMode(startIndex) {
+                this.isMultiSelectMode = true;
+                this.selectedMessages.clear();
+                this.selectedMessages.add(startIndex);
+                this.updateMultiSelectBar();
+                this.highlightSelectedMessages();
+            },
+
+            exitMultiSelectMode() {
+                this.isMultiSelectMode = false;
+                this.selectedMessages.clear();
+                document.getElementById('multiSelectBar').classList.remove('active');
+                document.querySelectorAll('.message').forEach(msg => msg.classList.remove('selected'));
+            },
+
+            toggleMessageSelection(index) {
+                if (!this.isMultiSelectMode) return;
+                if (this.selectedMessages.has(index)) {
+                    this.selectedMessages.delete(index);
+                } else {
+                    this.selectedMessages.add(index);
+                }
+                this.updateMultiSelectBar();
+                this.highlightSelectedMessages();
+            },
+
+            updateMultiSelectBar() {
+                const bar = document.getElementById('multiSelectBar');
+                const countSpan = document.getElementById('selectCount');
+                const count = this.selectedMessages.size;
+                if (count > 0) {
+                    bar.classList.add('active');
+                    countSpan.textContent = `已选择 ${count} 条`;
+                } else {
+                    bar.classList.remove('active');
+                }
+            },
+
+            highlightSelectedMessages() {
+                document.querySelectorAll('.message').forEach(msg => {
+                    const index = parseInt(msg.dataset.index);
+                    if (this.selectedMessages.has(index)) {
+                        msg.classList.add('selected');
+                    } else {
+                        msg.classList.remove('selected');
+                    }
+                });
+            },
+
+            deleteSelectedMessages() {
+                if (this.selectedMessages.size === 0) return;
+                if (!confirm(`确定删除选中的 ${this.selectedMessages.size} 条消息吗？`)) return;
+                const contact = DataManager.getCurrentContact();
+                // 从后往前删除避免索引变化
+                const indices = Array.from(this.selectedMessages).sort((a,b) => b - a);
+                for (let idx of indices) {
+                    contact.messages.splice(idx, 1);
+                }
+                DataManager.saveContacts();
+                this.exitMultiSelectMode();
+                UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
+                Utils.showToast('已删除', 1500);
+            }
         };
 
         // ==================== 配置处理模块 ====================
@@ -4752,6 +5116,15 @@
             const messageArea = document.getElementById('messageArea');
             messageArea.addEventListener('scroll', () => { if (messageArea.scrollTop < 100 && !ChatHandler.isLoadingMore) ChatHandler.loadMoreMessages(); });
 
+            // 点击消息用于多选
+            messageArea.addEventListener('click', (e) => {
+                if (!ChatHandler.isMultiSelectMode) return;
+                const msgRow = e.target.closest('.message');
+                if (!msgRow) return;
+                const index = parseInt(msgRow.dataset.index);
+                ChatHandler.toggleMessageSelection(index);
+            });
+
             // 图片选择按钮（从相册）
             document.getElementById('imageBtn').addEventListener('click', () => {
                 const fileInput = document.createElement('input'); fileInput.type = 'file'; fileInput.accept = 'image/*'; fileInput.style.display = 'none'; document.body.appendChild(fileInput);
@@ -4759,25 +5132,68 @@
                 fileInput.addEventListener('change', (e) => { const file = e.target.files[0]; if (file) ChatHandler.sendImage(file); document.body.removeChild(fileInput); });
             });
 
-            // ========== 新增：相机拍照按钮（适配移动端/桌面） ==========
+            // 相机拍照按钮
             document.getElementById('cameraBtn').addEventListener('click', () => {
                 const cameraInput = document.createElement('input');
                 cameraInput.type = 'file';
                 cameraInput.accept = 'image/*';
-                // 添加 capture 属性：移动设备上直接打开相机；桌面设备仍显示文件选择（合理降级）
-                cameraInput.capture = 'environment'; // 后置摄像头，如需前置可改为 'user'
+                cameraInput.capture = 'environment';
                 cameraInput.style.display = 'none';
                 document.body.appendChild(cameraInput);
 
                 cameraInput.addEventListener('change', (e) => {
                     const file = e.target.files[0];
                     if (file) {
-                        ChatHandler.sendImage(file); // 复用现有的图片发送逻辑
+                        ChatHandler.sendImage(file);
                     }
                     document.body.removeChild(cameraInput);
                 });
 
                 cameraInput.click();
+            });
+
+            // 加号按钮打开功能模态框
+            document.getElementById('plusActionBtn').addEventListener('click', () => {
+                document.getElementById('plusActionModal').classList.add('active');
+            });
+
+            // 关闭加号模态框（点击关闭图标）
+            document.getElementById('closePlusModal').addEventListener('click', () => {
+                document.getElementById('plusActionModal').classList.remove('active');
+            });
+            // 点击遮罩关闭
+            document.getElementById('plusActionModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('plusActionModal')) {
+                    document.getElementById('plusActionModal').classList.remove('active');
+                }
+            });
+
+            // 为 action-item 添加占位点击事件（包括新增的定位和小剧场）
+            document.querySelectorAll('#plusActionModal .action-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const action = item.dataset.action;
+                    Utils.showToast(`功能 ${action} 开发中`);
+                    // 可选：不关闭模态框，或者关闭
+                    // document.getElementById('plusActionModal').classList.remove('active');
+                });
+            });
+
+            // 长按消息操作菜单关闭
+            document.getElementById('cancelMessageAction').addEventListener('click', () => {
+                document.getElementById('messageActionModal').classList.remove('active');
+            });
+            document.getElementById('messageActionModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('messageActionModal')) {
+                    document.getElementById('messageActionModal').classList.remove('active');
+                }
+            });
+
+            // 多选操作栏
+            document.getElementById('deleteSelectedBtn').addEventListener('click', () => {
+                ChatHandler.deleteSelectedMessages();
+            });
+            document.getElementById('cancelMultiSelectBtn').addEventListener('click', () => {
+                ChatHandler.exitMultiSelectMode();
             });
 
             document.getElementById('homeButton').addEventListener('click', hideAllAppViews);
