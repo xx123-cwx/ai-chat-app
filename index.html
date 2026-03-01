@@ -402,12 +402,48 @@
             padding-bottom: 16px;
         }
 
-        /* ===== 仿LINE最新版联系人列表样式 ===== */
+        /* ===== 联系人列表页布局（重要：确保滚动正确）===== */
+        #contactListPage {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 0; /* 允许flex子项收缩 */
+        }
+
+        .tab-content {
+            flex: 1;
+            min-height: 0; /* 关键：防止内容撑开 */
+            position: relative;
+        }
+
+        /* 每个标签页容器 */
+        #chatsTab, #friendsTab, #dynamicTab {
+            height: 100%;
+            overflow: hidden; /* 内部滚动由子元素控制 */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 聊天和好友列表滚动区域 */
         .contact-list {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
             background: #fff;
         }
+
+        /* 动态页滚动区域 */
+        .moments-list {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+            padding: 12px;
+            background: #f5f5f5;
+        }
+
         /* 用户个人资料区域 */
         .user-profile {
+            flex-shrink: 0; /* 防止被压缩 */
             display: flex;
             align-items: center;
             padding: 16px;
@@ -465,6 +501,7 @@
             padding: 12px 16px;
             background: #ffffff;
             border-bottom: 1px solid #f0f0f0;
+            flex-shrink: 0;
         }
         .chats-header-left {
             display: flex;
@@ -505,6 +542,7 @@
             padding: 8px 16px;
             background: #f5f5f5;
             border-bottom: 1px solid #f0f0f0;
+            flex-shrink: 0;
         }
         .search-container i {
             font-size: 16px;
@@ -531,7 +569,7 @@
             background: #ffffff;
             border-top: 1px solid #f0f0f0;
             border-bottom: none;
-            margin-top: auto;
+            flex-shrink: 0;
         }
         .tab-item {
             flex: 1;
@@ -552,11 +590,6 @@
         .tab-item.active {
             color: #06c755;
             font-weight: 500;
-        }
-        .tab-content {
-            flex: 1;
-            overflow-y: auto;
-            background: #fff;
         }
         .contact-item {
             display: flex;
@@ -779,6 +812,7 @@
             padding: 12px 16px;
             background-color: transparent;
             color: #000;
+            flex-shrink: 0;
         }
         .header-left {
             display: flex;
@@ -812,6 +846,7 @@
             -webkit-overflow-scrolling: touch;
             background: #87CEFA;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%2387CEFA"/><circle cx="20" cy="20" r="15" fill="%23fff" opacity="0.1"/><circle cx="80" cy="80" r="20" fill="%23fff" opacity="0.1"/></svg>');
+            min-height: 0;
         }
 
         .message {
@@ -982,9 +1017,8 @@
             flex: 1;
             padding: 20px 16px;
             background: #f5f5f5;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+            overflow-y: auto;
+            min-height: 0;
         }
         /* AI角色头像卡片（可点击） */
         .ai-avatar-card {
@@ -1106,6 +1140,7 @@
             padding: 16px;
             background: #f5f5f5;
             overflow-y: auto;
+            min-height: 0;
         }
         .beautify-section {
             background: white;
@@ -1202,6 +1237,7 @@
             padding: 12px 16px;
             background: white;
             border-bottom: 1px solid #f0f0f0;
+            flex-shrink: 0;
         }
         .app-header .back-btn {
             margin-right: 12px;
@@ -1220,6 +1256,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 0;
         }
         .profile-avatar {
             width: 100px;
@@ -1297,6 +1334,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 0;
         }
         .archive-field {
             width: 100%;
@@ -1331,6 +1369,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            min-height: 0;
         }
         .decorate-placeholder {
             color: #999;
@@ -1343,6 +1382,7 @@
             padding: 16px;
             background: #f5f5f5;
             overflow-y: auto;
+            min-height: 0;
         }
         .worldbook-header {
             display: flex;
@@ -1485,12 +1525,20 @@
             cursor: pointer;
             backdrop-filter: blur(2px);
         }
+
+        /* 确保动态列表可滚动 */
+        #dynamicTab {
+            overflow: hidden;
+            min-height: 0;
+        }
         .moments-list {
             flex: 1;
             overflow-y: auto;
+            min-height: 0;
             padding: 12px;
             background: #f5f5f5;
         }
+
         .moment-item {
             background: white;
             border-radius: 12px;
@@ -1699,7 +1747,7 @@
         <!-- 联系人应用 -->
         <div class="app-view" id="chatView">
             <!-- 联系人列表页 -->
-            <div id="contactListPage" style="display:flex; flex-direction:column; flex:1;">
+            <div id="contactListPage">
                 <!-- 用户个人资料区域 -->
                 <div class="user-profile" id="userProfileArea">
                     <div class="user-info">
@@ -3556,7 +3604,7 @@
             }
         };
 
-        // ==================== 聊天处理模块 ====================
+        // ==================== 聊天处理模块（重要修改：回车不触发AI，话筒触发AI） ====================
         const ChatHandler = {
             currentVisibleStart: 0, currentVisibleEnd: 0, isLoadingMore: false, prevStart: 0,
             longPressTimer: null,
@@ -3607,48 +3655,79 @@
                 reader.readAsDataURL(file);
             },
 
+            // 话筒点击时触发：发送输入框消息（如果有）并请求AI回复，同时支持朋友圈命令
             async handleSendWithAI() {
                 const messageInput = document.getElementById('messageInput');
                 const recordBtn = document.getElementById('recordBtn');
                 const loadingIndicator = document.getElementById('loadingIndicator');
                 const text = messageInput.value.trim();
-                if (!text) return;
-
-                // 检测命令：让当前 AI 角色发布朋友圈
-                if (text === '发朋友圈' || text === '发布一条朋友圈' || text.startsWith('/post')) {
-                    messageInput.value = '';
-                    const contact = DataManager.getCurrentContact();
-                    const customPrompt = text.replace(/^(发朋友圈|发布一条朋友圈|\/post)/, '').trim();
-                    await PostManager.generateAIPost(contact.id, customPrompt || '');
-                    return;
-                }
 
                 const contact = DataManager.getCurrentContact();
                 if (contact.blocked) { Utils.showToast('你已将对方拉黑，无法发送消息'); return; }
+
+                // 检测命令：让当前 AI 角色发布朋友圈（无论输入框是否有内容，只要匹配就执行）
+                if (text && (text === '发朋友圈' || text === '发布一条朋友圈' || text.startsWith('/post'))) {
+                    messageInput.value = '';
+                    const customPrompt = text.replace(/^(发朋友圈|发布一条朋友圈|\/post)/, '').trim();
+                    // 先执行发朋友圈
+                    await PostManager.generateAIPost(contact.id, customPrompt || '');
+                    // 注意：这里不return，继续触发普通回复，但不会添加命令消息
+                }
+
+                // 如果输入框有内容，先发送用户消息（不请求AI）
+                if (text) {
+                    // 复用已有方法发送消息，它会清空输入框
+                    this.sendOnlyMessage();
+                }
+
+                // 准备请求 AI 回复
                 let config;
                 if (contact.configId) {
                     config = DataManager.apiConfigs.find(c => c.id === contact.configId);
                     if (!config) { Utils.showToast('联系人关联的API配置不存在，请重新选择'); return; }
-                } else config = DataManager.getActiveConfig();
-                if (!config.base_url || !config.api_key || !config.currentModel) { Utils.showToast('请先在设置中配置并激活一个有效的API配置，并拉取模型'); return; }
-                messageInput.disabled = true; recordBtn.style.pointerEvents = 'none'; recordBtn.style.opacity = '0.5'; loadingIndicator.style.display = 'flex';
+                } else {
+                    config = DataManager.getActiveConfig();
+                }
+                if (!config.base_url || !config.api_key || !config.currentModel) {
+                    Utils.showToast('请先在设置中配置并激活一个有效的API配置，并拉取模型');
+                    return;
+                }
+
+                // 显示加载状态
+                messageInput.disabled = true;
+                recordBtn.style.pointerEvents = 'none';
+                recordBtn.style.opacity = '0.5';
+                loadingIndicator.style.display = 'flex';
+
                 const now = new Date();
                 const timeInfo = `当前现实时间是：${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
                 const userInfo = `用户信息：真名：${DataManager.userProfile.realName || '未填写'}，地址：${DataManager.userProfile.address || '未填写'}，LINE号码：${DataManager.userProfile.lineId || '未填写'}，个性签名：${DataManager.userProfile.bio || '未填写'}，用户设定：${DataManager.userProfile.userSetting || '未填写'}`;
                 const worldBooks = DataManager.getWorldBooksForContact(contact.id);
                 const worldBookContent = worldBooks.map(w => `【${w.name}】\n${w.content}`).join('\n\n');
                 const worldBookInfo = worldBookContent ? `世界书规则：\n${worldBookContent}` : '';
-                this.addMessageToCurrent(text, true, false, 'text');
-                messageInput.value = '';
+
+                // 构建系统消息
                 const systemMessages = [
-                    { role: 'system', content: timeInfo }, { role: 'system', content: userInfo }, { role: 'system', content: contact.personality }
+                    { role: 'system', content: timeInfo },
+                    { role: 'system', content: userInfo },
+                    { role: 'system', content: contact.personality }
                 ];
                 if (worldBookInfo) systemMessages.push({ role: 'system', content: worldBookInfo });
-                const messages = [ ...systemMessages, ...contact.messages.filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.content })) ];
+
+                // 从联系人历史中提取所有非系统消息（用户和助手）
+                const historyMessages = contact.messages.filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.content }));
+                const messages = [...systemMessages, ...historyMessages];
+
                 try {
                     const response = await fetch(`${BACKEND_URL}/api/chat`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ base_url: config.base_url, api_key: config.api_key, model: config.currentModel, messages })
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            base_url: config.base_url,
+                            api_key: config.api_key,
+                            model: config.currentModel,
+                            messages
+                        })
                     });
                     if (!response.ok) {
                         if (response.status === 429) throw new Error(API_ERRORS[429]);
@@ -3665,7 +3744,10 @@
                     this.addMessageToCurrent('请求失败：' + errorMsg, false, false, 'text');
                     Utils.showToast(errorMsg, 3000);
                 } finally {
-                    messageInput.disabled = false; recordBtn.style.pointerEvents = 'auto'; recordBtn.style.opacity = '1'; loadingIndicator.style.display = 'none';
+                    messageInput.disabled = false;
+                    recordBtn.style.pointerEvents = 'auto';
+                    recordBtn.style.opacity = '1';
+                    loadingIndicator.style.display = 'none';
                 }
             },
 
@@ -4280,7 +4362,14 @@
             });
 
             const messageInput = document.getElementById('messageInput');
-            messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); ChatHandler.sendOnlyMessage(); } });
+            // 回车只发送消息，不触发AI
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    ChatHandler.sendOnlyMessage();
+                }
+            });
+            // 话筒点击触发AI回复
             document.getElementById('recordBtn').addEventListener('click', () => ChatHandler.handleSendWithAI());
 
             document.getElementById('messageArea').addEventListener('touchstart', (e) => {
