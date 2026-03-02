@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>phone</title>
+    <title>AI角色 · 完整版（AI日常状态增强）</title>
     <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -1948,7 +1948,7 @@
             display: block;
         }
 
-        /* ===== 加号功能模态框 - 卡片样式（仿桌面小组件，从底部弹出） ===== */
+        /* ===== 加号功能模态框 - 卡片样式（仿桌面小组件，从输入框上方弹出） ===== */
         #plusActionModal .modal-content {
             background: rgba(255,255,255,0.2);
             backdrop-filter: blur(15px);
@@ -1961,9 +1961,9 @@
             border-radius: 20px;
             padding: 0;
             overflow: hidden;
-            /* 从底部弹出 */
+            /* 从输入框上方弹出 */
             position: absolute;
-            bottom: 20px;
+            bottom: 80px; /* 输入区域高度约60px，稍高一些 */
             left: 50%;
             transform: translateX(-50%);
         }
@@ -2011,70 +2011,33 @@
             color: white;
         }
 
-        /* ===== 长按消息操作菜单 ===== */
-        #messageActionModal .modal-content {
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.3);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            color: white;
-            max-width: 400px;
-            width: 90%;
-            border-radius: 20px;
-            padding: 0;
-            overflow: hidden;
+        /* ===== 长按消息浮动菜单（类似微信） ===== */
+        .message-float-menu {
             position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        .action-card {
-            display: flex;
-            flex-direction: column;
-            padding: 16px;
-        }
-        .action-row {
-            display: flex;
-            justify-content: space-around;
-            margin: 8px 0;
-        }
-        .action-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            color: white;
-            padding: 10px;
-            transition: background 0.2s;
+            background: rgba(50, 50, 50, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: 8px;
-            flex: 1;
-        }
-        .action-btn i {
-            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             color: white;
+            z-index: 1000;
+            min-width: 150px;
+            overflow: hidden;
+            padding: 4px 0;
         }
-        .action-btn span {
-            font-size: 12px;
-        }
-        .action-btn:hover {
-            background: rgba(255,255,255,0.2);
-        }
-        .cancel-btn {
-            margin-top: 12px;
-            padding: 12px;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            border-radius: 8px;
-            color: white;
+        .message-float-menu .menu-item {
+            padding: 12px 16px;
             font-size: 16px;
             cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
             text-align: center;
+            transition: background 0.2s;
         }
-        .cancel-btn:hover {
-            background: rgba(255,255,255,0.3);
+        .message-float-menu .menu-item:last-child {
+            border-bottom: none;
+        }
+        .message-float-menu .menu-item:hover {
+            background: rgba(255,255,255,0.2);
         }
 
         /* ===== 多选操作栏 ===== */
@@ -2188,7 +2151,7 @@
 
                     <!-- 左侧应用网格（两行两列） -->
                     <div class="app-grid-left">
-                        <div class="app-icon" data-app="app4" draggable="false"><div class="icon-bg" id="icon-app4"><i class="fa-solid fa-mobile-screen"></i></div><span class="app-label">应用4</span></div>
+                        <div class="app-icon" data-app="app4" draggable="false"><div class="icon-bg" id="icon-app4"><i class="fa-solid fa-heart"></i></div><span class="app-label">情侣空间</span></div>
                         <div class="app-icon" data-app="music" draggable="false"><div class="icon-bg" id="icon-music"><i class="fa-solid fa-music"></i></div><span class="app-label">音乐</span></div>
                         <div class="app-icon" data-app="video" draggable="false"><div class="icon-bg" id="icon-video"><i class="fa-solid fa-video"></i></div><span class="app-label">视频</span></div>
                         <div class="app-icon" data-app="calculator" draggable="false"><div class="icon-bg" id="icon-calculator"><i class="fa-solid fa-calculator"></i></div><span class="app-label">计算器</span></div>
@@ -2761,7 +2724,7 @@
         </div>
     </div>
 
-    <!-- 加号功能模态框（从底部弹出） -->
+    <!-- 加号功能模态框（从输入框上方弹出） -->
     <div class="modal-overlay" id="plusActionModal">
         <div class="modal-content">
             <div class="action-card-header">
@@ -2800,16 +2763,8 @@
         </div>
     </div>
 
-    <!-- 长按消息操作菜单 -->
-    <div class="modal-overlay" id="messageActionModal">
-        <div class="modal-content">
-            <div class="action-card">
-                <div class="action-row" id="messageActionsRow1"></div>
-                <div class="action-row" id="messageActionsRow2"></div>
-                <div class="cancel-btn" id="cancelMessageAction">取消</div>
-            </div>
-        </div>
-    </div>    <script>
+    <!-- 长按消息浮动菜单（类似微信） -->
+    <div class="message-float-menu" id="messageFloatMenu" style="display: none;"></div>    <script>
         // ==================== 常量定义 ====================
         const BACKEND_URL = ''; // 如果前后端同域，留空即可。否则替换为您的后端地址
         const TOAST_DURATION = 3000; // 延长提示时间
@@ -4027,7 +3982,7 @@
                 const appList = [
                     { key: 'chat', name: '信息', defaultIcon: 'fa-comment-dots' }, { key: 'settings', name: '设置', defaultIcon: 'fa-gear' },
                     { key: 'worldbook', name: '世界书', defaultIcon: 'fa-book-open' }, { key: 'beautify', name: '美化', defaultIcon: 'fa-palette' },
-                    { key: 'app4', name: '应用4', defaultIcon: 'fa-mobile-screen' }, { key: 'music', name: '音乐', defaultIcon: 'fa-music' },
+                    { key: 'app4', name: '情侣空间', defaultIcon: 'fa-heart' }, { key: 'music', name: '音乐', defaultIcon: 'fa-music' },
                     { key: 'video', name: '视频', defaultIcon: 'fa-video' }, { key: 'calculator', name: '计算器', defaultIcon: 'fa-calculator' },
                     { key: 'browser', name: '浏览器', defaultIcon: 'fa-globe' }, { key: 'phone', name: '电话', defaultIcon: 'fa-phone' }
                 ];
@@ -4096,7 +4051,7 @@
                 const appList = [
                     { key: 'chat', defaultIcon: 'fa-comment-dots' }, { key: 'settings', defaultIcon: 'fa-gear' },
                     { key: 'worldbook', defaultIcon: 'fa-book-open' }, { key: 'beautify', defaultIcon: 'fa-palette' },
-                    { key: 'app4', defaultIcon: 'fa-mobile-screen' }, { key: 'music', defaultIcon: 'fa-music' },
+                    { key: 'app4', defaultIcon: 'fa-heart' }, { key: 'music', defaultIcon: 'fa-music' },
                     { key: 'video', defaultIcon: 'fa-video' }, { key: 'calculator', defaultIcon: 'fa-calculator' },
                     { key: 'browser', defaultIcon: 'fa-globe' }, { key: 'phone', defaultIcon: 'fa-phone' }
                 ];
@@ -4524,12 +4479,19 @@
                 this.isLoadingMore = false;
             },
 
+            // 撤回消息（区分用户和对方）
             recallMessage(index) {
                 const contact = DataManager.getCurrentContact();
                 const msg = contact.messages[index];
-                if (!msg || msg.role !== 'user') return;
+                if (!msg) return;
                 if (Utils.isRecallMessage(msg)) return;
-                msg.type = 'recall'; msg.content = '您撤回了一条消息';
+                msg.type = 'recall';
+                // 根据消息角色设置撤回提示
+                if (msg.role === 'user') {
+                    msg.content = '您撤回了一条消息';
+                } else {
+                    msg.content = '对方撤回了一条消息';
+                }
                 DataManager.saveContacts();
                 UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
                 Utils.showToast('已撤回', 1500);
@@ -4549,14 +4511,14 @@
                 messageInput.focus();
             },
 
-            // 长按处理
+            // 长按处理 - 显示浮动菜单
             handleLongPressStart(e, index) {
                 if (this.longPressTimer) clearTimeout(this.longPressTimer);
                 if (this.isMultiSelectMode) return; // 多选模式不触发长按
                 const msg = DataManager.getCurrentContact().messages[index];
                 if (!msg || Utils.isRecallMessage(msg)) return;
                 this.longPressTimer = setTimeout(() => {
-                    this.showMessageActionModal(index);
+                    this.showFloatMenu(e, index);
                     this.longPressTimer = null;
                 }, 500);
             },
@@ -4568,50 +4530,101 @@
                 }
             },
 
-            showMessageActionModal(index) {
+            // 显示浮动菜单
+            showFloatMenu(event, index) {
                 const msg = DataManager.getCurrentContact().messages[index];
                 if (!msg) return;
+
+                const menu = document.getElementById('messageFloatMenu');
+                menu.innerHTML = ''; // 清空
+
+                // 根据消息角色添加菜单项
                 const isUser = msg.role === 'user';
-                const row1 = document.getElementById('messageActionsRow1');
-                const row2 = document.getElementById('messageActionsRow2');
-                row1.innerHTML = '';
-                row2.innerHTML = '';
 
-                // 第一行
-                if (isUser) {
-                    row1.innerHTML += `<div class="action-btn" data-action="recall" data-index="${index}"><i class="fa-solid fa-undo"></i><span>撤回</span></div>`;
-                } else {
-                    row1.innerHTML += `<div class="action-btn" data-action="quote" data-index="${index}"><i class="fa-solid fa-quote-right"></i><span>引用</span></div>`;
+                // 撤回（所有消息都提供撤回）
+                const recallItem = document.createElement('div');
+                recallItem.className = 'menu-item';
+                recallItem.textContent = '撤回';
+                recallItem.dataset.action = 'recall';
+                recallItem.dataset.index = index;
+                menu.appendChild(recallItem);
+
+                // 删除
+                const deleteItem = document.createElement('div');
+                deleteItem.className = 'menu-item';
+                deleteItem.textContent = '删除';
+                deleteItem.dataset.action = 'delete';
+                deleteItem.dataset.index = index;
+                menu.appendChild(deleteItem);
+
+                // 多选
+                const multiItem = document.createElement('div');
+                multiItem.className = 'menu-item';
+                multiItem.textContent = '多选';
+                multiItem.dataset.action = 'multiselect';
+                multiItem.dataset.index = index;
+                menu.appendChild(multiItem);
+
+                // 翻译
+                const translateItem = document.createElement('div');
+                translateItem.className = 'menu-item';
+                translateItem.textContent = '翻译';
+                translateItem.dataset.action = 'translate';
+                translateItem.dataset.index = index;
+                menu.appendChild(translateItem);
+
+                // 如果是AI消息，添加引用（可选）
+                if (!isUser) {
+                    const quoteItem = document.createElement('div');
+                    quoteItem.className = 'menu-item';
+                    quoteItem.textContent = '引用';
+                    quoteItem.dataset.action = 'quote';
+                    quoteItem.dataset.index = index;
+                    menu.appendChild(quoteItem);
                 }
-                row1.innerHTML += `<div class="action-btn" data-action="delete" data-index="${index}"><i class="fa-solid fa-trash-can"></i><span>删除</span></div>`;
-                // 第二行
-                row2.innerHTML = `<div class="action-btn" data-action="multiselect" data-index="${index}"><i class="fa-solid fa-check-double"></i><span>多选</span></div>`;
 
-                // 绑定事件
-                row1.querySelectorAll('.action-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const action = btn.dataset.action;
-                        const idx = parseInt(btn.dataset.index);
-                        document.getElementById('messageActionModal').classList.remove('active');
+                // 绑定点击事件
+                menu.querySelectorAll('.menu-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        const action = item.dataset.action;
+                        const idx = parseInt(item.dataset.index);
+                        menu.style.display = 'none';
                         if (action === 'recall') {
                             if (confirm('确定要撤回这条消息吗？')) this.recallMessage(idx);
                         } else if (action === 'delete') {
                             if (confirm('确定要删除这条消息吗？')) this.deleteMessage(idx);
+                        } else if (action === 'multiselect') {
+                            this.enterMultiSelectMode(idx);
+                        } else if (action === 'translate') {
+                            Utils.showToast('翻译功能开发中');
                         } else if (action === 'quote') {
                             const content = DataManager.getCurrentContact().messages[idx].content;
                             this.quoteMessage(content);
                         }
                     });
                 });
-                row2.querySelectorAll('.action-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const idx = parseInt(btn.dataset.index);
-                        document.getElementById('messageActionModal').classList.remove('active');
-                        this.enterMultiSelectMode(idx);
-                    });
-                });
 
-                document.getElementById('messageActionModal').classList.add('active');
+                // 计算菜单位置
+                const targetRect = event.currentTarget.getBoundingClientRect();
+                const chatArea = document.getElementById('messageArea').getBoundingClientRect();
+                let top = targetRect.top - menu.offsetHeight - 10;
+                if (top < chatArea.top) {
+                    top = targetRect.bottom + 10;
+                }
+                menu.style.top = top + 'px';
+                menu.style.left = targetRect.left + 'px';
+                menu.style.display = 'block';
+
+                // 点击其他地方关闭菜单
+                const closeMenu = (e) => {
+                    if (!menu.contains(e.target)) {
+                        menu.style.display = 'none';
+                        document.removeEventListener('click', closeMenu);
+                    }
+                };
+                setTimeout(() => {
+                    document.addEventListener('click', closeMenu);
+                }, 0);
             },
 
             // 多选模式
@@ -5178,16 +5191,6 @@
                 });
             });
 
-            // 长按消息操作菜单关闭
-            document.getElementById('cancelMessageAction').addEventListener('click', () => {
-                document.getElementById('messageActionModal').classList.remove('active');
-            });
-            document.getElementById('messageActionModal').addEventListener('click', (e) => {
-                if (e.target === document.getElementById('messageActionModal')) {
-                    document.getElementById('messageActionModal').classList.remove('active');
-                }
-            });
-
             // 多选操作栏
             document.getElementById('deleteSelectedBtn').addEventListener('click', () => {
                 ChatHandler.deleteSelectedMessages();
@@ -5534,7 +5537,7 @@
                 const index = msgRow.dataset.index;
                 if (index !== undefined) {
                     const msg = DataManager.getCurrentContact().messages[index];
-                    if (msg && msg.role === 'user' && !Utils.isRecallMessage(msg) && confirm('确定要撤回这条消息吗？')) ChatHandler.recallMessage(parseInt(index));
+                    if (msg && !Utils.isRecallMessage(msg) && confirm('确定要撤回这条消息吗？')) ChatHandler.recallMessage(parseInt(index));
                 }
             });
 
