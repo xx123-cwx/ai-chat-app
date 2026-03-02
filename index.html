@@ -1100,8 +1100,7 @@
         .bubble-wrapper {
             position: relative;
             display: flex;
-            flex-direction: column;
-            align-items: flex-start;
+            align-items: center;
         }
 
         .msg-bubble {
@@ -1151,60 +1150,6 @@
             border-radius: 20px;
             max-width: 90%;
             margin: 8px 0;
-        }
-
-        /* 引用预览条（位于输入框上方） */
-        .quote-preview {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: #f0f0f0;
-            padding: 8px 12px;
-            border-left: 4px solid #07c160;
-            font-size: 14px;
-            color: #333;
-            border-radius: 8px;
-            margin: 0 12px 8px;
-        }
-        .quote-preview .quote-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1;
-        }
-        .quote-preview .quote-sender {
-            font-weight: 600;
-            color: #07c160;
-        }
-        .quote-preview .quote-text {
-            color: #666;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .quote-preview .close-btn {
-            font-size: 18px;
-            cursor: pointer;
-            color: #999;
-        }
-
-        /* 消息内的引用预览 */
-        .quote-bubble {
-            background-color: rgba(0,0,0,0.05);
-            border-left: 3px solid #888;
-            padding: 6px 10px;
-            font-size: 14px;
-            color: #666;
-            margin-top: 4px;
-            margin-bottom: 4px;
-            border-radius: 8px;
-            max-width: 100%;
-            word-break: break-word;
-        }
-        .message.me .quote-bubble {
-            background-color: rgba(255,255,255,0.2);
-            border-left-color: #fff;
-            color: rgba(255,255,255,0.9);
         }
 
         .input-area {
@@ -2342,14 +2287,6 @@
                     <button id="cancelMultiSelectBtn">取消</button>
                 </div>
             </div>
-            <!-- 引用预览条 -->
-            <div id="quotePreview" class="quote-preview" style="display: none;">
-                <div class="quote-info">
-                    <span class="quote-sender" id="quoteSender"></span>
-                    <span class="quote-text" id="quoteText"></span>
-                </div>
-                <span class="close-btn" id="cancelQuoteBtn">&times;</span>
-            </div>
             <div class="input-area">
                 <!-- 为加号图标添加 id -->
                 <span class="input-btn" id="plusActionBtn"><i class="fa-solid fa-plus"></i></span>
@@ -2386,6 +2323,9 @@
                 <button class="option-button" id="optionsPin">置顶联系人</button>
                 <button class="option-button" id="optionsRemark">修改备注名</button>
                 <button class="option-button" id="optionsEditPersona">编辑人设</button>
+
+                <!-- 翻译按钮（新增） -->
+                <button class="option-button" id="optionsTranslate">翻译</button>
 
                 <!-- 聊天背景设置 -->
                 <div class="chat-bg-settings">
@@ -2827,7 +2767,8 @@
     </div>
 
     <!-- 长按消息浮动菜单（类似微信） -->
-    <div class="message-float-menu" id="messageFloatMenu" style="display: none;"></div>    <script>
+    <div class="message-float-menu" id="messageFloatMenu" style="display: none;"></div>
+    <script>
         // ==================== 常量定义 ====================
         const BACKEND_URL = ''; // 如果前后端同域，留空即可。否则替换为您的后端地址
         const TOAST_DURATION = 3000;
@@ -3136,8 +3077,6 @@
                                 if (!msg.timestamp) {
                                     msg.timestamp = now - (c.messages.length - 1 - index) * 60000;
                                 }
-                                // 确保 quote 字段存在
-                                if (msg.quote === undefined) msg.quote = null;
                                 return msg;
                             });
                         }
@@ -3170,8 +3109,7 @@
                             role: 'assistant', 
                             type: 'text', 
                             content: '你好！我是你的AI助手，有什么可以帮你的？',
-                            timestamp: Date.now(),
-                            quote: null
+                            timestamp: Date.now()
                         }],
                         autoPostEnabled: false,
                         autoPostInterval: 1,
@@ -3980,14 +3918,6 @@
                         }
                         const bubbleWrapper = document.createElement('div'); bubbleWrapper.className = 'bubble-wrapper';
                         
-                        // 如果有引用内容，先显示引用气泡
-                        if (msg.quote) {
-                            const quoteDiv = document.createElement('div');
-                            quoteDiv.className = 'quote-bubble';
-                            quoteDiv.textContent = msg.quote;
-                            bubbleWrapper.appendChild(quoteDiv);
-                        }
-                        
                         const bubble = document.createElement('div'); bubble.className = 'msg-bubble';
                         if (msg.type === 'image') {
                             Utils.loadImageFromDB(msg.content).then(dataUrl => {
@@ -4343,12 +4273,11 @@
             longPressTimer: null,
             isMultiSelectMode: false,
             selectedMessages: new Set(),
-            pendingQuote: null, // 待发送的引用内容
 
-            addMessageToCurrent(text, isUser, isSystem = false, type = 'text', quote = null) {
+            addMessageToCurrent(text, isUser, isSystem = false, type = 'text') {
                 const contact = DataManager.getCurrentContact();
                 const role = isSystem ? 'system' : (isUser ? 'user' : 'assistant');
-                const msg = { role, type, content: text, timestamp: Date.now(), quote: quote };
+                const msg = { role, type, content: text, timestamp: Date.now() };
                 contact.messages.push(msg);
                 DataManager.saveContacts();
                 if (document.getElementById('chatDetailPage').style.display === 'flex') {
@@ -4373,14 +4302,7 @@
                 if (!text) return;
                 const contact = DataManager.getCurrentContact();
                 if (contact.blocked) { Utils.showToast('你已将对方拉黑，无法发送消息'); return; }
-                
-                // 如果有待引用的内容，一并发送
-                if (this.pendingQuote) {
-                    this.addMessageToCurrent(text, true, false, 'text', this.pendingQuote);
-                    this.cancelQuote(); // 清除引用
-                } else {
-                    this.addMessageToCurrent(text, true, false, 'text');
-                }
+                this.addMessageToCurrent(text, true, false, 'text');
                 messageInput.value = '';
             },
 
@@ -4395,9 +4317,7 @@
                         const compressedDataUrl = await Utils.compressImage(originalDataUrl, 800, 0.9);
                         const imageId = Utils.generateImageId('chat_img');
                         await Utils.saveImageToDB(imageId, compressedDataUrl);
-                        // 图片消息不支持引用（简化处理），如有引用可清空
-                        this.addMessageToCurrent(imageId, true, false, 'image', null);
-                        this.cancelQuote(); // 清空引用
+                        this.addMessageToCurrent(imageId, true, false, 'image');
                         Utils.showToast('图片发送成功', 1500);
                     } catch (err) { Utils.showToast('图片处理失败', 2000); }
                 };
@@ -4421,7 +4341,7 @@
                 }
 
                 if (text) {
-                    this.sendOnlyMessage(); // 该方法已处理引用
+                    this.sendOnlyMessage();
                 }
 
                 let config;
@@ -4507,15 +4427,12 @@
                 requestAnimationFrame(() => { const area = document.getElementById('messageArea'); if (area) area.scrollTop = area.scrollHeight; });
                 // 退出多选模式
                 this.exitMultiSelectMode();
-                // 清除引用
-                this.cancelQuote();
             },
 
             showContactList() {
                 document.getElementById('contactListPage').style.display = 'flex'; document.getElementById('chatDetailPage').style.display = 'none'; document.getElementById('contactOptionsPage').style.display = 'none';
                 UIManager.renderContactList();
                 this.exitMultiSelectMode();
-                this.cancelQuote();
             },
 
             showContactOptions() {
@@ -4533,7 +4450,6 @@
                 UIManager.updateContactBubbleCssInput();
                 UIManager.updateContactOptionsAvatar();
                 this.exitMultiSelectMode();
-                this.cancelQuote();
             },
 
             deleteContact(id) {
@@ -4581,7 +4497,6 @@
                 } else {
                     msg.content = '对方撤回了一条消息';
                 }
-                msg.quote = null; // 清除引用
                 DataManager.saveContacts();
                 UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
                 Utils.showToast('已撤回', 1500);
@@ -4593,22 +4508,6 @@
                 DataManager.saveContacts();
                 UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
                 Utils.showToast('已删除', 1500);
-            },
-
-            // 引用消息：显示预览条，设置 pendingQuote
-            quoteMessage(content, sender) {
-                const preview = document.getElementById('quotePreview');
-                const senderSpan = document.getElementById('quoteSender');
-                const textSpan = document.getElementById('quoteText');
-                senderSpan.textContent = sender;
-                textSpan.textContent = content;
-                preview.style.display = 'flex';
-                this.pendingQuote = content;
-            },
-
-            cancelQuote() {
-                this.pendingQuote = null;
-                document.getElementById('quotePreview').style.display = 'none';
             },
 
             // 长按处理 - 显示浮动菜单
@@ -4632,7 +4531,7 @@
                 }
             },
 
-            // 显示浮动菜单
+            // 显示浮动菜单（仅保留撤回、删除、多选）
             showFloatMenu(event, index) {
                 const msg = DataManager.getCurrentContact().messages[index];
                 if (!msg) return;
@@ -4640,9 +4539,7 @@
                 const menu = document.getElementById('messageFloatMenu');
                 menu.innerHTML = ''; // 清空
 
-                const isUser = msg.role === 'user';
-
-                // 撤回（所有消息都提供撤回）
+                // 撤回
                 const recallItem = document.createElement('div');
                 recallItem.className = 'menu-item';
                 recallItem.textContent = '撤回';
@@ -4666,24 +4563,6 @@
                 multiItem.dataset.index = index;
                 menu.appendChild(multiItem);
 
-                // 翻译
-                const translateItem = document.createElement('div');
-                translateItem.className = 'menu-item';
-                translateItem.textContent = '翻译';
-                translateItem.dataset.action = 'translate';
-                translateItem.dataset.index = index;
-                menu.appendChild(translateItem);
-
-                // 如果是AI消息，添加引用
-                if (!isUser) {
-                    const quoteItem = document.createElement('div');
-                    quoteItem.className = 'menu-item';
-                    quoteItem.textContent = '引用';
-                    quoteItem.dataset.action = 'quote';
-                    quoteItem.dataset.index = index;
-                    menu.appendChild(quoteItem);
-                }
-
                 // 绑定点击事件
                 menu.querySelectorAll('.menu-item').forEach(item => {
                     item.addEventListener('click', (e) => {
@@ -4696,13 +4575,6 @@
                             if (confirm('确定要删除这条消息吗？')) this.deleteMessage(idx);
                         } else if (action === 'multiselect') {
                             this.enterMultiSelectMode(idx);
-                        } else if (action === 'translate') {
-                            Utils.showToast('翻译功能开发中');
-                        } else if (action === 'quote') {
-                            const contact = DataManager.getCurrentContact();
-                            const msg = contact.messages[idx];
-                            const sender = msg.role === 'user' ? '我' : Utils.getDisplayName(contact);
-                            this.quoteMessage(msg.content, sender);
                         }
                     });
                 });
@@ -5289,8 +5161,6 @@
                 item.addEventListener('click', () => {
                     const action = item.dataset.action;
                     Utils.showToast(`功能 ${action} 开发中`);
-                    // 可选：不关闭模态框，或者关闭
-                    // document.getElementById('plusActionModal').classList.remove('active');
                 });
             });
 
@@ -5300,11 +5170,6 @@
             });
             document.getElementById('cancelMultiSelectBtn').addEventListener('click', () => {
                 ChatHandler.exitMultiSelectMode();
-            });
-
-            // 引用取消按钮
-            document.getElementById('cancelQuoteBtn').addEventListener('click', () => {
-                ChatHandler.cancelQuote();
             });
 
             document.getElementById('homeButton').addEventListener('click', hideAllAppViews);
@@ -5371,7 +5236,7 @@
                 DataManager.contacts.push({
                     id: newId, avatar: avatarId || '🤖', name, remark, personality: personality || '你是一个友好的AI助手。', configId,
                     blocked: false, pinned: false, muted: false, mutedLastMessage: '',
-                    messages: [{ role: 'assistant', type: 'text', content: `你好！我是${name}，很高兴认识你！`, timestamp: Date.now(), quote: null }],
+                    messages: [{ role: 'assistant', type: 'text', content: `你好！我是${name}，很高兴认识你！`, timestamp: Date.now() }],
                     autoPostEnabled: false,
                     autoPostInterval: 1,
                     lastAutoPostTime: 0,
@@ -5401,6 +5266,11 @@
 
             document.getElementById('optionsRemark').addEventListener('click', ModalHandler.openRemarkModal);
             document.getElementById('optionsEditPersona').addEventListener('click', ModalHandler.openEditPersonaModal);
+
+            // 翻译按钮（联系人选项）
+            document.getElementById('optionsTranslate').addEventListener('click', () => {
+                Utils.showToast('翻译功能开发中');
+            });
 
             const muteSwitch = document.getElementById('optionsMuteSwitch');
             muteSwitch.addEventListener('change', (e) => {
@@ -5487,7 +5357,7 @@
             });
             document.getElementById('optionsClear').addEventListener('click', () => {
                 const contact = DataManager.getCurrentContact();
-                if (confirm('确定清空所有聊天记录吗？')) { contact.messages = []; contact.messages.push({ role: 'system', type: 'text', content: '聊天记录已清空', timestamp: Date.now(), quote: null }); DataManager.saveContacts(); document.getElementById('contactListPage').style.display = 'none'; document.getElementById('contactOptionsPage').style.display = 'none'; document.getElementById('chatDetailPage').style.display = 'flex'; UIManager.renderMessages(contact.messages, 0, 0); }
+                if (confirm('确定清空所有聊天记录吗？')) { contact.messages = []; contact.messages.push({ role: 'system', type: 'text', content: '聊天记录已清空', timestamp: Date.now() }); DataManager.saveContacts(); document.getElementById('contactListPage').style.display = 'none'; document.getElementById('contactOptionsPage').style.display = 'none'; document.getElementById('chatDetailPage').style.display = 'flex'; UIManager.renderMessages(contact.messages, 0, 0); }
             });
 
             document.getElementById('closeRemarkModal').addEventListener('click', ModalHandler.closeRemarkModal);
