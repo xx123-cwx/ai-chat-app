@@ -1111,6 +1111,7 @@
             align-items: center;
         }
 
+        /* 文本消息气泡样式（恢复原始样式） */
         .msg-bubble {
             padding: 10px 14px;
             font-size: 16px;
@@ -1136,6 +1137,42 @@
             max-height: 200px;
             border-radius: 8px;
             display: block;
+        }
+
+        /* 微信风格语音气泡（独立样式，不继承文本气泡） */
+        .voice-bubble-wechat {
+            display: flex;
+            align-items: center;
+            min-width: 100px;
+            max-width: 200px;
+            padding: 8px 12px;
+            border-radius: 18px;
+            background-color: #fff; /* 对方气泡背景白色 */
+        }
+        .message.me .voice-bubble-wechat {
+            background-color: #95ec69; /* 自己气泡背景绿色 */
+        }
+        .voice-icon-wechat {
+            font-size: 20px;
+            margin-right: 8px;
+            color: #333;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .voice-icon-wechat:active {
+            transform: scale(0.9);
+        }
+        .message.me .voice-icon-wechat {
+            color: #fff;
+        }
+        .voice-duration-wechat {
+            font-size: 14px;
+            font-weight: 500;
+            margin-left: auto;
+            color: #666;
+        }
+        .message.me .voice-duration-wechat {
+            color: #fff;
         }
 
         .msg-time {
@@ -2081,7 +2118,7 @@
             color: #ff3b30;
         }
 
-        /* ===== 新增：编辑消息模态框 ===== */
+        /* ===== 编辑消息模态框 ===== */
         #editMessageModal .modal-content {
             max-width: 400px;
         }
@@ -2094,6 +2131,94 @@
             font-size: 16px;
             resize: vertical;
             margin-bottom: 20px;
+        }
+
+        /* ===== 新增：语音操作卡片（白色悬浮） ===== */
+        .voice-card {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 20px;
+            z-index: 1001;
+            display: none;
+        }
+        .voice-card.active {
+            display: block;
+        }
+        .voice-card-header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+        .voice-card-close {
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .voice-card-close:hover {
+            color: #333;
+        }
+        .voice-mic-area {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .voice-mic-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #07c160;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .voice-mic-icon.recording {
+            background: #ff3b30;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .voice-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-size: 16px;
+            margin: 15px 0 10px;
+            outline: none;
+        }
+        .voice-input:focus {
+            border-color: #07c160;
+        }
+        .voice-send-btn {
+            width: 100%;
+            padding: 14px;
+            background: #07c160;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        .voice-send-btn:active {
+            opacity: 0.8;
         }
     </style>
 </head>
@@ -2307,7 +2432,7 @@
                 <span class="select-info" id="selectCount">已选择 0 条</span>
                 <div class="select-actions">
                     <button class="danger" id="deleteSelectedBtn">删除</button>
-                    <button id="editSelectedBtn">编辑</button>  <!-- 新增编辑按钮 -->
+                    <button id="editSelectedBtn">编辑</button>
                     <button id="cancelMultiSelectBtn">取消</button>
                 </div>
             </div>
@@ -2793,7 +2918,7 @@
     <!-- 长按消息浮动菜单（类似微信） -->
     <div class="message-float-menu" id="messageFloatMenu" style="display: none;"></div>
 
-    <!-- 新增：编辑消息模态框 -->
+    <!-- 编辑消息模态框 -->
     <div class="modal-overlay" id="editMessageModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -2806,6 +2931,20 @@
                 <button class="cancel-btn" id="cancelEditMessage">取消</button>
             </div>
         </div>
+    </div>
+
+    <!-- 新增：语音操作卡片（白色悬浮） -->
+    <div class="voice-card" id="voiceCard">
+        <div class="voice-card-header">
+            <span class="voice-card-close" id="closeVoiceCard"><i class="fa-solid fa-times"></i></span>
+        </div>
+        <div class="voice-mic-area">
+            <div class="voice-mic-icon" id="voiceMicIcon">
+                <i class="fa-solid fa-microphone"></i>
+            </div>
+        </div>
+        <input type="text" class="voice-input" id="voiceTextInput" placeholder="输入文字，点击下方发送">
+        <button class="voice-send-btn" id="voiceSendBtn">发送</button>
     </div>
 
     <script>
@@ -2883,6 +3022,8 @@
                 const lastMsg = contact.messages.length ? contact.messages[contact.messages.length-1] : null;
                 if (!lastMsg) return '';
                 if (lastMsg.type === 'image') return '[图片]';
+                if (lastMsg.type === 'voice') return '[语音]';
+                if (lastMsg.type === 'voice_sim') return '[语音]'; // 统一显示为语音
                 if (lastMsg.type === 'recall') return '已撤回';
                 return lastMsg.content || '';
             },
@@ -3257,101 +3398,6 @@
                 const globalBooks = this.worldBooks.filter(w => w.global === true);
                 const specificBooks = this.worldBooks.filter(w => w.global === false && w.boundRoles && w.boundRoles.includes(contactId));
                 return [...globalBooks, ...specificBooks];
-            }
-        };
-
-        // ==================== 备份处理模块 ====================
-        const BackupHandler = {
-            async exportBackup() {
-                try {
-                    Utils.showToast('正在打包数据...', 0);
-                    const appKeys = ['apiConfigs', 'activeConfigId', 'contacts', 'userProfile', 'beautifySettings', 'worldBooks', 'posts'];
-                    const localStorageData = {};
-                    appKeys.forEach(key => {
-                        const val = localStorage.getItem(key);
-                        if (val) localStorageData[key] = JSON.parse(val);
-                    });
-                    const images = await Utils.getAllImages();
-                    const backup = { version: 1, timestamp: Date.now(), localStorage: localStorageData, images };
-                    const json = JSON.stringify(backup, null, 2);
-                    const blob = new Blob([json], { type: 'application/json' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `ai-chat-backup-${new Date().toISOString().slice(0,10)}.json`;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                    Utils.showToast('备份导出成功', 1500);
-                } catch (err) {
-                    console.error('导出备份失败:', err);
-                    Utils.showToast('导出失败：' + err.message, 3000);
-                }
-            },
-
-            async importBackup(file) {
-                try {
-                    Utils.showToast('正在恢复数据...', 0);
-                    const text = await Utils.readFileAsText(file);
-                    let backup;
-                    try {
-                        backup = JSON.parse(text);
-                    } catch (e) {
-                        throw new Error('备份文件格式错误，不是有效的 JSON 文件。');
-                    }
-                    if (backup.version !== 1) throw new Error('不支持的备份版本，请确认文件正确。');
-                    
-                    const appKeys = ['apiConfigs', 'activeConfigId', 'contacts', 'userProfile', 'beautifySettings', 'worldBooks', 'posts'];
-                    appKeys.forEach(key => localStorage.removeItem(key));
-                    
-                    if (backup.localStorage) {
-                        Object.entries(backup.localStorage).forEach(([key, val]) => {
-                            localStorage.setItem(key, JSON.stringify(val));
-                        });
-                    }
-                    
-                    await Utils.clearImages();
-                    if (backup.images && backup.images.length > 0) {
-                        const db = await Utils.openDB();
-                        const tx = db.transaction('images', 'readwrite');
-                        const store = tx.objectStore('images');
-                        let successCount = 0;
-                        let failCount = 0;
-                        for (const img of backup.images) {
-                            try {
-                                await store.put(img);
-                                successCount++;
-                            } catch (imgErr) {
-                                console.error('图片保存失败:', img.id, imgErr);
-                                failCount++;
-                            }
-                        }
-                        await tx.complete;
-                        if (failCount > 0) {
-                            Utils.showToast(`部分图片恢复失败 (${failCount} 张)，请检查控制台`, 3000);
-                        }
-                    }
-                    
-                    Utils.showToast('恢复成功，页面即将刷新', 1500);
-                    setTimeout(() => location.reload(), 1500);
-                } catch (err) {
-                    console.error('导入备份失败:', err);
-                    Utils.showToast('导入失败：' + err.message, 3000);
-                }
-            },
-
-            async clearAllData() {
-                if (!confirm('⚠️ 确定要一键清除所有数据吗？\n包括所有API配置、联系人、聊天记录、世界书、美化设置、朋友圈及图片，此操作不可恢复！')) return;
-                Utils.showToast('正在清除所有数据...', 0);
-                try {
-                    const appKeys = ['apiConfigs', 'activeConfigId', 'contacts', 'userProfile', 'beautifySettings', 'worldBooks', 'posts'];
-                    appKeys.forEach(key => localStorage.removeItem(key));
-                    await Utils.clearImages();
-                    Utils.showToast('数据已清空，即将刷新', 1500);
-                    setTimeout(() => location.reload(), 1500);
-                } catch (err) {
-                    console.error('清除数据失败:', err);
-                    Utils.showToast('清除失败：' + err.message, 3000);
-                }
             }
         };
 
@@ -3958,16 +4004,41 @@
                         }
                         const bubbleWrapper = document.createElement('div'); bubbleWrapper.className = 'bubble-wrapper';
                         
-                        const bubble = document.createElement('div'); bubble.className = 'msg-bubble';
                         if (msg.type === 'image') {
+                            const bubble = document.createElement('div'); bubble.className = 'msg-bubble';
                             Utils.loadImageFromDB(msg.content).then(dataUrl => {
                                 if (dataUrl) bubble.innerHTML = `<img src="${dataUrl}" alt="image">`;
                                 else bubble.textContent = '[图片加载失败]';
                             }).catch(() => bubble.textContent = '[图片加载失败]');
+                            bubbleWrapper.appendChild(bubble);
+                        } else if (msg.type === 'voice') {
+                            // 真实录音
+                            const audioId = msg.content;
+                            const duration = msg.duration || '3"';
+                            const voiceBubble = document.createElement('div');
+                            voiceBubble.className = 'voice-bubble-wechat';
+                            voiceBubble.innerHTML = `
+                                <i class="fa-solid fa-play voice-icon-wechat" data-audio-id="${audioId}" onclick="playVoice('${audioId}', this)"></i>
+                                <span class="voice-duration-wechat">${duration}</span>
+                            `;
+                            bubbleWrapper.appendChild(voiceBubble);
+                        } else if (msg.type === 'voice_sim') {
+                            // 模拟语音
+                            const text = msg.content.replace(/'/g, "\\'");
+                            const voiceBubble = document.createElement('div');
+                            voiceBubble.className = 'voice-bubble-wechat';
+                            voiceBubble.innerHTML = `
+                                <i class="fa-solid fa-play voice-icon-wechat" data-text="${text}" onclick="speakText('${text}', this)"></i>
+                                <span class="voice-duration-wechat">1"</span>
+                            `;
+                            bubbleWrapper.appendChild(voiceBubble);
                         } else {
+                            // 文本消息（恢复原始聊天气泡）
+                            const bubble = document.createElement('div'); bubble.className = 'msg-bubble';
                             bubble.textContent = msg.content;
+                            bubbleWrapper.appendChild(bubble);
                         }
-                        bubbleWrapper.appendChild(bubble);
+                        
                         const timeSpan = document.createElement('span'); timeSpan.className = 'msg-time'; timeSpan.textContent = Utils.formatTime(msg.timestamp);
                         bubbleWrapper.appendChild(timeSpan);
                         row.appendChild(bubbleWrapper);
@@ -4316,10 +4387,10 @@
             isSendingChunks: false,      // 是否正在逐条发送
             stopSendingFlag: false,       // 停止发送标志
 
-            addMessageToCurrent(text, isUser, isSystem = false, type = 'text') {
+            addMessageToCurrent(text, isUser, isSystem = false, type = 'text', extra = {}) {
                 const contact = DataManager.getCurrentContact();
                 const role = isSystem ? 'system' : (isUser ? 'user' : 'assistant');
-                const msg = { role, type, content: text, timestamp: Date.now() };
+                const msg = { role, type, content: text, timestamp: Date.now(), ...extra };
                 contact.messages.push(msg);
                 DataManager.saveContacts();
                 if (document.getElementById('chatDetailPage').style.display === 'flex') {
@@ -4367,6 +4438,69 @@
                     } catch (err) { Utils.showToast('图片处理失败', 2000); }
                 };
                 reader.readAsDataURL(file);
+            },
+
+            // 模拟语音：将输入的文字转为语音消息（可指定文字）
+            sendSimulatedVoice(text) {
+                const finalText = text || document.getElementById('messageInput').value.trim();
+                if (!finalText) {
+                    Utils.showToast('请输入要模拟的语音内容');
+                    return;
+                }
+                const contact = DataManager.getCurrentContact();
+                if (contact.blocked) { Utils.showToast('你已将对方拉黑，无法发送消息'); return; }
+                this.stopSendingChunks();
+                // 添加模拟语音消息，存储文字内容，展示为语音气泡（统一使用voice_sim类型，时长固定为1"）
+                this.addMessageToCurrent(finalText, true, false, 'voice_sim', { duration: '1"' });
+                // 清空输入框（如果是来自主输入框）
+                if (!text) document.getElementById('messageInput').value = '';
+                Utils.showToast('模拟语音已发送');
+            },
+
+            // 真实录音：调用麦克风录制音频
+            mediaRecorder: null,
+            audioChunks: [],
+            isRecording: false,
+
+            async startRecording() {
+                if (this.isRecording) {
+                    // 停止录音
+                    if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+                        this.mediaRecorder.stop();
+                    }
+                    return;
+                }
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    Utils.showToast('开始录音...', 0);
+                    this.mediaRecorder = new MediaRecorder(stream);
+                    this.audioChunks = [];
+                    this.mediaRecorder.ondataavailable = e => this.audioChunks.push(e.data);
+                    this.mediaRecorder.onstop = async () => {
+                        const blob = new Blob(this.audioChunks, { type: 'audio/webm' });
+                        const reader = new FileReader();
+                        reader.onload = async (e) => {
+                            const base64 = e.target.result;
+                            const audioId = Utils.generateImageId('voice');
+                            await Utils.saveImageToDB(audioId, base64);
+                            const contact = DataManager.getCurrentContact();
+                            if (contact.blocked) { Utils.showToast('你已将对方拉黑，无法发送消息'); return; }
+                            this.stopSendingChunks();
+                            // 添加真实语音消息，存储音频ID，展示时长（暂时固定3秒）
+                            this.addMessageToCurrent(audioId, true, false, 'voice', { duration: '3"' });
+                            Utils.showToast('录音已发送');
+                        };
+                        reader.readAsDataURL(blob);
+                        stream.getTracks().forEach(track => track.stop());
+                        this.isRecording = false;
+                        document.getElementById('voiceMicIcon').classList.remove('recording');
+                    };
+                    this.mediaRecorder.start();
+                    this.isRecording = true;
+                    document.getElementById('voiceMicIcon').classList.add('recording');
+                } catch (err) {
+                    Utils.showToast('无法访问麦克风', 2000);
+                }
             },
 
             // 停止逐条发送
@@ -5205,6 +5339,57 @@
             });
         }
 
+        // 全局音频播放和语音合成控制
+        window.currentAudio = null;
+
+        window.playVoice = async function(audioId, icon) {
+            // 如果已有正在播放的音频，先停止并重置图标
+            if (window.currentAudio && !window.currentAudio.paused) {
+                window.currentAudio.pause();
+                window.currentAudio = null;
+                document.querySelectorAll('.voice-icon-wechat').forEach(i => {
+                    i.classList.remove('fa-pause');
+                    i.classList.add('fa-play');
+                });
+            }
+            const dataUrl = await Utils.loadImageFromDB(audioId);
+            if (!dataUrl) {
+                Utils.showToast('音频加载失败');
+                return;
+            }
+            const audio = new Audio(dataUrl);
+            window.currentAudio = audio;
+            audio.play();
+            icon.classList.remove('fa-play');
+            icon.classList.add('fa-pause');
+            audio.onended = () => {
+                icon.classList.remove('fa-pause');
+                icon.classList.add('fa-play');
+                window.currentAudio = null;
+            };
+        };
+
+        window.speakText = function(text, icon) {
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+                document.querySelectorAll('.voice-icon-wechat').forEach(i => {
+                    i.classList.remove('fa-pause');
+                    i.classList.add('fa-play');
+                });
+            }
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-CN';
+            utterance.onstart = () => {
+                icon.classList.remove('fa-play');
+                icon.classList.add('fa-pause');
+            };
+            utterance.onend = () => {
+                icon.classList.remove('fa-pause');
+                icon.classList.add('fa-play');
+            };
+            window.speechSynthesis.speak(utterance);
+        };
+
         // ==================== 事件绑定初始化 ====================
         function bindEvents() {
             document.querySelectorAll('.app-icon[data-app]').forEach(icon => { 
@@ -5293,12 +5478,40 @@
                 }
             });
 
-            // 为 action-item 添加占位点击事件（包括新增的定位和小剧场）
+            // 为 action-item 添加事件（语音按钮打开语音卡片）
             document.querySelectorAll('#plusActionModal .action-item').forEach(item => {
-                item.addEventListener('click', () => {
+                item.addEventListener('click', (e) => {
                     const action = item.dataset.action;
-                    Utils.showToast(`功能 ${action} 开发中`);
+                    if (action === 'voice') {
+                        // 关闭加号面板，打开语音卡片
+                        document.getElementById('plusActionModal').classList.remove('active');
+                        document.getElementById('voiceCard').classList.add('active');
+                    } else {
+                        Utils.showToast(`功能 ${action} 开发中`);
+                    }
                 });
+            });
+
+            // 语音卡片关闭
+            document.getElementById('closeVoiceCard').addEventListener('click', () => {
+                document.getElementById('voiceCard').classList.remove('active');
+            });
+
+            // 话筒图标点击：开始/停止录音
+            document.getElementById('voiceMicIcon').addEventListener('click', () => {
+                ChatHandler.startRecording();
+            });
+
+            // 语音卡片发送按钮：将输入框文字作为模拟语音发送
+            document.getElementById('voiceSendBtn').addEventListener('click', () => {
+                const text = document.getElementById('voiceTextInput').value.trim();
+                if (!text) {
+                    Utils.showToast('请输入文字');
+                    return;
+                }
+                ChatHandler.sendSimulatedVoice(text);
+                document.getElementById('voiceTextInput').value = '';
+                document.getElementById('voiceCard').classList.remove('active');
             });
 
             // 多选操作栏
@@ -5309,7 +5522,7 @@
                 ChatHandler.exitMultiSelectMode();
             });
 
-            // 新增：编辑按钮事件
+            // 编辑按钮事件
             document.getElementById('editSelectedBtn').addEventListener('click', () => {
                 if (ChatHandler.selectedMessages.size !== 1) {
                     Utils.showToast('请只选择一条消息进行编辑');
