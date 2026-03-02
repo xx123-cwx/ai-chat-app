@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 最终版（优化喇叭点击+气泡点击转文字）</title>
+    <title>AI角色 · 最终版（时间戳修正+语音转文字）</title>
     <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -1110,9 +1110,36 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
+            max-width: 100%;
         }
         .message.me .bubble-wrapper {
             align-items: flex-end;
+        }
+
+        /* 气泡行：包含气泡和时间戳，水平排列 */
+        .bubble-row, .voice-row {
+            display: flex;
+            align-items: center;
+            max-width: 100%;
+            width: 100%;
+        }
+        .message.other .bubble-row,
+        .message.other .voice-row {
+            justify-content: flex-start;
+        }
+        .message.me .bubble-row,
+        .message.me .voice-row {
+            justify-content: flex-start; /* 保持正常流，时间戳和气泡按顺序排列 */
+        }
+
+        /* 时间戳间距：AI消息时间戳在右侧，使用左间距；用户消息时间戳在左侧，使用右间距 */
+        .message.other .bubble-row .msg-time,
+        .message.other .voice-row .msg-time {
+            margin-left: 8px;
+        }
+        .message.me .bubble-row .msg-time,
+        .message.me .voice-row .msg-time {
+            margin-right: 8px;
         }
 
         /* 文本消息气泡样式 */
@@ -1191,7 +1218,7 @@
         .voice-transcript {
             font-size: 12px;
             color: #999;
-            margin-top: 2px;
+            margin-top: 4px;  /* 与气泡的间距 */
             max-width: 200px;
             word-break: break-word;
         }
@@ -1202,12 +1229,10 @@
         .msg-time {
             font-size: 11px;
             color: #666;
-            margin: 0 6px;
             white-space: nowrap;
         }
         .message.me .msg-time {
-            order: -1; /* 自己的时间戳在气泡左侧 */
-            margin: 0 2px 0 6px;
+            color: #ddd;
         }
 
         .system-message {
@@ -3078,7 +3103,7 @@
                 if (!lastMsg) return '';
                 if (lastMsg.type === 'image') return '[图片]';
                 if (lastMsg.type === 'voice') return '[语音]';
-                if (lastMsg.type === 'voice_sim') return '[语音]'; // 统一显示为语音
+                if (lastMsg.type === 'voice_sim') return '[语音]';
                 if (lastMsg.type === 'recall') return '已撤回';
                 return lastMsg.content || '';
             },
@@ -3232,7 +3257,6 @@
             // 语音识别函数（模拟）
             recognizeSpeech(audioBlob) {
                 return new Promise((resolve, reject) => {
-                    // 模拟识别结果
                     Utils.showToast('正在识别语音...', 0);
                     setTimeout(() => {
                         const mockText = '这是一条模拟识别的语音消息';
@@ -3465,6 +3489,134 @@
                 const globalBooks = this.worldBooks.filter(w => w.global === true);
                 const specificBooks = this.worldBooks.filter(w => w.global === false && w.boundRoles && w.boundRoles.includes(contactId));
                 return [...globalBooks, ...specificBooks];
+            }
+        };
+
+        // ==================== 备份处理模块 ====================
+        const BackupHandler = {
+            async exportBackup() {
+                try {
+                    Utils.showToast('正在准备备份...', 0);
+                    const images = await Utils.getAllImages();
+                    const backup = {
+                        version: 1,
+                        timestamp: Date.now(),
+                        apiConfigs: DataManager.apiConfigs,
+                        activeConfigId: DataManager.activeConfigId,
+                        contacts: DataManager.contacts,
+                        userProfile: DataManager.userProfile,
+                        beautifySettings: DataManager.beautifySettings,
+                        worldBooks: DataManager.worldBooks,
+                        posts: DataManager.posts,
+                        images: images
+                    };
+                    const json = JSON.stringify(backup, null, 2);
+                    const blob = new Blob([json], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `ai-chat-backup-${new Date().toISOString().slice(0, 10)}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    Utils.showToast('备份导出成功', 2000);
+                } catch (err) {
+                    console.error(err);
+                    Utils.showToast('导出失败：' + err.message, 3000);
+                }
+            },
+
+            async importBackup(file) {
+                try {
+                    Utils.showToast('正在导入备份...', 0);
+                    const text = await Utils.readFileAsText(file);
+                    const backup = JSON.parse(text);
+                    if (!backup.version || backup.version !== 1) {
+                        throw new Error('不支持的备份版本');
+                    }
+                    if (!confirm('导入将覆盖所有现有数据，确定继续？')) return;
+
+                    await this.clearAllData(false);
+
+                    if (backup.images && Array.isArray(backup.images)) {
+                        await Utils.saveImagesBatch(backup.images);
+                    }
+
+                    DataManager.apiConfigs = backup.apiConfigs || [];
+                    DataManager.activeConfigId = backup.activeConfigId || (DataManager.apiConfigs[0]?.id || null);
+                    DataManager.contacts = backup.contacts || [];
+                    DataManager.userProfile = backup.userProfile || { name: '我的网名', status: '在线', avatar: '🤖' };
+                    DataManager.beautifySettings = backup.beautifySettings || { wallpaper: null, appIcons: {}, momentCover: null };
+                    DataManager.worldBooks = backup.worldBooks || [];
+                    DataManager.posts = backup.posts || [];
+
+                    DataManager.saveConfigs();
+                    DataManager.saveContacts();
+                    DataManager.saveUserProfile();
+                    DataManager.saveBeautifySettings();
+                    DataManager.saveWorldBooks();
+                    DataManager.savePosts();
+
+                    Utils.showToast('导入成功，页面即将刷新', 2000);
+                    setTimeout(() => location.reload(), 1500);
+                } catch (err) {
+                    console.error(err);
+                    Utils.showToast('导入失败：' + err.message, 3000);
+                }
+            },
+
+            async clearAllData(confirmMsg = true) {
+                if (confirmMsg && !confirm('⚠️ 确定要清除所有数据吗？此操作不可恢复！')) return;
+                Utils.showToast('正在清除数据...', 0);
+                localStorage.removeItem('apiConfigs');
+                localStorage.removeItem('activeConfigId');
+                localStorage.removeItem('contacts');
+                localStorage.removeItem('userProfile');
+                localStorage.removeItem('beautifySettings');
+                localStorage.removeItem('worldBooks');
+                localStorage.removeItem('posts');
+                await Utils.clearImages();
+                DataManager.apiConfigs = [{
+                    id: Date.now().toString(),
+                    name: '默认配置',
+                    base_url: '',
+                    api_key: '',
+                    models: [],
+                    currentModel: ''
+                }];
+                DataManager.activeConfigId = DataManager.apiConfigs[0].id;
+                DataManager.contacts = [{
+                    id: Date.now().toString(),
+                    avatar: '🤖',
+                    name: '默认助手',
+                    remark: '',
+                    personality: '你是一个友好的AI助手，乐于助人。',
+                    configId: '',
+                    blocked: false,
+                    pinned: false,
+                    muted: false,
+                    mutedLastMessage: '',
+                    messages: [{ role: 'assistant', type: 'text', content: '你好！我是你的AI助手，有什么可以帮你的？', timestamp: Date.now() }],
+                    autoPostEnabled: false,
+                    autoPostInterval: 1,
+                    lastAutoPostTime: 0,
+                    bubbleCss: '',
+                    chatBackground: null
+                }];
+                DataManager.currentContactId = DataManager.contacts[0].id;
+                DataManager.userProfile = { name: '我的网名', status: '在线', avatar: '🤖', realName: '', address: '', lineId: '', bio: '', userSetting: '' };
+                DataManager.beautifySettings = { wallpaper: null, appIcons: {}, momentCover: null };
+                DataManager.worldBooks = [];
+                DataManager.posts = [];
+
+                DataManager.saveConfigs();
+                DataManager.saveContacts();
+                DataManager.saveUserProfile();
+                DataManager.saveBeautifySettings();
+                DataManager.saveWorldBooks();
+                DataManager.savePosts();
+
+                Utils.showToast('数据已清除，页面即将刷新', 2000);
+                setTimeout(() => location.reload(), 1500);
             }
         };
 
@@ -4041,6 +4193,7 @@
                 });
             },
 
+            // 渲染消息列表（修正时间戳位置）
             renderMessages(messages, start, end) {
                 const area = document.getElementById('messageArea');
                 if (!area) return;
@@ -4072,27 +4225,34 @@
                         const bubbleWrapper = document.createElement('div'); bubbleWrapper.className = 'bubble-wrapper';
                         
                         if (msg.type === 'image') {
+                            const bubbleRow = document.createElement('div'); bubbleRow.className = 'bubble-row';
                             const bubble = document.createElement('div'); bubble.className = 'msg-bubble';
                             Utils.loadImageFromDB(msg.content).then(dataUrl => {
                                 if (dataUrl) bubble.innerHTML = `<img src="${dataUrl}" alt="image">`;
                                 else bubble.textContent = '[图片加载失败]';
                             }).catch(() => bubble.textContent = '[图片加载失败]');
-                            bubbleWrapper.appendChild(bubble);
+                            const timeSpan = document.createElement('span'); timeSpan.className = 'msg-time'; timeSpan.textContent = Utils.formatTime(msg.timestamp);
+                            if (isUser) {
+                                bubbleRow.appendChild(timeSpan);
+                                bubbleRow.appendChild(bubble);
+                            } else {
+                                bubbleRow.appendChild(bubble);
+                                bubbleRow.appendChild(timeSpan);
+                            }
+                            bubbleWrapper.appendChild(bubbleRow);
                         } else if (msg.type === 'voice' || msg.type === 'voice_sim') {
-                            // 真实录音或模拟语音（统一显示为语音气泡）
+                            const voiceRow = document.createElement('div'); voiceRow.className = 'voice-row';
                             const duration = msg.duration || (msg.type === 'voice' ? '3"' : '1"');
                             const voiceBubble = document.createElement('div');
                             voiceBubble.className = 'voice-bubble-wechat';
-                            // 存储转文字内容
                             let transcript = '';
                             if (msg.type === 'voice') {
                                 transcript = msg.transcript || '[语音消息]';
                             } else {
-                                transcript = msg.content; // 模拟语音直接存储文字
+                                transcript = msg.content;
                             }
                             voiceBubble.dataset.transcript = transcript;
                             
-                            // 创建喇叭图标
                             const icon = document.createElement('i');
                             icon.className = 'fa-solid fa-play voice-icon-wechat';
                             if (msg.type === 'voice') {
@@ -4100,7 +4260,6 @@
                             } else {
                                 icon.dataset.text = msg.content.replace(/'/g, "\\'");
                             }
-                            // 喇叭点击事件：播放语音，阻止冒泡
                             icon.addEventListener('click', function(e) {
                                 e.stopPropagation();
                                 if (this.dataset.audioId) {
@@ -4117,9 +4276,7 @@
                             voiceBubble.appendChild(icon);
                             voiceBubble.appendChild(durationSpan);
                             
-                            // 点击整个气泡（非喇叭）显示转文字
                             voiceBubble.addEventListener('click', function(e) {
-                                // 如果点击的是图标本身，已经通过 icon 的 click 处理了，这里不会执行（因为 stopPropagation）
                                 const transcript = this.dataset.transcript;
                                 if (transcript) {
                                     document.getElementById('voiceTranscriptContent').textContent = transcript;
@@ -4127,22 +4284,36 @@
                                 }
                             });
                             
-                            bubbleWrapper.appendChild(voiceBubble);
+                            const timeSpan = document.createElement('span'); timeSpan.className = 'msg-time'; timeSpan.textContent = Utils.formatTime(msg.timestamp);
+                            if (isUser) {
+                                voiceRow.appendChild(timeSpan);
+                                voiceRow.appendChild(voiceBubble);
+                            } else {
+                                voiceRow.appendChild(voiceBubble);
+                                voiceRow.appendChild(timeSpan);
+                            }
                             
-                            // 在气泡下方添加转文字（直接显示）
+                            bubbleWrapper.appendChild(voiceRow);
+                            
                             const transcriptDiv = document.createElement('div');
                             transcriptDiv.className = 'voice-transcript';
                             transcriptDiv.textContent = transcript;
                             bubbleWrapper.appendChild(transcriptDiv);
                         } else {
-                            // 文本消息（恢复原始聊天气泡）
+                            const bubbleRow = document.createElement('div'); bubbleRow.className = 'bubble-row';
                             const bubble = document.createElement('div'); bubble.className = 'msg-bubble';
                             bubble.textContent = msg.content;
-                            bubbleWrapper.appendChild(bubble);
+                            const timeSpan = document.createElement('span'); timeSpan.className = 'msg-time'; timeSpan.textContent = Utils.formatTime(msg.timestamp);
+                            if (isUser) {
+                                bubbleRow.appendChild(timeSpan);
+                                bubbleRow.appendChild(bubble);
+                            } else {
+                                bubbleRow.appendChild(bubble);
+                                bubbleRow.appendChild(timeSpan);
+                            }
+                            bubbleWrapper.appendChild(bubbleRow);
                         }
                         
-                        const timeSpan = document.createElement('span'); timeSpan.className = 'msg-time'; timeSpan.textContent = Utils.formatTime(msg.timestamp);
-                        bubbleWrapper.appendChild(timeSpan);
                         row.appendChild(bubbleWrapper);
                         area.appendChild(row);
                     }
@@ -4170,11 +4341,9 @@
                     if (config.models && config.models.length > 0) {
                         config.models.forEach(m => { const option = document.createElement('option'); option.value = m.id; option.textContent = m.name || m.id; if (m.id === config.currentModel) option.selected = true; select.appendChild(option); });
                     } else {
-                        // 允许用户手动输入任何模型名称
                         const option = document.createElement('option'); option.value = config.currentModel || ''; option.textContent = config.currentModel || '请输入模型名称';
                         select.appendChild(option);
                     }
-                    // 添加可编辑属性，让用户可以输入任意模型
                     select.setAttribute('contenteditable', 'true');
                     const fetchBtn = document.createElement('button'); fetchBtn.textContent = '拉取模型列表'; fetchBtn.dataset.id = config.id;
                     modelRow.appendChild(select); modelRow.appendChild(fetchBtn);
@@ -4186,7 +4355,6 @@
                     }
                     container.appendChild(item);
                     fetchBtn.addEventListener('click', () => ConfigHandler.fetchModelsForConfig(config.id));
-                    // 监听select变化，允许手动输入
                     select.addEventListener('change', (e) => { config.currentModel = e.target.value; DataManager.saveConfigs(); });
                     select.addEventListener('input', (e) => { config.currentModel = e.target.innerText; DataManager.saveConfigs(); });
                 });
@@ -4374,7 +4542,6 @@
                 const contact = contacts[DataManager.currentStatusIndex];
                 if (!contact) return;
 
-                // 更新头像
                 const avatarDiv = document.getElementById('aiStatusAvatar');
                 avatarDiv.innerHTML = '';
                 const span = document.createElement('span'); span.id = 'aiStatusAvatarText';
@@ -4382,15 +4549,12 @@
                 avatarDiv.appendChild(span); avatarDiv.appendChild(img);
                 await Utils.setImageElement(avatarDiv, contact.avatar, '🤖');
 
-                // 更新名称
                 document.getElementById('aiStatusName').textContent = Utils.getDisplayName(contact);
 
-                // 随机在线状态
                 const online = Math.random() > 0.3;
                 const badge = document.getElementById('aiStatusBadge');
                 badge.className = `ai-status-badge ${online ? '' : 'offline'}`;
 
-                // 生成今日详细数据（基于人设模拟）
                 const details = this.generateAIDailyDetails(contact);
                 document.getElementById('aiStatusWater').innerHTML = `<i class="fa-solid fa-droplet ai-status-water"></i> ${details.water}`;
                 document.getElementById('aiStatusBreakfast').innerHTML = `<i class="fa-solid fa-sun ai-status-breakfast"></i> 早餐：${details.breakfast}`;
@@ -4399,12 +4563,10 @@
                 document.getElementById('aiStatusLocation').innerHTML = `<i class="fa-solid fa-location-dot ai-status-location"></i> ${details.location}`;
             },
 
-            // 基于人设的模拟生成（无API调用）
             generateAIDailyDetails(contact) {
                 const now = new Date();
                 const hour = now.getHours();
                 
-                // 根据时间确定餐饮状态
                 let breakfastStatus = '', lunchStatus = '', dinnerStatus = '';
                 if (hour < 10) {
                     breakfastStatus = '准备吃';
@@ -4424,17 +4586,14 @@
                     dinnerStatus = '已吃';
                 }
 
-                // 根据人设关键词选择食物池
                 const personality = (contact.personality || '').toLowerCase();
                 
-                // 默认食物池
                 let breakfastPool = ['豆浆+油条', '包子+粥', '三明治+牛奶', '煎蛋+吐司', '燕麦+水果', '馄饨', '肠粉'];
                 let lunchPool = ['牛肉面', '红烧肉+米饭', '鱼香肉丝+米饭', '炸鸡+薯条', '沙拉+意面', '饺子', '炒饭'];
                 let dinnerPool = ['米饭+炒菜', '火锅', '寿司', '牛排+红酒', '披萨', '烤鱼', '麻辣香锅'];
                 let placePool = ['书房', '咖啡馆', '公园', '办公室', '家里', '图书馆', '健身房', '超市', '餐厅', '电影院'];
                 let activityPool = ['工作', '学习', '休息', '散步', '看书', '运动', '看电影', '听音乐'];
 
-                // 根据人设调整
                 if (personality.includes('健康') || personality.includes('健身') || personality.includes('减肥')) {
                     breakfastPool = ['燕麦+水果', '水煮蛋+牛奶', '全麦面包+酸奶', '蔬菜沙拉'];
                     lunchPool = ['鸡胸肉沙拉', '糙米+蔬菜', '三文鱼+西兰花', '藜麦碗'];
@@ -4467,7 +4626,6 @@
                     activityPool = ['品酒', '听音乐会', '看歌剧', '社交'];
                 }
 
-                // 随机选择
                 const breakfast = breakfastStatus + '：' + breakfastPool[Math.floor(Math.random() * breakfastPool.length)];
                 const lunch = lunchStatus + '：' + lunchPool[Math.floor(Math.random() * lunchPool.length)];
                 const dinner = dinnerStatus + '：' + dinnerPool[Math.floor(Math.random() * dinnerPool.length)];
@@ -4486,8 +4644,8 @@
             longPressTimer: null,
             isMultiSelectMode: false,
             selectedMessages: new Set(),
-            isSendingChunks: false,      // 是否正在逐条发送
-            stopSendingFlag: false,       // 停止发送标志
+            isSendingChunks: false,
+            stopSendingFlag: false,
 
             addMessageToCurrent(text, isUser, isSystem = false, type = 'text', extra = {}) {
                 const contact = DataManager.getCurrentContact();
@@ -4517,7 +4675,6 @@
                 if (!text) return;
                 const contact = DataManager.getCurrentContact();
                 if (contact.blocked) { Utils.showToast('你已将对方拉黑，无法发送消息'); return; }
-                // 用户发送新消息时，停止AI逐条发送
                 this.stopSendingChunks();
                 this.addMessageToCurrent(text, true, false, 'text');
                 messageInput.value = '';
@@ -4526,7 +4683,7 @@
             async sendImage(file) {
                 const contact = DataManager.getCurrentContact();
                 if (contact.blocked) { Utils.showToast('你已将对方拉黑，无法发送消息'); return; }
-                this.stopSendingChunks(); // 停止AI逐条发送
+                this.stopSendingChunks();
                 Utils.showToast('正在处理图片...', 0);
                 const reader = new FileReader();
                 reader.onload = async (event) => {
@@ -4542,7 +4699,6 @@
                 reader.readAsDataURL(file);
             },
 
-            // 模拟语音：将输入的文字转为语音消息（可指定文字）
             sendSimulatedVoice(text) {
                 const finalText = text || document.getElementById('messageInput').value.trim();
                 if (!finalText) {
@@ -4552,21 +4708,17 @@
                 const contact = DataManager.getCurrentContact();
                 if (contact.blocked) { Utils.showToast('你已将对方拉黑，无法发送消息'); return; }
                 this.stopSendingChunks();
-                // 添加模拟语音消息，存储文字内容，展示为语音气泡（统一使用voice_sim类型，时长固定为1"）
                 this.addMessageToCurrent(finalText, true, false, 'voice_sim', { duration: '1"' });
-                // 清空输入框（如果是来自主输入框）
                 if (!text) document.getElementById('messageInput').value = '';
                 Utils.showToast('模拟语音已发送');
             },
 
-            // 真实录音：调用麦克风录制音频，并尝试识别
             mediaRecorder: null,
             audioChunks: [],
             isRecording: false,
 
             async startRecording() {
                 if (this.isRecording) {
-                    // 停止录音
                     if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
                         this.mediaRecorder.stop();
                     }
@@ -4580,7 +4732,6 @@
                     this.mediaRecorder.ondataavailable = e => this.audioChunks.push(e.data);
                     this.mediaRecorder.onstop = async () => {
                         const blob = new Blob(this.audioChunks, { type: 'audio/webm' });
-                        // 进行语音识别（模拟）
                         const transcript = await Utils.recognizeSpeech(blob);
                         
                         const reader = new FileReader();
@@ -4591,7 +4742,6 @@
                             const contact = DataManager.getCurrentContact();
                             if (contact.blocked) { Utils.showToast('你已将对方拉黑，无法发送消息'); return; }
                             this.stopSendingChunks();
-                            // 添加真实语音消息，存储音频ID，同时存储识别文字用于转文字
                             this.addMessageToCurrent(audioId, true, false, 'voice', { duration: '3"', transcript: transcript });
                             Utils.showToast('录音已发送' + (transcript ? ' (已识别)' : ''));
                         };
@@ -4608,7 +4758,6 @@
                 }
             },
 
-            // 停止逐条发送
             stopSendingChunks() {
                 if (this.isSendingChunks) {
                     this.stopSendingFlag = true;
@@ -4616,9 +4765,7 @@
                 }
             },
 
-            // 将回复拆分成句子（按标点分割）
             splitIntoSentences(text) {
-                // 按中英文句号、感叹号、问号分割，保留标点
                 const regex = /[。！？.!?]+/;
                 let sentences = [];
                 let lastIndex = 0;
@@ -4633,12 +4780,10 @@
                     const remaining = text.slice(lastIndex).trim();
                     if (remaining) sentences.push(remaining);
                 }
-                // 如果句子为空或只有一个，则直接返回原文本
                 if (sentences.length <= 1) return [text];
                 return sentences;
             },
 
-            // 逐条发送AI消息（20%概率以语音形式发送）
             async sendAIMessagesInChunks(sentences) {
                 if (!sentences || sentences.length === 0) return;
                 this.isSendingChunks = true;
@@ -4646,14 +4791,12 @@
 
                 for (let i = 0; i < sentences.length; i++) {
                     if (this.stopSendingFlag) break;
-                    // 20%概率以语音形式发送
                     const useVoice = Math.random() < 0.2;
                     if (useVoice) {
                         this.addMessageToCurrent(sentences[i], false, false, 'voice_sim', { duration: '1"' });
                     } else {
                         this.addMessageToCurrent(sentences[i], false, false, 'text');
                     }
-                    // 除了最后一条，其他间隔800ms
                     if (i < sentences.length - 1) {
                         await new Promise(resolve => setTimeout(resolve, 800));
                     }
@@ -4735,9 +4878,7 @@
                     const reply = data.choices?.[0]?.message?.content;
                     if (!reply) throw new Error('AI返回内容为空');
 
-                    // 判断是否需要分句发送
                     const sentences = this.splitIntoSentences(reply);
-                    // 如果只有一句且总字数小于等于20，直接发送；否则逐句发送
                     if (sentences.length === 1 || reply.length <= 20) {
                         const useVoice = Math.random() < 0.2;
                         if (useVoice) {
@@ -4762,7 +4903,6 @@
             },
 
             enterChatDetail(contactId) {
-                // 切换聊天时停止逐条发送
                 this.stopSendingChunks();
                 DataManager.currentContactId = contactId;
                 const contact = DataManager.getCurrentContact();
@@ -4778,12 +4918,11 @@
                 UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
                 document.getElementById('contactListPage').style.display = 'none'; document.getElementById('chatDetailPage').style.display = 'flex'; document.getElementById('contactOptionsPage').style.display = 'none';
                 requestAnimationFrame(() => { const area = document.getElementById('messageArea'); if (area) area.scrollTop = area.scrollHeight; });
-                // 退出多选模式
                 this.exitMultiSelectMode();
             },
 
             showContactList() {
-                this.stopSendingChunks(); // 返回列表时停止
+                this.stopSendingChunks();
                 document.getElementById('contactListPage').style.display = 'flex'; document.getElementById('chatDetailPage').style.display = 'none'; document.getElementById('contactOptionsPage').style.display = 'none';
                 UIManager.renderContactList();
                 this.exitMultiSelectMode();
@@ -4839,14 +4978,12 @@
                 this.isLoadingMore = false;
             },
 
-            // 撤回消息（区分用户和对方）
             recallMessage(index) {
                 const contact = DataManager.getCurrentContact();
                 const msg = contact.messages[index];
                 if (!msg) return;
                 if (Utils.isRecallMessage(msg)) return;
                 msg.type = 'recall';
-                // 根据消息角色设置撤回提示
                 if (msg.role === 'user') {
                     msg.content = '您撤回了一条消息';
                 } else {
@@ -4865,12 +5002,10 @@
                 Utils.showToast('已删除', 1500);
             },
 
-            // 编辑消息
             editMessage(index, newContent) {
                 const contact = DataManager.getCurrentContact();
                 const msg = contact.messages[index];
                 if (!msg) return;
-                // 只允许编辑文本消息，且不能是撤回消息
                 if (msg.type !== 'text' || Utils.isRecallMessage(msg)) {
                     Utils.showToast('只能编辑文本消息');
                     return;
@@ -4881,15 +5016,12 @@
                 Utils.showToast('编辑成功', 1500);
             },
 
-            // 长按处理 - 显示浮动菜单
             handleLongPressStart(e, index) {
                 if (this.longPressTimer) clearTimeout(this.longPressTimer);
-                if (this.isMultiSelectMode) return; // 多选模式不触发长按
+                if (this.isMultiSelectMode) return;
                 const msg = DataManager.getCurrentContact().messages[index];
                 if (!msg || Utils.isRecallMessage(msg)) return;
-                // 阻止浏览器默认菜单（重要！）
                 e.preventDefault();
-                // 对于移动设备，还需要阻止事件冒泡以防止页面滚动等
                 e.stopPropagation();
                 this.longPressTimer = setTimeout(() => {
                     this.showFloatMenu(e, index);
@@ -4904,15 +5036,13 @@
                 }
             },
 
-            // 显示浮动菜单（仅保留撤回、删除、多选）
             showFloatMenu(event, index) {
                 const msg = DataManager.getCurrentContact().messages[index];
                 if (!msg) return;
 
                 const menu = document.getElementById('messageFloatMenu');
-                menu.innerHTML = ''; // 清空
+                menu.innerHTML = '';
 
-                // 撤回
                 const recallItem = document.createElement('div');
                 recallItem.className = 'menu-item';
                 recallItem.textContent = '撤回';
@@ -4920,7 +5050,6 @@
                 recallItem.dataset.index = index;
                 menu.appendChild(recallItem);
 
-                // 删除
                 const deleteItem = document.createElement('div');
                 deleteItem.className = 'menu-item';
                 deleteItem.textContent = '删除';
@@ -4928,7 +5057,6 @@
                 deleteItem.dataset.index = index;
                 menu.appendChild(deleteItem);
 
-                // 多选
                 const multiItem = document.createElement('div');
                 multiItem.className = 'menu-item';
                 multiItem.textContent = '多选';
@@ -4936,7 +5064,6 @@
                 multiItem.dataset.index = index;
                 menu.appendChild(multiItem);
 
-                // 绑定点击事件
                 menu.querySelectorAll('.menu-item').forEach(item => {
                     item.addEventListener('click', (e) => {
                         const action = item.dataset.action;
@@ -4952,10 +5079,8 @@
                     });
                 });
 
-                // 计算菜单位置
                 let targetRect;
                 if (event.touches) {
-                    // 触摸事件
                     targetRect = {
                         top: event.touches[0].clientY,
                         left: event.touches[0].clientX,
@@ -4971,10 +5096,9 @@
                     top = targetRect.bottom + 10;
                 }
                 menu.style.top = top + 'px';
-                menu.style.left = (targetRect.left - 20) + 'px'; // 稍微偏移避免遮挡
+                menu.style.left = (targetRect.left - 20) + 'px';
                 menu.style.display = 'block';
 
-                // 点击其他地方关闭菜单
                 const closeMenu = (e) => {
                     if (!menu.contains(e.target)) {
                         menu.style.display = 'none';
@@ -4988,7 +5112,6 @@
                 }, 0);
             },
 
-            // 多选模式
             enterMultiSelectMode(startIndex) {
                 this.isMultiSelectMode = true;
                 this.selectedMessages.clear();
@@ -5042,7 +5165,6 @@
                 if (this.selectedMessages.size === 0) return;
                 if (!confirm(`确定删除选中的 ${this.selectedMessages.size} 条消息吗？`)) return;
                 const contact = DataManager.getCurrentContact();
-                // 从后往前删除避免索引变化
                 const indices = Array.from(this.selectedMessages).sort((a,b) => b - a);
                 for (let idx of indices) {
                     contact.messages.splice(idx, 1);
@@ -5454,11 +5576,9 @@
             });
         }
 
-        // 全局音频播放和语音合成控制
         window.currentAudio = null;
 
         window.playVoice = async function(audioId, icon) {
-            // 如果已有正在播放的音频，先停止并重置图标
             if (window.currentAudio && !window.currentAudio.paused) {
                 window.currentAudio.pause();
                 window.currentAudio = null;
@@ -5541,7 +5661,6 @@
             const messageArea = document.getElementById('messageArea');
             messageArea.addEventListener('scroll', () => { if (messageArea.scrollTop < 100 && !ChatHandler.isLoadingMore) ChatHandler.loadMoreMessages(); });
 
-            // 点击消息用于多选
             messageArea.addEventListener('click', (e) => {
                 if (!ChatHandler.isMultiSelectMode) return;
                 const msgRow = e.target.closest('.message');
@@ -5550,14 +5669,12 @@
                 ChatHandler.toggleMessageSelection(index);
             });
 
-            // 图片选择按钮（从相册）
             document.getElementById('imageBtn').addEventListener('click', () => {
                 const fileInput = document.createElement('input'); fileInput.type = 'file'; fileInput.accept = 'image/*'; fileInput.style.display = 'none'; document.body.appendChild(fileInput);
                 fileInput.click();
                 fileInput.addEventListener('change', (e) => { const file = e.target.files[0]; if (file) ChatHandler.sendImage(file); document.body.removeChild(fileInput); });
             });
 
-            // 相机拍照按钮
             document.getElementById('cameraBtn').addEventListener('click', () => {
                 const cameraInput = document.createElement('input');
                 cameraInput.type = 'file';
@@ -5577,28 +5694,23 @@
                 cameraInput.click();
             });
 
-            // 加号按钮打开功能模态框
             document.getElementById('plusActionBtn').addEventListener('click', () => {
                 document.getElementById('plusActionModal').classList.add('active');
             });
 
-            // 关闭加号模态框（点击关闭图标）
             document.getElementById('closePlusModal').addEventListener('click', () => {
                 document.getElementById('plusActionModal').classList.remove('active');
             });
-            // 点击遮罩关闭
             document.getElementById('plusActionModal').addEventListener('click', (e) => {
                 if (e.target === document.getElementById('plusActionModal')) {
                     document.getElementById('plusActionModal').classList.remove('active');
                 }
             });
 
-            // 为 action-item 添加事件（语音按钮打开语音卡片）
             document.querySelectorAll('#plusActionModal .action-item').forEach(item => {
                 item.addEventListener('click', (e) => {
                     const action = item.dataset.action;
                     if (action === 'voice') {
-                        // 关闭加号面板，打开语音卡片
                         document.getElementById('plusActionModal').classList.remove('active');
                         document.getElementById('voiceCard').classList.add('active');
                     } else {
@@ -5607,17 +5719,14 @@
                 });
             });
 
-            // 语音卡片关闭
             document.getElementById('closeVoiceCard').addEventListener('click', () => {
                 document.getElementById('voiceCard').classList.remove('active');
             });
 
-            // 话筒图标点击：开始/停止录音
             document.getElementById('voiceMicIcon').addEventListener('click', () => {
                 ChatHandler.startRecording();
             });
 
-            // 语音卡片发送按钮：将输入框文字作为模拟语音发送
             document.getElementById('voiceSendBtn').addEventListener('click', () => {
                 const text = document.getElementById('voiceTextInput').value.trim();
                 if (!text) {
@@ -5629,7 +5738,6 @@
                 document.getElementById('voiceCard').classList.remove('active');
             });
 
-            // 多选操作栏
             document.getElementById('deleteSelectedBtn').addEventListener('click', () => {
                 ChatHandler.deleteSelectedMessages();
             });
@@ -5637,7 +5745,6 @@
                 ChatHandler.exitMultiSelectMode();
             });
 
-            // 编辑按钮事件
             document.getElementById('editSelectedBtn').addEventListener('click', () => {
                 if (ChatHandler.selectedMessages.size !== 1) {
                     Utils.showToast('请只选择一条消息进行编辑');
@@ -5651,14 +5758,11 @@
                     Utils.showToast('只能编辑文本消息');
                     return;
                 }
-                // 打开编辑模态框
                 document.getElementById('editMessageContent').value = msg.content;
                 document.getElementById('editMessageModal').classList.add('active');
-                // 临时保存索引
                 window.currentEditMessageIndex = index;
             });
 
-            // 编辑模态框保存
             document.getElementById('saveEditMessage').addEventListener('click', () => {
                 const newContent = document.getElementById('editMessageContent').value.trim();
                 if (!newContent) {
@@ -5670,10 +5774,9 @@
                     ChatHandler.editMessage(index, newContent);
                 }
                 document.getElementById('editMessageModal').classList.remove('active');
-                ChatHandler.exitMultiSelectMode(); // 编辑后退出多选
+                ChatHandler.exitMultiSelectMode();
             });
 
-            // 关闭编辑模态框
             document.getElementById('closeEditMessageModal').addEventListener('click', () => {
                 document.getElementById('editMessageModal').classList.remove('active');
             });
@@ -5686,7 +5789,6 @@
                 }
             });
 
-            // 语音转文字模态框关闭
             document.getElementById('closeTranscriptModal').addEventListener('click', () => {
                 document.getElementById('voiceTranscriptModal').classList.remove('active');
             });
@@ -5779,11 +5881,9 @@
                 UIManager.updateAIStatusWidget();
             });
 
-            // 返回按钮事件（保留原有绑定，同时增加事件委托防止失效）
             document.getElementById('backToListBtn').addEventListener('click', ChatHandler.showContactList);
             document.getElementById('moreMenuBtn').addEventListener('click', ChatHandler.showContactOptions);
             
-            // 事件委托增强：确保返回和菜单按钮在任何情况下可点
             document.getElementById('chatDetailPage').addEventListener('click', function(e) {
                 const target = e.target.closest('#backToListBtn, #moreMenuBtn');
                 if (!target) return;
@@ -5808,7 +5908,6 @@
             document.getElementById('optionsRemark').addEventListener('click', ModalHandler.openRemarkModal);
             document.getElementById('optionsEditPersona').addEventListener('click', ModalHandler.openEditPersonaModal);
 
-            // 翻译按钮（联系人选项）
             document.getElementById('optionsTranslate').addEventListener('click', () => {
                 Utils.showToast('翻译功能开发中');
             });
@@ -6168,7 +6267,6 @@
 
             document.getElementById('savePost').addEventListener('click', () => PostManager.publishPost());
 
-            // AI状态小部件事件
             document.getElementById('aiStatusPrev').addEventListener('click', () => {
                 if (DataManager.contacts.length === 0) return;
                 DataManager.currentStatusIndex--;
