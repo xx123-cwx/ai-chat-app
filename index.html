@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 完整版（长按修复）</title>
+    <title>AI角色 · 最终版（长按修复+分句发送+紧凑卡片）</title>
     <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -1026,6 +1026,9 @@
             background-color: transparent;
             color: #000;
             flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+            pointer-events: auto;
         }
         .header-left {
             display: flex;
@@ -1043,6 +1046,11 @@
             font-size: 20px;
         }
         .header-right span {
+            cursor: pointer;
+        }
+        /* 确保按钮内部图标也响应点击 */
+        .header-left span, .header-right span {
+            pointer-events: auto;
             cursor: pointer;
         }
 
@@ -1948,7 +1956,7 @@
             display: block;
         }
 
-        /* ===== 加号功能模态框 - 卡片样式（从输入框上方弹出） ===== */
+        /* ===== 加号功能模态框 - 卡片样式（紧凑版） ===== */
         #plusActionModal .modal-content {
             background: rgba(255,255,255,0.2);
             backdrop-filter: blur(15px);
@@ -1973,7 +1981,7 @@
             padding: 12px 16px 0;
         }
         .close-icon {
-            font-size: 24px;
+            font-size: 22px;
             color: white;
             cursor: pointer;
             opacity: 0.8;
@@ -1985,7 +1993,7 @@
         .action-grid {
             display: flex;
             flex-wrap: wrap;
-            gap: 16px;
+            gap: 12px;
             padding: 16px;
             justify-content: center;
         }
@@ -1993,21 +2001,21 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
             color: white;
-            padding: 10px;
+            padding: 8px 4px;
             transition: background 0.2s;
-            border-radius: 8px;
-            width: calc(25% - 12px);
+            border-radius: 10px;
+            width: calc(25% - 9px); /* 一行四个，减去gap */
             min-width: 70px;
         }
         .action-item:hover {
             background: rgba(255,255,255,0.2);
         }
         .action-item i {
-            font-size: 28px;
+            font-size: 26px;
             color: white;
         }
 
@@ -4274,6 +4282,8 @@
             longPressTimer: null,
             isMultiSelectMode: false,
             selectedMessages: new Set(),
+            isSendingChunks: false,      // 是否正在逐条发送
+            stopSendingFlag: false,       // 停止发送标志
 
             addMessageToCurrent(text, isUser, isSystem = false, type = 'text') {
                 const contact = DataManager.getCurrentContact();
@@ -4303,6 +4313,8 @@
                 if (!text) return;
                 const contact = DataManager.getCurrentContact();
                 if (contact.blocked) { Utils.showToast('你已将对方拉黑，无法发送消息'); return; }
+                // 用户发送新消息时，停止AI逐条发送
+                this.stopSendingChunks();
                 this.addMessageToCurrent(text, true, false, 'text');
                 messageInput.value = '';
             },
@@ -4310,6 +4322,7 @@
             async sendImage(file) {
                 const contact = DataManager.getCurrentContact();
                 if (contact.blocked) { Utils.showToast('你已将对方拉黑，无法发送消息'); return; }
+                this.stopSendingChunks(); // 停止AI逐条发送
                 Utils.showToast('正在处理图片...', 0);
                 const reader = new FileReader();
                 reader.onload = async (event) => {
@@ -4323,6 +4336,55 @@
                     } catch (err) { Utils.showToast('图片处理失败', 2000); }
                 };
                 reader.readAsDataURL(file);
+            },
+
+            // 停止逐条发送
+            stopSendingChunks() {
+                if (this.isSendingChunks) {
+                    this.stopSendingFlag = true;
+                    this.isSendingChunks = false;
+                }
+            },
+
+            // 将回复拆分成句子（按标点分割）
+            splitIntoSentences(text) {
+                // 按中英文句号、感叹号、问号分割，保留标点
+                const regex = /[。！？.!?]+/;
+                let sentences = [];
+                let lastIndex = 0;
+                let match;
+                while ((match = regex.exec(text.slice(lastIndex))) !== null) {
+                    const end = lastIndex + match.index + match[0].length;
+                    const sentence = text.slice(lastIndex, end).trim();
+                    if (sentence) sentences.push(sentence);
+                    lastIndex = end;
+                }
+                if (lastIndex < text.length) {
+                    const remaining = text.slice(lastIndex).trim();
+                    if (remaining) sentences.push(remaining);
+                }
+                // 如果句子为空或只有一个，则直接返回原文本
+                if (sentences.length <= 1) return [text];
+                return sentences;
+            },
+
+            // 逐条发送AI消息
+            async sendAIMessagesInChunks(sentences) {
+                if (!sentences || sentences.length === 0) return;
+                this.isSendingChunks = true;
+                this.stopSendingFlag = false;
+
+                for (let i = 0; i < sentences.length; i++) {
+                    if (this.stopSendingFlag) break;
+                    // 添加消息
+                    this.addMessageToCurrent(sentences[i], false, false, 'text');
+                    // 除了最后一条，其他间隔800ms
+                    if (i < sentences.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 800));
+                    }
+                }
+                this.isSendingChunks = false;
+                this.stopSendingFlag = false;
             },
 
             async handleSendWithAI() {
@@ -4397,7 +4459,15 @@
                     const data = await response.json();
                     const reply = data.choices?.[0]?.message?.content;
                     if (!reply) throw new Error('AI返回内容为空');
-                    this.addMessageToCurrent(reply, false, false, 'text');
+
+                    // 判断是否需要分句发送
+                    const sentences = this.splitIntoSentences(reply);
+                    // 如果只有一句且总字数小于等于20，直接发送；否则逐句发送
+                    if (sentences.length === 1 || reply.length <= 20) {
+                        this.addMessageToCurrent(reply, false, false, 'text');
+                    } else {
+                        await this.sendAIMessagesInChunks(sentences);
+                    }
                 } catch (error) {
                     let errorMsg = error.message;
                     if (error.name === 'TypeError' && error.message.includes('fetch')) errorMsg = '网络连接失败，请检查网络或API地址';
@@ -4412,6 +4482,8 @@
             },
 
             enterChatDetail(contactId) {
+                // 切换聊天时停止逐条发送
+                this.stopSendingChunks();
                 DataManager.currentContactId = contactId;
                 const contact = DataManager.getCurrentContact();
                 document.getElementById('detailContactName').textContent = Utils.getDisplayName(contact) + (contact.blocked ? ' (已拉黑)' : '');
@@ -4431,12 +4503,14 @@
             },
 
             showContactList() {
+                this.stopSendingChunks(); // 返回列表时停止
                 document.getElementById('contactListPage').style.display = 'flex'; document.getElementById('chatDetailPage').style.display = 'none'; document.getElementById('contactOptionsPage').style.display = 'none';
                 UIManager.renderContactList();
                 this.exitMultiSelectMode();
             },
 
             showContactOptions() {
+                this.stopSendingChunks();
                 document.getElementById('contactListPage').style.display = 'none'; document.getElementById('chatDetailPage').style.display = 'none'; document.getElementById('contactOptionsPage').style.display = 'flex';
                 const contact = DataManager.getCurrentContact();
                 document.getElementById('optionsPin').textContent = contact.pinned ? '取消置顶' : '置顶联系人';
@@ -5268,8 +5342,22 @@
                 UIManager.updateAIStatusWidget();
             });
 
+            // 返回按钮事件（保留原有绑定，同时增加事件委托防止失效）
             document.getElementById('backToListBtn').addEventListener('click', ChatHandler.showContactList);
             document.getElementById('moreMenuBtn').addEventListener('click', ChatHandler.showContactOptions);
+            
+            // 事件委托增强：确保返回和菜单按钮在任何情况下可点
+            document.getElementById('chatDetailPage').addEventListener('click', function(e) {
+                const target = e.target.closest('#backToListBtn, #moreMenuBtn');
+                if (!target) return;
+                e.preventDefault();
+                if (target.id === 'backToListBtn') {
+                    ChatHandler.showContactList();
+                } else if (target.id === 'moreMenuBtn') {
+                    ChatHandler.showContactOptions();
+                }
+            });
+
             document.getElementById('backToChatBtn').addEventListener('click', () => {
                 document.getElementById('contactListPage').style.display = 'none'; document.getElementById('contactOptionsPage').style.display = 'none'; document.getElementById('chatDetailPage').style.display = 'flex';
             });
