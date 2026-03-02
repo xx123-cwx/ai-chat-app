@@ -2080,6 +2080,21 @@
         .select-actions button.danger {
             color: #ff3b30;
         }
+
+        /* ===== 新增：编辑消息模态框 ===== */
+        #editMessageModal .modal-content {
+            max-width: 400px;
+        }
+        #editMessageContent {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: vertical;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -2287,11 +2302,12 @@
                 </div>
             </div>
             <div class="chat-messages" id="messageArea"></div>
-            <!-- 多选操作栏 -->
+            <!-- 多选操作栏（新增编辑按钮） -->
             <div class="multi-select-bar" id="multiSelectBar">
                 <span class="select-info" id="selectCount">已选择 0 条</span>
                 <div class="select-actions">
                     <button class="danger" id="deleteSelectedBtn">删除</button>
+                    <button id="editSelectedBtn">编辑</button>  <!-- 新增编辑按钮 -->
                     <button id="cancelMultiSelectBtn">取消</button>
                 </div>
             </div>
@@ -2776,6 +2792,21 @@
 
     <!-- 长按消息浮动菜单（类似微信） -->
     <div class="message-float-menu" id="messageFloatMenu" style="display: none;"></div>
+
+    <!-- 新增：编辑消息模态框 -->
+    <div class="modal-overlay" id="editMessageModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑消息</h3>
+                <span class="close-modal" id="closeEditMessageModal">&times;</span>
+            </div>
+            <textarea id="editMessageContent" placeholder="输入新内容..."></textarea>
+            <div class="form-actions">
+                <button class="save-btn" id="saveEditMessage">保存</button>
+                <button class="cancel-btn" id="cancelEditMessage">取消</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // ==================== 常量定义 ====================
@@ -4585,6 +4616,22 @@
                 Utils.showToast('已删除', 1500);
             },
 
+            // 编辑消息
+            editMessage(index, newContent) {
+                const contact = DataManager.getCurrentContact();
+                const msg = contact.messages[index];
+                if (!msg) return;
+                // 只允许编辑文本消息，且不能是撤回消息
+                if (msg.type !== 'text' || Utils.isRecallMessage(msg)) {
+                    Utils.showToast('只能编辑文本消息');
+                    return;
+                }
+                msg.content = newContent;
+                DataManager.saveContacts();
+                UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
+                Utils.showToast('编辑成功', 1500);
+            },
+
             // 长按处理 - 显示浮动菜单
             handleLongPressStart(e, index) {
                 if (this.longPressTimer) clearTimeout(this.longPressTimer);
@@ -5260,6 +5307,55 @@
             });
             document.getElementById('cancelMultiSelectBtn').addEventListener('click', () => {
                 ChatHandler.exitMultiSelectMode();
+            });
+
+            // 新增：编辑按钮事件
+            document.getElementById('editSelectedBtn').addEventListener('click', () => {
+                if (ChatHandler.selectedMessages.size !== 1) {
+                    Utils.showToast('请只选择一条消息进行编辑');
+                    return;
+                }
+                const index = Array.from(ChatHandler.selectedMessages)[0];
+                const contact = DataManager.getCurrentContact();
+                const msg = contact.messages[index];
+                if (!msg) return;
+                if (msg.type !== 'text' || Utils.isRecallMessage(msg)) {
+                    Utils.showToast('只能编辑文本消息');
+                    return;
+                }
+                // 打开编辑模态框
+                document.getElementById('editMessageContent').value = msg.content;
+                document.getElementById('editMessageModal').classList.add('active');
+                // 临时保存索引
+                window.currentEditMessageIndex = index;
+            });
+
+            // 编辑模态框保存
+            document.getElementById('saveEditMessage').addEventListener('click', () => {
+                const newContent = document.getElementById('editMessageContent').value.trim();
+                if (!newContent) {
+                    Utils.showToast('内容不能为空');
+                    return;
+                }
+                const index = window.currentEditMessageIndex;
+                if (index !== undefined) {
+                    ChatHandler.editMessage(index, newContent);
+                }
+                document.getElementById('editMessageModal').classList.remove('active');
+                ChatHandler.exitMultiSelectMode(); // 编辑后退出多选
+            });
+
+            // 关闭编辑模态框
+            document.getElementById('closeEditMessageModal').addEventListener('click', () => {
+                document.getElementById('editMessageModal').classList.remove('active');
+            });
+            document.getElementById('cancelEditMessage').addEventListener('click', () => {
+                document.getElementById('editMessageModal').classList.remove('active');
+            });
+            document.getElementById('editMessageModal').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) {
+                    document.getElementById('editMessageModal').classList.remove('active');
+                }
             });
 
             document.getElementById('homeButton').addEventListener('click', hideAllAppViews);
