@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 完整版（AI日常状态增强）</title>
+    <title>AI角色 · 完整版（长按修复）</title>
     <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -2768,6 +2768,7 @@
 
     <!-- 长按消息浮动菜单（类似微信） -->
     <div class="message-float-menu" id="messageFloatMenu" style="display: none;"></div>
+
     <script>
         // ==================== 常量定义 ====================
         const BACKEND_URL = ''; // 如果前后端同域，留空即可。否则替换为您的后端地址
@@ -4518,13 +4519,15 @@
                 if (!msg || Utils.isRecallMessage(msg)) return;
                 // 阻止浏览器默认菜单（重要！）
                 e.preventDefault();
+                // 对于移动设备，还需要阻止事件冒泡以防止页面滚动等
+                e.stopPropagation();
                 this.longPressTimer = setTimeout(() => {
                     this.showFloatMenu(e, index);
                     this.longPressTimer = null;
                 }, 500);
             },
 
-            handleLongPressEnd() {
+            handleLongPressEnd(e) {
                 if (this.longPressTimer) {
                     clearTimeout(this.longPressTimer);
                     this.longPressTimer = null;
@@ -4580,14 +4583,25 @@
                 });
 
                 // 计算菜单位置
-                const targetRect = event.currentTarget.getBoundingClientRect();
+                let targetRect;
+                if (event.touches) {
+                    // 触摸事件
+                    targetRect = {
+                        top: event.touches[0].clientY,
+                        left: event.touches[0].clientX,
+                        width: 0,
+                        height: 0
+                    };
+                } else {
+                    targetRect = event.currentTarget.getBoundingClientRect();
+                }
                 const chatArea = document.getElementById('messageArea').getBoundingClientRect();
                 let top = targetRect.top - menu.offsetHeight - 10;
                 if (top < chatArea.top) {
                     top = targetRect.bottom + 10;
                 }
                 menu.style.top = top + 'px';
-                menu.style.left = targetRect.left + 'px';
+                menu.style.left = (targetRect.left - 20) + 'px'; // 稍微偏移避免遮挡
                 menu.style.display = 'block';
 
                 // 点击其他地方关闭菜单
@@ -4595,10 +4609,12 @@
                     if (!menu.contains(e.target)) {
                         menu.style.display = 'none';
                         document.removeEventListener('click', closeMenu);
+                        document.removeEventListener('touchstart', closeMenu);
                     }
                 };
                 setTimeout(() => {
                     document.addEventListener('click', closeMenu);
+                    document.addEventListener('touchstart', closeMenu);
                 }, 0);
             },
 
@@ -5506,8 +5522,9 @@
                 const index = msgRow.dataset.index;
                 if (index !== undefined) ChatHandler.handleLongPressStart(e, parseInt(index));
             });
-            document.getElementById('messageArea').addEventListener('touchend', () => ChatHandler.handleLongPressEnd());
-            document.getElementById('messageArea').addEventListener('touchcancel', () => ChatHandler.handleLongPressEnd());
+            document.getElementById('messageArea').addEventListener('touchend', (e) => ChatHandler.handleLongPressEnd(e));
+            document.getElementById('messageArea').addEventListener('touchcancel', (e) => ChatHandler.handleLongPressEnd(e));
+            document.getElementById('messageArea').addEventListener('touchmove', (e) => ChatHandler.handleLongPressEnd(e));
             document.getElementById('messageArea').addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 const msgRow = e.target.closest('.message');
