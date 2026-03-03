@@ -1627,9 +1627,7 @@ const UIManager = {
 
         return { water, breakfast, lunch, dinner, location };
     }
-};
-
-// ==================== 聊天处理模块 ====================
+};// ==================== 聊天处理模块 ====================
 const ChatHandler = {
     currentVisibleStart: 0, currentVisibleEnd: 0, isLoadingMore: false, prevStart: 0,
     longPressTimer: null,
@@ -2290,6 +2288,60 @@ const ChatHandler = {
         Utils.showToast('已删除', 1500);
     },
 
+    // ---------- 新增的两个方法 ----------
+    // 接受转账（直接处理，不经过卡片）
+    acceptTransferMsg(index) {
+        const contact = DataManager.getCurrentContact();
+        const msg = contact.messages[index];
+        if (!msg || msg.type !== 'transfer') return;
+        let transferData = msg.content;
+        if (typeof transferData === 'string') {
+            try { transferData = JSON.parse(transferData); } catch (e) { return; }
+        }
+        if (transferData.status !== 'pending') {
+            Utils.showToast('该转账已处理');
+            return;
+        }
+        transferData.status = 'accepted';
+        msg.content = transferData;
+        DataManager.saveContacts();
+        // 加款
+        const amount = parseFloat(transferData.amount);
+        DataManager.updateBalance(amount);
+        DataManager.addTransaction({
+            id: Date.now(),
+            name: `收到来自 ${Utils.getDisplayName(contact)} 的转账`,
+            amount: amount,
+            date: new Date().toLocaleDateString(),
+            type: 'receive'
+        });
+        WalletManager.renderWallet();
+        UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
+        this.addMessageToCurrent('你已接收转账', true, false, 'text');
+        Utils.showToast('已收款');
+    },
+
+    // 退回转账（直接处理）
+    rejectTransferMsg(index) {
+        const contact = DataManager.getCurrentContact();
+        const msg = contact.messages[index];
+        if (!msg || msg.type !== 'transfer') return;
+        let transferData = msg.content;
+        if (typeof transferData === 'string') {
+            try { transferData = JSON.parse(transferData); } catch (e) { return; }
+        }
+        if (transferData.status !== 'pending') {
+            Utils.showToast('该转账已处理');
+            return;
+        }
+        transferData.status = 'rejected';
+        msg.content = transferData;
+        DataManager.saveContacts();
+        UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
+        this.addMessageToCurrent('你已退回转账', true, false, 'text');
+        Utils.showToast('已退回');
+    },
+
     handleTransferClick(index) {
         const contact = DataManager.getCurrentContact();
         const msg = contact.messages[index];
@@ -2836,29 +2888,51 @@ function bindEvents() {
     });
 
     const messageArea = document.getElementById('messageArea');
-    messageArea.addEventListener('scroll', () => { if (messageArea.scrollTop < 100 && !ChatHandler.isLoadingMore) ChatHandler.loadMoreMessages(); });
+    // 处理转账气泡点击（同时支持触摸和点击）
+    messageArea.addEventListener('click', handleMessageAreaClick);
+    messageArea.addEventListener('touchstart', handleMessageAreaClick, { passive: false });
 
-    messageArea.addEventListener('click', (e) => {
-        // 优先处理转账气泡点击（即使多选模式下也允许点击转账）
+    function handleMessageAreaClick(e) {
+        if (e.type === 'touchstart') {
+            e.preventDefault();
+        }
         const transferBubble = e.target.closest('.transfer-bubble');
         if (transferBubble) {
-            const idx = transferBubble.dataset.index;
-            if (idx !== undefined) {
-                ChatHandler.handleTransferClick(parseInt(idx));
+            const idx = parseInt(transferBubble.getAttribute('data-index'));
+            if (!isNaN(idx)) {
+                // 获取转账数据
+                const contact = DataManager.getCurrentContact();
+                const msg = contact.messages[idx];
+                if (!msg || msg.type !== 'transfer') return;
+                let transferData = msg.content;
+                if (typeof transferData === 'string') {
+                    try { transferData = JSON.parse(transferData); } catch (e) { return; }
+                }
+                if (transferData.status !== 'pending') {
+                    Utils.showToast('该转账已处理');
+                    return;
+                }
+                const amount = transferData.amount;
+                const note = transferData.note || '无留言';
+                const userAction = confirm(`转账金额：¥${amount}\n留言：${note}\n\n点击“确定”收款，点击“取消”退回`);
+                if (userAction) {
+                    ChatHandler.acceptTransferMsg(idx);
+                } else {
+                    ChatHandler.rejectTransferMsg(idx);
+                }
             }
             e.stopPropagation();
-            e.preventDefault();
             return;
         }
 
-        // 处理多选
+        // 处理多选模式（原有逻辑）
         if (ChatHandler.isMultiSelectMode) {
             const msgRow = e.target.closest('.message');
             if (!msgRow) return;
-            const index = parseInt(msgRow.dataset.index);
+            const index = parseInt(msgRow.getAttribute('data-index'));
             ChatHandler.toggleMessageSelection(index);
         }
-    });
+    }
 
     document.getElementById('imageBtn').addEventListener('click', () => {
         const fileInput = document.createElement('input'); fileInput.type = 'file'; fileInput.accept = 'image/*'; fileInput.style.display = 'none'; document.body.appendChild(fileInput);
