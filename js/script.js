@@ -2919,9 +2919,7 @@ function bindEvents() {
                     ChatHandler.rejectTransferMsg(idx);
                 }
             }
-            e.stopPropagation();
-            return;
-        }
+                 }
 
         // 处理多选模式（原有逻辑）
         if (ChatHandler.isMultiSelectMode) {
