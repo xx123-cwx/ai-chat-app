@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 完整版（转账颜色统一+双向转账）</title>
+    <title>AI角色 · 完整版（转账颜色统一+双向转账+时间分隔）</title>
     <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -575,6 +575,18 @@
             background: #87CEFA;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%2387CEFA"/><circle cx="20" cy="20" r="15" fill="%23fff" opacity="0.1"/><circle cx="80" cy="80" r="20" fill="%23fff" opacity="0.1"/></svg>');
             min-height: 0;
+        }
+
+        /* 时间分隔线 */
+        .time-separator {
+            align-self: center;
+            background-color: rgba(0,0,0,0.05);
+            color: #666;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin: 8px 0;
+            backdrop-filter: blur(2px);
         }
 
         .message {
@@ -1904,6 +1916,7 @@
         const STORE_NAME = 'images';
         const INITIAL_MESSAGE_COUNT = 20;
         const LOAD_MORE_COUNT = 10;
+        const TIME_SEPARATOR_THRESHOLD = 30 * 60 * 1000; // 30分钟
 
         // ==================== 工具函数模块 ====================
         const Utils = {
@@ -1972,7 +1985,12 @@
 
             formatTime(timestamp) {
                 let date = timestamp ? new Date(timestamp) : new Date();
-                return date.getHours() + ':' + (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes());
+                return date.getHours().toString().padStart(2,'0') + ':' + date.getMinutes().toString().padStart(2,'0');
+            },
+
+            formatTimeHM(timestamp) {
+                let date = timestamp ? new Date(timestamp) : new Date();
+                return date.getHours().toString().padStart(2,'0') + ':' + date.getMinutes().toString().padStart(2,'0');
             },
 
             // ---------- IndexedDB 操作 ----------
@@ -3061,16 +3079,29 @@
                 }
                 const contact = DataManager.getCurrentContact();
                 const avatarContent = contact.avatar;
+                let prevTimestamp = null;
                 for (let i = start; i < end; i++) {
                     const msg = messages[i];
                     if (!msg) continue;
+
+                    // 时间分隔符：非系统消息且与上一条消息时间差超过阈值
+                    if (msg.role !== 'system' && prevTimestamp !== null && (msg.timestamp - prevTimestamp > TIME_SEPARATOR_THRESHOLD)) {
+                        const sep = document.createElement('div');
+                        sep.className = 'time-separator';
+                        sep.textContent = Utils.formatTimeHM(msg.timestamp);
+                        area.appendChild(sep);
+                    }
+
                     if (msg.role === 'system') {
                         const div = document.createElement('div'); div.className = 'system-message'; div.textContent = msg.content;
                         area.appendChild(div);
+                        // 系统消息不更新prevTimestamp
                     } else {
                         if (Utils.isRecallMessage(msg)) {
                             const div = document.createElement('div'); div.className = 'system-message'; div.textContent = msg.content || '您撤回了一条消息';
-                            area.appendChild(div); continue;
+                            area.appendChild(div);
+                            prevTimestamp = msg.timestamp; // 撤回消息也更新时间
+                            continue;
                         }
                         const isUser = msg.role === 'user';
                         const row = document.createElement('div'); row.className = `message ${isUser ? 'me' : 'other'}`; row.dataset.index = i;
@@ -3191,6 +3222,15 @@
                                 ${transferData.note ? `<div class="transfer-note">${transferData.note}</div>` : ''}
                                 <div class="transfer-status">${statusText}</div>
                             `;
+
+                            // ===== 修复：为每个转账气泡单独绑定点击事件 =====
+                            transferBubble.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                const idx = transferBubble.dataset.index;
+                                if (idx !== undefined) {
+                                    ChatHandler.handleTransferClick(parseInt(idx));
+                                }
+                            });
                             
                             const timeSpan = document.createElement('span'); timeSpan.className = 'msg-time'; timeSpan.textContent = Utils.formatTime(msg.timestamp);
                             if (isUser) {
@@ -3218,6 +3258,13 @@
                         
                         row.appendChild(bubbleWrapper);
                         area.appendChild(row);
+                    }
+                    // 更新上一个时间戳（系统消息不计入时间分隔判断）
+                    if (msg.role !== 'system' && !Utils.isRecallMessage(msg)) {
+                        prevTimestamp = msg.timestamp;
+                    } else if (Utils.isRecallMessage(msg)) {
+                        // 撤回消息也可以更新prevTimestamp，使后续消息与撤回消息比较时间
+                        prevTimestamp = msg.timestamp;
                     }
                 }
                 ChatHandler.prevStart = start;
@@ -4744,7 +4791,7 @@
             messageArea.addEventListener('scroll', () => { if (messageArea.scrollTop < 100 && !ChatHandler.isLoadingMore) ChatHandler.loadMoreMessages(); });
 
             messageArea.addEventListener('click', (e) => {
-                // 处理转账点击
+                // 处理转账点击（备用，但每个气泡已绑定独立事件，此处可保留）
                 const transferBubble = e.target.closest('.transfer-bubble');
                 if (transferBubble) {
                     const index = transferBubble.dataset.index;
