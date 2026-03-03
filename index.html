@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 完整版（转账修复+钱包）</title>
+    <title>AI角色 · 完整版（转账修复+钱包实时更新）</title>
     <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -636,6 +636,8 @@
             min-width: 150px;
             cursor: pointer;
             color: #333;
+            touch-action: manipulation;  /* 优化触摸响应 */
+            -webkit-tap-highlight-color: rgba(0,0,0,0.1);
         }
         .transfer-amount {
             font-size: 18px;
@@ -1233,7 +1235,7 @@
 </head>
 <body>
     <div class="phone-screen">
-        <!-- 桌面（新布局） -->
+        <!-- 桌面（包含状态栏、AI状态小部件、两列布局、Dock、Home按钮） -->
         <div class="desktop" id="desktop">
             <div class="status-bar">
                 <span id="currentTime">9:41</span>
@@ -1244,7 +1246,7 @@
                 </span>
             </div>
 
-            <!-- AI状态小部件（全宽，位于状态栏下方，增强版） -->
+            <!-- AI状态小部件 -->
             <div class="ai-status-wide" id="aiStatusWidget">
                 <div class="ai-status-card">
                     <div class="ai-status-header">
@@ -2591,140 +2593,6 @@
             }
         };
 
-        // ==================== 备份处理模块 ====================
-        const BackupHandler = {
-            async exportBackup() {
-                try {
-                    Utils.showToast('正在准备备份...', 0);
-                    const images = await Utils.getAllImages();
-                    const backup = {
-                        version: 1,
-                        timestamp: Date.now(),
-                        apiConfigs: DataManager.apiConfigs,
-                        activeConfigId: DataManager.activeConfigId,
-                        contacts: DataManager.contacts,
-                        userProfile: DataManager.userProfile,
-                        beautifySettings: DataManager.beautifySettings,
-                        worldBooks: DataManager.worldBooks,
-                        posts: DataManager.posts,
-                        wallet: DataManager.wallet,
-                        images: images
-                    };
-                    const json = JSON.stringify(backup, null, 2);
-                    const blob = new Blob([json], { type: 'application/json' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `ai-chat-backup-${new Date().toISOString().slice(0, 10)}.json`;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                    Utils.showToast('备份导出成功', 2000);
-                } catch (err) {
-                    console.error(err);
-                    Utils.showToast('导出失败：' + err.message, 3000);
-                }
-            },
-
-            async importBackup(file) {
-                try {
-                    Utils.showToast('正在导入备份...', 0);
-                    const text = await Utils.readFileAsText(file);
-                    const backup = JSON.parse(text);
-                    if (!backup.version || backup.version !== 1) {
-                        throw new Error('不支持的备份版本');
-                    }
-                    if (!confirm('导入将覆盖所有现有数据，确定继续？')) return;
-
-                    await this.clearAllData(false);
-
-                    if (backup.images && Array.isArray(backup.images)) {
-                        await Utils.saveImagesBatch(backup.images);
-                    }
-
-                    DataManager.apiConfigs = backup.apiConfigs || [];
-                    DataManager.activeConfigId = backup.activeConfigId || (DataManager.apiConfigs[0]?.id || null);
-                    DataManager.contacts = backup.contacts || [];
-                    DataManager.userProfile = backup.userProfile || { name: '我的网名', status: '在线', avatar: '🤖' };
-                    DataManager.beautifySettings = backup.beautifySettings || { wallpaper: null, appIcons: {}, momentCover: null };
-                    DataManager.worldBooks = backup.worldBooks || [];
-                    DataManager.posts = backup.posts || [];
-                    DataManager.wallet = backup.wallet || { balance: 1234.56, transactions: [] };
-
-                    DataManager.saveConfigs();
-                    DataManager.saveContacts();
-                    DataManager.saveUserProfile();
-                    DataManager.saveBeautifySettings();
-                    DataManager.saveWorldBooks();
-                    DataManager.savePosts();
-                    DataManager.saveWallet();
-
-                    Utils.showToast('导入成功，页面即将刷新', 2000);
-                    setTimeout(() => location.reload(), 1500);
-                } catch (err) {
-                    console.error(err);
-                    Utils.showToast('导入失败：' + err.message, 3000);
-                }
-            },
-
-            async clearAllData(confirmMsg = true) {
-                if (confirmMsg && !confirm('⚠️ 确定要清除所有数据吗？此操作不可恢复！')) return;
-                Utils.showToast('正在清除数据...', 0);
-                localStorage.removeItem('apiConfigs');
-                localStorage.removeItem('activeConfigId');
-                localStorage.removeItem('contacts');
-                localStorage.removeItem('userProfile');
-                localStorage.removeItem('beautifySettings');
-                localStorage.removeItem('worldBooks');
-                localStorage.removeItem('posts');
-                localStorage.removeItem('wallet');
-                await Utils.clearImages();
-                DataManager.apiConfigs = [{
-                    id: Date.now().toString(),
-                    name: '默认配置',
-                    base_url: '',
-                    api_key: '',
-                    models: [],
-                    currentModel: ''
-                }];
-                DataManager.activeConfigId = DataManager.apiConfigs[0].id;
-                DataManager.contacts = [{
-                    id: Date.now().toString(),
-                    avatar: '🤖',
-                    name: '默认助手',
-                    remark: '',
-                    personality: '你是一个友好的AI助手，乐于助人。',
-                    configId: '',
-                    blocked: false,
-                    pinned: false,
-                    muted: false,
-                    mutedLastMessage: '',
-                    messages: [],
-                    autoPostEnabled: false,
-                    autoPostInterval: 1,
-                    lastAutoPostTime: 0,
-                    bubbleCss: '',
-                    chatBackground: null
-                }];
-                DataManager.currentContactId = DataManager.contacts[0].id;
-                DataManager.userProfile = { name: '我的网名', status: '在线', avatar: '🤖', realName: '', address: '', lineId: '', bio: '', userSetting: '' };
-                DataManager.beautifySettings = { wallpaper: null, appIcons: {}, momentCover: null };
-                DataManager.worldBooks = [];
-                DataManager.posts = [];
-                DataManager.wallet = { balance: 1234.56, transactions: [] };
-
-                DataManager.saveConfigs();
-                DataManager.saveContacts();
-                DataManager.saveUserProfile();
-                DataManager.saveBeautifySettings();
-                DataManager.saveWorldBooks();
-                DataManager.savePosts();
-                DataManager.saveWallet();
-
-                Utils.showToast('数据已清除，页面即将刷新', 2000);
-                setTimeout(() => location.reload(), 1500);
-            }
-        };
-
         // ==================== 朋友圈模块 ====================
         const PostManager = {
             tempImages: [],
@@ -3447,7 +3315,7 @@
                                 <div class="transfer-status">${statusText}</div>
                             `;
 
-                            // ===== 关键修复：为每个转账气泡单独绑定点击事件 =====
+                            // 为每个转账气泡单独绑定点击事件（确保移动端可用）
                             transferBubble.addEventListener('click', (e) => {
                                 e.stopPropagation();
                                 const idx = transferBubble.dataset.index;
@@ -3907,10 +3775,23 @@
                     if (!response.ok) throw new Error('API请求失败');
                     const data = await response.json();
                     const reply = data.choices?.[0]?.message?.content?.trim() || '';
+                    // 只要包含接收、收款、收下、接受等词，都视为接收
                     if (reply.includes('接收') || reply.includes('收款') || reply.includes('收下') || reply.includes('接受')) {
                         transferData.status = 'accepted';
+                        // ===== 用户发起的转账被AI接收：扣款 =====
+                        const amount = parseFloat(transferData.amount);
+                        DataManager.updateBalance(-amount);
+                        DataManager.addTransaction({
+                            id: Date.now(),
+                            name: `转账给 ${Utils.getDisplayName(contact)}`,
+                            amount: -amount,
+                            date: new Date().toLocaleDateString(),
+                            type: 'transfer'
+                        });
+                        WalletManager.renderWallet(); // 刷新钱包显示
                     } else {
                         transferData.status = 'rejected';
+                        // 退回：不产生交易
                     }
                     msg.content = transferData;
                     DataManager.saveContacts();
@@ -4487,6 +4368,18 @@
                             transferData.status = 'accepted';
                             msg.content = transferData;
                             DataManager.saveContacts();
+                            // ===== 用户接收AI的转账：加款 =====
+                            const amount = parseFloat(transferData.amount);
+                            DataManager.updateBalance(amount);
+                            DataManager.addTransaction({
+                                id: Date.now(),
+                                name: `收到来自 ${Utils.getDisplayName(contact)} 的转账`,
+                                amount: amount,
+                                date: new Date().toLocaleDateString(),
+                                type: 'receive'
+                            });
+                            WalletManager.renderWallet(); // 刷新钱包显示
+
                             UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
                             modal.classList.remove('active');
                             this.addMessageToCurrent('你已接收转账', true, false, 'text');
@@ -5686,6 +5579,140 @@
             function updateTime() { const now = new Date(); document.getElementById('currentTime').textContent = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`; }
             updateTime(); setInterval(updateTime, 1000);
         }
+
+        // ==================== 备份处理模块 ====================
+        const BackupHandler = {
+            async exportBackup() {
+                try {
+                    Utils.showToast('正在准备备份...', 0);
+                    const images = await Utils.getAllImages();
+                    const backup = {
+                        version: 1,
+                        timestamp: Date.now(),
+                        apiConfigs: DataManager.apiConfigs,
+                        activeConfigId: DataManager.activeConfigId,
+                        contacts: DataManager.contacts,
+                        userProfile: DataManager.userProfile,
+                        beautifySettings: DataManager.beautifySettings,
+                        worldBooks: DataManager.worldBooks,
+                        posts: DataManager.posts,
+                        wallet: DataManager.wallet,
+                        images: images
+                    };
+                    const json = JSON.stringify(backup, null, 2);
+                    const blob = new Blob([json], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `ai-chat-backup-${new Date().toISOString().slice(0, 10)}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    Utils.showToast('备份导出成功', 2000);
+                } catch (err) {
+                    console.error(err);
+                    Utils.showToast('导出失败：' + err.message, 3000);
+                }
+            },
+
+            async importBackup(file) {
+                try {
+                    Utils.showToast('正在导入备份...', 0);
+                    const text = await Utils.readFileAsText(file);
+                    const backup = JSON.parse(text);
+                    if (!backup.version || backup.version !== 1) {
+                        throw new Error('不支持的备份版本');
+                    }
+                    if (!confirm('导入将覆盖所有现有数据，确定继续？')) return;
+
+                    await this.clearAllData(false);
+
+                    if (backup.images && Array.isArray(backup.images)) {
+                        await Utils.saveImagesBatch(backup.images);
+                    }
+
+                    DataManager.apiConfigs = backup.apiConfigs || [];
+                    DataManager.activeConfigId = backup.activeConfigId || (DataManager.apiConfigs[0]?.id || null);
+                    DataManager.contacts = backup.contacts || [];
+                    DataManager.userProfile = backup.userProfile || { name: '我的网名', status: '在线', avatar: '🤖' };
+                    DataManager.beautifySettings = backup.beautifySettings || { wallpaper: null, appIcons: {}, momentCover: null };
+                    DataManager.worldBooks = backup.worldBooks || [];
+                    DataManager.posts = backup.posts || [];
+                    DataManager.wallet = backup.wallet || { balance: 1234.56, transactions: [] };
+
+                    DataManager.saveConfigs();
+                    DataManager.saveContacts();
+                    DataManager.saveUserProfile();
+                    DataManager.saveBeautifySettings();
+                    DataManager.saveWorldBooks();
+                    DataManager.savePosts();
+                    DataManager.saveWallet();
+
+                    Utils.showToast('导入成功，页面即将刷新', 2000);
+                    setTimeout(() => location.reload(), 1500);
+                } catch (err) {
+                    console.error(err);
+                    Utils.showToast('导入失败：' + err.message, 3000);
+                }
+            },
+
+            async clearAllData(confirmMsg = true) {
+                if (confirmMsg && !confirm('⚠️ 确定要清除所有数据吗？此操作不可恢复！')) return;
+                Utils.showToast('正在清除数据...', 0);
+                localStorage.removeItem('apiConfigs');
+                localStorage.removeItem('activeConfigId');
+                localStorage.removeItem('contacts');
+                localStorage.removeItem('userProfile');
+                localStorage.removeItem('beautifySettings');
+                localStorage.removeItem('worldBooks');
+                localStorage.removeItem('posts');
+                localStorage.removeItem('wallet');
+                await Utils.clearImages();
+                DataManager.apiConfigs = [{
+                    id: Date.now().toString(),
+                    name: '默认配置',
+                    base_url: '',
+                    api_key: '',
+                    models: [],
+                    currentModel: ''
+                }];
+                DataManager.activeConfigId = DataManager.apiConfigs[0].id;
+                DataManager.contacts = [{
+                    id: Date.now().toString(),
+                    avatar: '🤖',
+                    name: '默认助手',
+                    remark: '',
+                    personality: '你是一个友好的AI助手，乐于助人。',
+                    configId: '',
+                    blocked: false,
+                    pinned: false,
+                    muted: false,
+                    mutedLastMessage: '',
+                    messages: [],
+                    autoPostEnabled: false,
+                    autoPostInterval: 1,
+                    lastAutoPostTime: 0,
+                    bubbleCss: '',
+                    chatBackground: null
+                }];
+                DataManager.currentContactId = DataManager.contacts[0].id;
+                DataManager.userProfile = { name: '我的网名', status: '在线', avatar: '🤖', realName: '', address: '', lineId: '', bio: '', userSetting: '' };
+                DataManager.beautifySettings = { wallpaper: null, appIcons: {}, momentCover: null };
+                DataManager.worldBooks = [];
+                DataManager.posts = [];
+                DataManager.wallet = { balance: 1234.56, transactions: [] };
+
+                DataManager.saveConfigs();
+                DataManager.saveContacts();
+                DataManager.saveUserProfile();
+                DataManager.saveBeautifySettings();
+                DataManager.saveWorldBooks();
+                DataManager.savePosts();
+                DataManager.saveWallet();
+
+                Utils.showToast('数据已清除，页面即将刷新', 2000);
+                setTimeout(() => location.reload(), 1500);
+            }
+        };
 
         // ==================== 初始化入口 ====================
         document.addEventListener('DOMContentLoaded', async function() {
