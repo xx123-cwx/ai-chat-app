@@ -3642,7 +3642,8 @@
                     if (!response.ok) throw new Error('API请求失败');
                     const data = await response.json();
                     const reply = data.choices?.[0]?.message?.content?.trim() || '';
-                    if (reply.includes('接收')) {
+                    // ========== 修复：将多种接收词都视为接收 ==========
+                    if (reply.includes('接收') || reply.includes('收款') || reply.includes('收下') || reply.includes('接受')) {
                         transferData.status = 'accepted';
                     } else {
                         // 默认退回（包括回复“退回”或其他内容）
