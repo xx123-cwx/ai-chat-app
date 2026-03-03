@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 完整版（转账颜色统一+双向转账+时间分隔）</title>
+    <title>AI角色 · 完整版（转账修复+钱包）</title>
     <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -857,13 +857,122 @@
         }
         .archive-field textarea { min-height: 80px; resize: vertical; }
 
-        /* 装饰 */
-        .decorate-container {
-            flex: 1; padding: 20px 16px; background: #f5f5f5; overflow-y: auto;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 0;
+        /* ===== 钱包界面 ===== */
+        .wallet-container {
+            flex: 1;
+            background: #f5f5f5;
+            overflow-y: auto;
+            padding: 16px;
         }
-        .decorate-placeholder { color: #999; font-size: 16px; }
+        .wallet-balance-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .balance-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .balance-amount {
+            font-size: 36px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+        }
+        .balance-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .balance-action-btn {
+            flex: 1;
+            padding: 12px;
+            background: #07c160;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+        }
+        .wallet-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .wallet-grid-item {
+            background: white;
+            border-radius: 12px;
+            padding: 12px 0;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .wallet-grid-item i {
+            font-size: 24px;
+            color: #07c160;
+            margin-bottom: 4px;
+        }
+        .wallet-grid-item span {
+            font-size: 12px;
+            color: #333;
+        }
+        .transaction-list {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+        }
+        .transaction-header {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+        .transaction-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+        }
+        .transaction-icon i {
+            font-size: 20px;
+            color: #07c160;
+        }
+        .transaction-info {
+            flex: 1;
+        }
+        .transaction-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+        }
+        .transaction-desc {
+            font-size: 12px;
+            color: #999;
+        }
+        .transaction-amount {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .transaction-amount.positive { color: #07c160; }
+        .transaction-amount.negative { color: #ff3b30; }
 
         /* 世界书 */
         .worldbook-container {
@@ -1533,9 +1642,10 @@
                         <div class="icon-bg"><i class="fa-solid fa-address-card"></i></div>
                         <span>个人档案</span>
                     </div>
-                    <div class="profile-icon-item" id="profileDecorate">
-                        <div class="icon-bg"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-                        <span>装饰</span>
+                    <!-- 原“装饰”改为“钱包” -->
+                    <div class="profile-icon-item" id="profileWallet">
+                        <div class="icon-bg"><i class="fa-solid fa-wallet"></i></div>
+                        <span>钱包</span>
                     </div>
                     <div class="profile-icon-item" id="profileDiary">
                         <div class="icon-bg"><i class="fa-solid fa-book-open"></i></div>
@@ -1576,14 +1686,43 @@
             </div>
         </div>
 
-        <!-- 装饰设置界面 -->
-        <div class="app-view" id="decorateView">
+        <!-- 钱包界面（取代原来的装饰） -->
+        <div class="app-view" id="userWalletView">
             <div class="app-header">
-                <span class="back-btn" id="decorateBackBtn" data-back><i class="fa-solid fa-arrow-left"></i></span>
-                <span class="app-title">装饰</span>
+                <span class="back-btn" id="walletBackBtn" data-back><i class="fa-solid fa-arrow-left"></i></span>
+                <span class="app-title">钱包</span>
             </div>
-            <div class="decorate-container">
-                <div class="decorate-placeholder">功能开发中</div>
+            <div class="wallet-container">
+                <div class="wallet-balance-card">
+                    <div class="balance-label">我的余额</div>
+                    <div class="balance-amount" id="walletBalance">¥0.00</div>
+                    <div class="balance-actions">
+                        <button class="balance-action-btn" id="walletRecharge">充值</button>
+                        <button class="balance-action-btn" id="walletWithdraw">提现</button>
+                    </div>
+                </div>
+                <div class="wallet-grid">
+                    <div class="wallet-grid-item" id="walletPay">
+                        <i class="fa-solid fa-qrcode"></i>
+                        <span>收付款</span>
+                    </div>
+                    <div class="wallet-grid-item" id="walletCard">
+                        <i class="fa-regular fa-credit-card"></i>
+                        <span>银行卡</span>
+                    </div>
+                    <div class="wallet-grid-item" id="walletBill">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>账单</span>
+                    </div>
+                    <div class="wallet-grid-item" id="walletCoupon">
+                        <i class="fa-solid fa-ticket"></i>
+                        <span>优惠券</span>
+                    </div>
+                </div>
+                <div class="transaction-list">
+                    <div class="transaction-header">最近交易</div>
+                    <div id="walletTransactions"></div>
+                </div>
             </div>
         </div>
 
@@ -2170,6 +2309,15 @@
             },
             worldBooks: [],
             posts: [],
+            // 钱包数据
+            wallet: {
+                balance: 1234.56,
+                transactions: [
+                    { id: 1, name: '转账给AI', amount: -50.00, date: '2026-03-03', type: 'transfer' },
+                    { id: 2, name: '收到转账', amount: 100.00, date: '2026-03-02', type: 'receive' },
+                    { id: 3, name: '充值', amount: 500.00, date: '2026-03-01', type: 'recharge' }
+                ]
+            },
 
             async processImageForSave(imageData, prefix = 'img') {
                 if (!imageData) return null;
@@ -2364,6 +2512,82 @@
                 const globalBooks = this.worldBooks.filter(w => w.global === true);
                 const specificBooks = this.worldBooks.filter(w => w.global === false && w.boundRoles && w.boundRoles.includes(contactId));
                 return [...globalBooks, ...specificBooks];
+            },
+
+            // 钱包方法
+            loadWallet() {
+                const saved = localStorage.getItem('wallet');
+                if (saved) {
+                    this.wallet = JSON.parse(saved);
+                } else {
+                    this.wallet = { balance: 1234.56, transactions: [] };
+                }
+            },
+
+            saveWallet() {
+                localStorage.setItem('wallet', JSON.stringify(this.wallet));
+            },
+
+            addTransaction(tx) {
+                this.wallet.transactions.unshift(tx);
+                this.saveWallet();
+            },
+
+            updateBalance(amount) {
+                this.wallet.balance += amount;
+                this.saveWallet();
+            }
+        };
+
+        // ==================== 钱包管理器 ====================
+        const WalletManager = {
+            renderWallet() {
+                const balanceEl = document.getElementById('walletBalance');
+                if (balanceEl) balanceEl.textContent = '¥' + DataManager.wallet.balance.toFixed(2);
+                const txContainer = document.getElementById('walletTransactions');
+                if (!txContainer) return;
+                txContainer.innerHTML = '';
+                const txs = DataManager.wallet.transactions.slice(0, 5);
+                txs.forEach(tx => {
+                    const item = document.createElement('div'); item.className = 'transaction-item';
+                    const iconDiv = document.createElement('div'); iconDiv.className = 'transaction-icon';
+                    let iconClass = 'fa-solid fa-exchange-alt';
+                    if (tx.type === 'transfer') iconClass = 'fa-solid fa-paper-plane';
+                    else if (tx.type === 'receive') iconClass = 'fa-solid fa-download';
+                    else if (tx.type === 'recharge') iconClass = 'fa-solid fa-plus-circle';
+                    iconDiv.innerHTML = `<i class="${iconClass}"></i>`;
+                    item.appendChild(iconDiv);
+                    const infoDiv = document.createElement('div'); infoDiv.className = 'transaction-info';
+                    infoDiv.innerHTML = `<div class="transaction-name">${tx.name}</div><div class="transaction-desc">${tx.date}</div>`;
+                    item.appendChild(infoDiv);
+                    const amountSpan = document.createElement('span'); amountSpan.className = `transaction-amount ${tx.amount > 0 ? 'positive' : 'negative'}`;
+                    amountSpan.textContent = (tx.amount > 0 ? '+' : '') + tx.amount.toFixed(2);
+                    item.appendChild(amountSpan);
+                    txContainer.appendChild(item);
+                });
+            },
+
+            init() {
+                document.getElementById('walletRecharge').addEventListener('click', () => {
+                    DataManager.updateBalance(100);
+                    DataManager.addTransaction({ id: Date.now(), name: '充值', amount: 100, date: new Date().toLocaleDateString(), type: 'recharge' });
+                    this.renderWallet();
+                    Utils.showToast('充值成功 +100');
+                });
+                document.getElementById('walletWithdraw').addEventListener('click', () => {
+                    if (DataManager.wallet.balance >= 50) {
+                        DataManager.updateBalance(-50);
+                        DataManager.addTransaction({ id: Date.now(), name: '提现', amount: -50, date: new Date().toLocaleDateString(), type: 'withdraw' });
+                        this.renderWallet();
+                        Utils.showToast('提现成功 -50');
+                    } else {
+                        Utils.showToast('余额不足');
+                    }
+                });
+                // 功能入口提示
+                document.querySelectorAll('#walletPay, #walletCard, #walletBill, #walletCoupon').forEach(el => {
+                    el.addEventListener('click', () => Utils.showToast('功能开发中'));
+                });
             }
         };
 
@@ -2383,6 +2607,7 @@
                         beautifySettings: DataManager.beautifySettings,
                         worldBooks: DataManager.worldBooks,
                         posts: DataManager.posts,
+                        wallet: DataManager.wallet,
                         images: images
                     };
                     const json = JSON.stringify(backup, null, 2);
@@ -2423,6 +2648,7 @@
                     DataManager.beautifySettings = backup.beautifySettings || { wallpaper: null, appIcons: {}, momentCover: null };
                     DataManager.worldBooks = backup.worldBooks || [];
                     DataManager.posts = backup.posts || [];
+                    DataManager.wallet = backup.wallet || { balance: 1234.56, transactions: [] };
 
                     DataManager.saveConfigs();
                     DataManager.saveContacts();
@@ -2430,6 +2656,7 @@
                     DataManager.saveBeautifySettings();
                     DataManager.saveWorldBooks();
                     DataManager.savePosts();
+                    DataManager.saveWallet();
 
                     Utils.showToast('导入成功，页面即将刷新', 2000);
                     setTimeout(() => location.reload(), 1500);
@@ -2449,6 +2676,7 @@
                 localStorage.removeItem('beautifySettings');
                 localStorage.removeItem('worldBooks');
                 localStorage.removeItem('posts');
+                localStorage.removeItem('wallet');
                 await Utils.clearImages();
                 DataManager.apiConfigs = [{
                     id: Date.now().toString(),
@@ -2482,6 +2710,7 @@
                 DataManager.beautifySettings = { wallpaper: null, appIcons: {}, momentCover: null };
                 DataManager.worldBooks = [];
                 DataManager.posts = [];
+                DataManager.wallet = { balance: 1234.56, transactions: [] };
 
                 DataManager.saveConfigs();
                 DataManager.saveContacts();
@@ -2489,6 +2718,7 @@
                 DataManager.saveBeautifySettings();
                 DataManager.saveWorldBooks();
                 DataManager.savePosts();
+                DataManager.saveWallet();
 
                 Utils.showToast('数据已清除，页面即将刷新', 2000);
                 setTimeout(() => location.reload(), 1500);
@@ -3095,12 +3325,11 @@
                     if (msg.role === 'system') {
                         const div = document.createElement('div'); div.className = 'system-message'; div.textContent = msg.content;
                         area.appendChild(div);
-                        // 系统消息不更新prevTimestamp
                     } else {
                         if (Utils.isRecallMessage(msg)) {
                             const div = document.createElement('div'); div.className = 'system-message'; div.textContent = msg.content || '您撤回了一条消息';
                             area.appendChild(div);
-                            prevTimestamp = msg.timestamp; // 撤回消息也更新时间
+                            prevTimestamp = msg.timestamp;
                             continue;
                         }
                         const isUser = msg.role === 'user';
@@ -3149,7 +3378,6 @@
                                 icon.dataset.text = msg.content.replace(/'/g, "\\'");
                             }
                             
-                            // 真实语音：点击整个气泡播放
                             if (msg.type === 'voice') {
                                 voiceBubble.addEventListener('click', function(e) {
                                     e.stopPropagation();
@@ -3159,7 +3387,6 @@
                                     }
                                 });
                             } else {
-                                // 模拟语音：点击气泡显示转文字
                                 voiceBubble.addEventListener('click', function(e) {
                                     e.stopPropagation();
                                     const transcript = this.dataset.transcript;
@@ -3188,7 +3415,6 @@
                             
                             bubbleWrapper.appendChild(voiceRow);
                             
-                            // 只有模拟语音才显示转文字
                             if (msg.type === 'voice_sim') {
                                 const transcriptDiv = document.createElement('div');
                                 transcriptDiv.className = 'voice-transcript';
@@ -3199,8 +3425,7 @@
                             const transferRow = document.createElement('div'); transferRow.className = 'transfer-row';
                             const transferBubble = document.createElement('div');
                             transferBubble.className = 'transfer-bubble';
-                            transferBubble.dataset.index = i; // 添加索引以便点击操作
-                            // 解析转账内容（假设 content 为对象）
+                            transferBubble.dataset.index = i;
                             let transferData = { amount: '0.00', note: '', status: 'pending' };
                             if (typeof msg.content === 'object') {
                                 transferData = msg.content;
@@ -3211,7 +3436,6 @@
                                     transferData = { amount: msg.content, note: '', status: 'pending' };
                                 }
                             }
-                            // 确保状态字段
                             if (!transferData.status) transferData.status = 'pending';
                             let statusText = '';
                             if (transferData.status === 'pending') statusText = '待收款';
@@ -3223,7 +3447,7 @@
                                 <div class="transfer-status">${statusText}</div>
                             `;
 
-                            // ===== 修复：为每个转账气泡单独绑定点击事件 =====
+                            // ===== 关键修复：为每个转账气泡单独绑定点击事件 =====
                             transferBubble.addEventListener('click', (e) => {
                                 e.stopPropagation();
                                 const idx = transferBubble.dataset.index;
@@ -3259,11 +3483,9 @@
                         row.appendChild(bubbleWrapper);
                         area.appendChild(row);
                     }
-                    // 更新上一个时间戳（系统消息不计入时间分隔判断）
                     if (msg.role !== 'system' && !Utils.isRecallMessage(msg)) {
                         prevTimestamp = msg.timestamp;
                     } else if (Utils.isRecallMessage(msg)) {
-                        // 撤回消息也可以更新prevTimestamp，使后续消息与撤回消息比较时间
                         prevTimestamp = msg.timestamp;
                     }
                 }
@@ -3599,7 +3821,6 @@
                 const contact = DataManager.getCurrentContact();
                 const role = isSystem ? 'system' : (isUser ? 'user' : 'assistant');
                 let content = text;
-                // 如果是转账类型，确保 content 是对象
                 if (type === 'transfer' && typeof text === 'object') {
                     content = text;
                 }
@@ -3633,19 +3854,17 @@
                 const transferData = {
                     amount: parseFloat(amount).toFixed(2),
                     note: note || '',
-                    status: 'pending' // pending, accepted, rejected
+                    status: 'pending'
                 };
                 this.stopSendingChunks();
                 this.addMessageToCurrent(transferData, true, false, 'transfer');
                 Utils.showToast('转账已发送');
 
-                // 如果是转给AI，让AI决定是否接收
                 if (contact) {
                     this.askAIToHandleTransfer(contact, contact.messages.length - 1);
                 }
             },
 
-            // AI决定是否接收转账（只更新状态，不发送文字消息）
             async askAIToHandleTransfer(contact, msgIndex) {
                 const msg = contact.messages[msgIndex];
                 if (!msg || msg.type !== 'transfer' || msg.role !== 'user') return;
@@ -3659,7 +3878,6 @@
                 }
                 if (transferData.status !== 'pending') return;
 
-                // 构造提示词
                 const prompt = `用户向你转账 ${transferData.amount} 元，留言：${transferData.note || '无'}。请根据你的人设决定是否接收这笔转账。请回复“接收”或“退回”，只回复这两个词之一。`;
                 let config;
                 if (contact.configId) {
@@ -3689,16 +3907,13 @@
                     if (!response.ok) throw new Error('API请求失败');
                     const data = await response.json();
                     const reply = data.choices?.[0]?.message?.content?.trim() || '';
-                    // ========== 修复：将多种接收词都视为接收 ==========
                     if (reply.includes('接收') || reply.includes('收款') || reply.includes('收下') || reply.includes('接受')) {
                         transferData.status = 'accepted';
                     } else {
-                        // 默认退回（包括回复“退回”或其他内容）
                         transferData.status = 'rejected';
                     }
                     msg.content = transferData;
                     DataManager.saveContacts();
-                    // 重新渲染消息区域
                     if (document.getElementById('chatDetailPage').style.display === 'flex') {
                         UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
                     }
@@ -3709,7 +3924,6 @@
                 }
             },
 
-            // AI主动转账：解析AI回复中是否包含【转账|金额|备注】标记
             parseAIResponseForTransfer(aiReply) {
                 const regex = /【转账\|([\d.]+)\|(.*?)】/;
                 const match = aiReply.match(regex);
@@ -3844,7 +4058,6 @@
 
                 for (let i = 0; i < sentences.length; i++) {
                     if (this.stopSendingFlag) break;
-                    // 降低语音概率为10%
                     const useVoice = Math.random() < 0.1;
                     if (useVoice) {
                         this.addMessageToCurrent(sentences[i], false, false, 'voice_sim', { duration: '1"' });
@@ -3903,7 +4116,6 @@
                 const worldBookContent = worldBooks.map(w => `【${w.name}】\n${w.content}`).join('\n\n');
                 const worldBookInfo = worldBookContent ? `世界书规则：\n${worldBookContent}` : '';
 
-                // 添加一条系统提示：如果需要转账，请使用格式 【转账|金额|备注】
                 const transferInstruction = '如果你需要主动向用户转账，请在回复中包含【转账|金额|备注】标记，例如“【转账|10|请你喝奶茶】”。否则正常回复。';
 
                 const systemMessages = [
@@ -3936,10 +4148,8 @@
                     let reply = data.choices?.[0]?.message?.content;
                     if (!reply) throw new Error('AI返回内容为空');
 
-                    // 解析转账标记
                     const parsed = this.parseAIResponseForTransfer(reply);
                     if (parsed) {
-                        // 生成转账消息（AI发出）
                         const transferData = {
                             amount: parsed.transfer.amount,
                             note: parsed.transfer.note,
@@ -3951,7 +4161,6 @@
 
                     const sentences = this.splitIntoSentences(reply);
                     if (sentences.length === 1 || reply.length <= 20) {
-                        // 单句也应用10%语音概率
                         const useVoice = Math.random() < 0.1;
                         if (useVoice) {
                             this.addMessageToCurrent(reply, false, false, 'voice_sim', { duration: '1"' });
@@ -4247,7 +4456,6 @@
                 Utils.showToast('已删除', 1500);
             },
 
-            // 处理点击转账气泡
             handleTransferClick(index) {
                 const contact = DataManager.getCurrentContact();
                 const msg = contact.messages[index];
@@ -4260,7 +4468,6 @@
                         return;
                     }
                 }
-                // 显示转账操作模态框
                 const modal = document.getElementById('transferActionModal');
                 document.getElementById('transferActionAmount').textContent = `¥${transferData.amount}`;
                 document.getElementById('transferActionNote').textContent = transferData.note || '无留言';
@@ -4271,22 +4478,17 @@
                 document.getElementById('transferActionStatus').textContent = `状态：${statusText}`;
 
                 const buttonsDiv = document.getElementById('transferActionButtons');
-                // 根据状态和发送方显示按钮
                 if (msg.role === 'user') {
-                    // 自己发出的转账，只能查看，不能操作
                     buttonsDiv.style.display = 'none';
                 } else {
-                    // AI发出的转账，且状态为pending时，显示接收/退回按钮
                     if (transferData.status === 'pending') {
                         buttonsDiv.style.display = 'flex';
-                        // 绑定事件
                         document.getElementById('transferAcceptBtn').onclick = () => {
                             transferData.status = 'accepted';
                             msg.content = transferData;
                             DataManager.saveContacts();
                             UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
                             modal.classList.remove('active');
-                            // 添加一条用户消息告知AI
                             this.addMessageToCurrent('你已接收转账', true, false, 'text');
                         };
                         document.getElementById('transferRejectBtn').onclick = () => {
@@ -4472,7 +4674,7 @@
             document.getElementById('phoneView').classList.remove('active');
             document.getElementById('userProfileView').classList.remove('active');
             document.getElementById('userArchiveView').classList.remove('active');
-            document.getElementById('decorateView').classList.remove('active');
+            document.getElementById('userWalletView').classList.remove('active');
         }
 
         function openApp(app) {
@@ -4767,7 +4969,7 @@
             document.querySelectorAll('[data-back]').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (document.getElementById('decorateView').classList.contains('active')) { document.getElementById('decorateView').classList.remove('active'); document.getElementById('userProfileView').classList.add('active'); }
+                    if (document.getElementById('userWalletView').classList.contains('active')) { document.getElementById('userWalletView').classList.remove('active'); document.getElementById('userProfileView').classList.add('active'); }
                     else if (document.getElementById('userArchiveView').classList.contains('active')) { document.getElementById('userArchiveView').classList.remove('active'); document.getElementById('userProfileView').classList.add('active'); }
                     else if (document.getElementById('userProfileView').classList.contains('active')) { document.getElementById('userProfileView').classList.remove('active'); document.getElementById('chatView').classList.add('active'); ChatHandler.showContactList(); }
                     else hideAllAppViews();
@@ -4791,16 +4993,7 @@
             messageArea.addEventListener('scroll', () => { if (messageArea.scrollTop < 100 && !ChatHandler.isLoadingMore) ChatHandler.loadMoreMessages(); });
 
             messageArea.addEventListener('click', (e) => {
-                // 处理转账点击（备用，但每个气泡已绑定独立事件，此处可保留）
-                const transferBubble = e.target.closest('.transfer-bubble');
-                if (transferBubble) {
-                    const index = transferBubble.dataset.index;
-                    if (index !== undefined) {
-                        ChatHandler.handleTransferClick(parseInt(index));
-                    }
-                    e.preventDefault();
-                    return;
-                }
+                // 转账点击已由独立事件处理，这里仅处理多选
                 if (!ChatHandler.isMultiSelectMode) return;
                 const msgRow = e.target.closest('.message');
                 if (!msgRow) return;
@@ -4880,7 +5073,6 @@
                 document.getElementById('voiceCard').classList.remove('active');
             });
 
-            // 转账模态框事件（发送）
             document.getElementById('closeTransferModal').addEventListener('click', () => {
                 document.getElementById('transferModal').classList.remove('active');
             });
@@ -4901,7 +5093,6 @@
                 document.getElementById('transferNote').value = '';
             });
 
-            // 转账操作模态框（接收/退回）
             document.getElementById('closeTransferActionModal').addEventListener('click', () => {
                 document.getElementById('transferActionModal').classList.remove('active');
             });
@@ -5254,7 +5445,12 @@
             });
 
             document.getElementById('profileArchive').addEventListener('click', () => { document.getElementById('userProfileView').classList.remove('active'); document.getElementById('userArchiveView').classList.add('active'); });
-            document.getElementById('profileDecorate').addEventListener('click', () => { document.getElementById('userProfileView').classList.remove('active'); document.getElementById('decorateView').classList.add('active'); });
+            // 原装饰改为钱包
+            document.getElementById('profileWallet').addEventListener('click', () => { 
+                document.getElementById('userProfileView').classList.remove('active'); 
+                document.getElementById('userWalletView').classList.add('active');
+                WalletManager.renderWallet();
+            });
             document.getElementById('profileDiary').addEventListener('click', () => Utils.showToast('日记功能开发中'));
 
             document.getElementById('userProfileArea').addEventListener('click', (e) => { if (e.target.tagName === 'INPUT') return; document.getElementById('contactListPage').style.display = 'none'; document.getElementById('userProfileView').classList.add('active'); });
@@ -5499,6 +5695,7 @@
             DataManager.loadBeautifySettings();
             DataManager.loadWorldBooks();
             DataManager.loadPosts();
+            DataManager.loadWallet();
 
             await UIManager.updateUserProfileDisplay();
             UIManager.renderContactList();
@@ -5534,6 +5731,7 @@
             })();
 
             bindEvents();
+            WalletManager.init(); // 初始化钱包按钮事件
             startAutoPostTimer();
 
             WidgetManager.init();
