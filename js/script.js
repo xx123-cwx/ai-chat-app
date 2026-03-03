@@ -2842,7 +2842,7 @@ function bindEvents() {
         // 优先处理转账气泡点击（即使多选模式下也允许点击转账）
         const transferBubble = e.target.closest('.transfer-bubble');
                 if (transferBubble) {
-            const idx = parseInt(transferBubble.getAttribute('data-index'));
+            const idx = parseInt(transferBubble.dataset.index);
             if (!isNaN(idx)) {
                 // 获取转账数据
                 const contact = DataManager.getCurrentContact();
