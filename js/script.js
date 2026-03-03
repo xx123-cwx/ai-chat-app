@@ -2839,34 +2839,27 @@ function bindEvents() {
     messageArea.addEventListener('scroll', () => { if (messageArea.scrollTop < 100 && !ChatHandler.isLoadingMore) ChatHandler.loadMoreMessages(); });
 
     messageArea.addEventListener('click', (e) => {
-       // 处理转账气泡点击（同时支持触摸和点击）
-messageArea.addEventListener('click', handleMessageAreaClick);
-messageArea.addEventListener('touchstart', handleMessageAreaClick, { passive: false });
-
-function handleMessageAreaClick(e) {
-    // 如果是触摸事件，阻止默认滚动
-    if (e.type === 'touchstart') {
-        e.preventDefault();
-    }
-    // 优先处理转账气泡点击
-    const transferBubble = e.target.closest('.transfer-bubble');
-    if (transferBubble) {
-        const idx = transferBubble.getAttribute('data-index'); // 改用 getAttribute 确保兼容
-        if (idx !== undefined && idx !== null) {
-            ChatHandler.handleTransferClick(parseInt(idx));
+        // 优先处理转账气泡点击（即使多选模式下也允许点击转账）
+        const transferBubble = e.target.closest('.transfer-bubble');
+        if (transferBubble) {
+            const idx = transferBubble.dataset.index;
+            if (idx !== undefined) {
+                ChatHandler.handleTransferClick(parseInt(idx));
+            }
+            e.stopPropagation();
+            e.preventDefault();
+            return;
         }
-        e.stopPropagation();
-        return;
-    }
 
-    // 处理多选
-    if (ChatHandler.isMultiSelectMode) {
-        const msgRow = e.target.closest('.message');
-        if (!msgRow) return;
-        const index = parseInt(msgRow.getAttribute('data-index'));
-        ChatHandler.toggleMessageSelection(index);
-    }
-}
+        // 处理多选
+        if (ChatHandler.isMultiSelectMode) {
+            const msgRow = e.target.closest('.message');
+            if (!msgRow) return;
+            const index = parseInt(msgRow.dataset.index);
+            ChatHandler.toggleMessageSelection(index);
+        }
+    });
+
     document.getElementById('imageBtn').addEventListener('click', () => {
         const fileInput = document.createElement('input'); fileInput.type = 'file'; fileInput.accept = 'image/*'; fileInput.style.display = 'none'; document.body.appendChild(fileInput);
         fileInput.click();
