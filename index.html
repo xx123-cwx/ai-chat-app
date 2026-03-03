@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 最终版（转账颜色恢复+AI双向转账）</title>
+    <title>AI角色 · 完整版（转账颜色统一+双向转账）</title>
     <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -75,7 +75,7 @@
             text-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
 
-        /* ===== AI状态小部件（增强版，全宽）===== */
+        /* ===== AI状态小部件 ===== */
         .ai-status-wide {
             width: calc(100% - 32px);
             margin: 8px 16px 0;
@@ -164,7 +164,7 @@
             background: rgba(255,255,255,0.3);
         }
 
-        /* 状态详情区域（竖向排列） */
+        /* 状态详情区域 */
         .ai-status-details {
             display: flex;
             flex-direction: column;
@@ -188,21 +188,11 @@
             flex: 1;
             word-break: break-word;
         }
-        .ai-status-water {
-            color: #a8e6ff;
-        }
-        .ai-status-breakfast {
-            color: #ffd966;
-        }
-        .ai-status-lunch {
-            color: #b6d7a8;
-        }
-        .ai-status-dinner {
-            color: #d5a6bd;
-        }
-        .ai-status-location {
-            color: #c5a8ff;
-        }
+        .ai-status-water { color: #a8e6ff; }
+        .ai-status-breakfast { color: #ffd966; }
+        .ai-status-lunch { color: #b6d7a8; }
+        .ai-status-dinner { color: #d5a6bd; }
+        .ai-status-location { color: #c5a8ff; }
 
         /* ===== 桌面两列布局 ===== */
         .desktop-columns {
@@ -219,21 +209,14 @@
             gap: 16px;
         }
 
-        /* 左侧应用网格（两行两列） */
-        .app-grid-left {
+        /* 应用网格 */
+        .app-grid-left, .app-grid-right {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 8px;
         }
 
-        /* 右侧应用网格（两行两列） */
-        .app-grid-right {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-        }
-
-        /* 小部件卡片（通用） */
+        /* 小部件卡片 */
         .widget-card {
             width: 100%;
             background: rgba(255,255,255,0.2);
@@ -264,27 +247,14 @@
         }
 
         /* 天气小部件 */
-        .weather-temp {
-            font-size: 24px;
-            font-weight: 600;
-            line-height: 1.2;
-        }
-        .weather-desc {
-            font-size: 14px;
-            opacity: 0.9;
-        }
+        .weather-temp { font-size: 24px; font-weight: 600; line-height: 1.2; }
+        .weather-desc { font-size: 14px; opacity: 0.9; }
 
         /* 日历小部件 */
-        .calendar-date {
-            font-size: 22px;
-            font-weight: 600;
-        }
-        .calendar-day {
-            font-size: 14px;
-            opacity: 0.9;
-        }
+        .calendar-date { font-size: 22px; font-weight: 600; }
+        .calendar-day { font-size: 14px; opacity: 0.9; }
 
-        /* 应用图标样式（适配小网格） */
+        /* 应用图标 */
         .app-icon {
             display: flex;
             flex-direction: column;
@@ -293,907 +263,371 @@
             cursor: pointer;
             transition: transform 0.1s ease;
         }
-        .app-icon:active {
-            transform: scale(0.95);
-        }
-        /* 长按抖动动画 */
+        .app-icon:active { transform: scale(0.95); }
         @keyframes wiggle {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(2deg); }
-            75% { transform: rotate(-2deg); }
+            0%,100%{transform:rotate(0)}
+            25%{transform:rotate(2deg)}
+            75%{transform:rotate(-2deg)}
         }
-        .app-icon.long-press {
-            animation: wiggle 0.2s infinite;
-        }
-        /* 拖拽样式 */
-        .app-icon[draggable="true"] {
-            cursor: grab;
-        }
-        .app-icon[draggable="true"]:active {
-            cursor: grabbing;
-        }
+        .app-icon.long-press { animation: wiggle 0.2s infinite; }
+        .app-icon[draggable="true"] { cursor: grab; }
+        .app-icon[draggable="true"]:active { cursor: grabbing; }
         .icon-bg {
-            width: 50px;
-            height: 50px;
-            background: rgba(255,255,255,0.85);
-            backdrop-filter: blur(5px);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 26px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: #333;
-            overflow: hidden;
+            width: 50px; height: 50px; background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(5px); border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 26px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.3); color: #333; overflow: hidden;
         }
-        .icon-bg img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .icon-bg img { width: 100%; height: 100%; object-fit: cover; }
         .app-label {
-            color: white;
-            font-size: 10px;
-            font-weight: 500;
-            text-shadow: 0 1px 3px black;
-            max-width: 70px;
-            text-align: center;
+            color: white; font-size: 10px; font-weight: 500;
+            text-shadow: 0 1px 3px black; max-width: 70px; text-align: center;
         }
 
-        /* Dock 样式 */
+        /* Dock */
         .dock {
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(20px);
-            margin: 0 16px 16px;
-            padding: 8px 12px;
-            border-radius: 40px;
-            display: flex;
-            justify-content: space-around;
+            background: rgba(255,255,255,0.2); backdrop-filter: blur(20px);
+            margin: 0 16px 16px; padding: 8px 12px; border-radius: 40px;
+            display: flex; justify-content: space-around;
             border: 1px solid rgba(255,255,255,0.3);
         }
         .dock .app-icon .icon-bg {
-            width: 52px;
-            height: 52px;
-            border-radius: 16px;
-            background: rgba(255,255,255,0.9);
-            font-size: 28px;
+            width: 52px; height: 52px; border-radius: 16px;
+            background: rgba(255,255,255,0.9); font-size: 28px;
         }
         .home-button {
-            width: 140px;
-            height: 5px;
-            background: rgba(255,255,255,0.6);
-            border-radius: 3px;
-            margin: 8px auto 12px;
-            cursor: pointer;
+            width: 140px; height: 5px; background: rgba(255,255,255,0.6);
+            border-radius: 3px; margin: 8px auto 12px; cursor: pointer;
             transition: background 0.2s;
         }
-        .home-button:active {
-            background: white;
-        }
+        .home-button:active { background: white; }
 
-        /* 应用视图（全屏覆盖） */
+        /* 应用视图 */
         .app-view {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: white;
-            z-index: 20;
-            display: none;
-            flex-direction: column;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 20; display: none; flex-direction: column;
             transition: transform 0.2s ease;
         }
-        .app-view.active {
-            display: flex;
-        }
+        .app-view.active { display: flex; }
 
-        /* 写实简约风返回按钮样式（无背景，纯箭头） */
+        /* 返回按钮 */
         .back-btn {
-            font-size: 20px;
-            color: #007aff;
-            cursor: pointer;
-            padding: 8px;
-            margin-right: 8px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
+            font-size: 20px; color: #007aff; cursor: pointer; padding: 8px;
+            margin-right: 8px; display: inline-flex; align-items: center;
+            justify-content: center; text-decoration: none;
         }
-        .back-btn:hover {
-            opacity: 0.8;
-        }
-        /* 聊天详情页和联系人选项页的返回箭头保持不变（已无圆圈） */
-        #backToListBtn {
-            cursor: pointer;
-            font-size: 20px;
-            color: #007aff;
-            width: auto;
-            height: auto;
-            border-radius: 0;
-            background-color: transparent;
-            display: inline;
-            padding: 8px;
-        }
-        #backToListBtn:hover {
-            background-color: transparent;
-        }
-        #backToChatBtn {
-            cursor: pointer;
-            font-size: 20px;
-            color: #007aff;
-            width: auto;
-            height: auto;
-            border-radius: 0;
-            background-color: transparent;
-            display: inline;
-            margin-right: 8px;
-            padding: 8px;
-        }
-        #backToChatBtn:hover {
-            background-color: transparent;
+        .back-btn:hover { opacity: 0.8; }
+        #backToListBtn, #backToChatBtn {
+            cursor: pointer; font-size: 20px; color: #007aff;
+            background-color: transparent; display: inline; padding: 8px;
         }
 
-        /* ===== 设置界面样式 ===== */
+        /* 设置界面 */
         .settings-container {
-            flex: 1;
-            padding: 16px;
-            background: #f5f5f5;
-            overflow-y: auto;
+            flex: 1; padding: 16px; background: #f5f5f5; overflow-y: auto;
             min-height: 0;
         }
         .config-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 16px;
         }
-        .config-header h3 {
-            font-size: 18px;
-            font-weight: 600;
-        }
+        .config-header h3 { font-size: 18px; font-weight: 600; }
         .add-config-btn {
-            background: #07c160;
-            color: white;
-            border: none;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+            background: #07c160; color: white; border: none; width: 44px;
+            height: 44px; border-radius: 50%; font-size: 24px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
         .config-item {
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            background: white; border-radius: 12px; padding: 16px;
+            margin-bottom: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
             position: relative;
         }
-        .config-item.active {
-            border: 2px solid #07c160;
-        }
+        .config-item.active { border: 2px solid #07c160; }
         .config-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 8px;
         }
         .config-name {
-            font-weight: 600;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            font-weight: 600; font-size: 16px; display: flex;
+            align-items: center; gap: 6px;
         }
         .active-badge {
-            background: #07c160;
-            color: white;
-            font-size: 12px;
-            padding: 2px 8px;
-            border-radius: 12px;
+            background: #07c160; color: white; font-size: 12px;
+            padding: 2px 8px; border-radius: 12px;
         }
-        .config-actions {
-            display: flex;
-            gap: 8px;
-        }
+        .config-actions { display: flex; gap: 8px; }
         .config-actions button {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 4px;
-            color: #555;
+            background: none; border: none; font-size: 20px;
+            cursor: pointer; padding: 4px; color: #555;
         }
         .config-detail {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 12px;
+            font-size: 14px; color: #666; margin-bottom: 12px;
             word-break: break-all;
         }
-        .config-detail div {
-            margin-bottom: 4px;
-        }
         .config-model-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            margin-top: 8px;
+            display: flex; gap: 8px; align-items: center; margin-top: 8px;
         }
         .config-model-row select {
-            flex: 2;
-            padding: 8px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            background: white;
-            user-select: text;
+            flex: 2; padding: 8px; border-radius: 8px; border: 1px solid #ccc;
+            background: white; user-select: text;
         }
         .config-model-row button {
-            flex: 1;
-            padding: 8px;
-            background: #07c160;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
+            flex: 1; padding: 8px; background: #07c160; color: white;
+            border: none; border-radius: 8px; cursor: pointer;
         }
         .edit-form {
-            background: #f0f2f5;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 12px;
+            background: #f0f2f5; padding: 12px; border-radius: 8px; margin-top: 12px;
         }
         .edit-form input {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            user-select: text;
-            -webkit-user-select: text;
+            width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 8px;
+            border: 1px solid #ccc; user-select: text; -webkit-user-select: text;
         }
         .edit-form button {
-            padding: 8px 16px;
-            background: #07c160;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            margin-right: 8px;
+            padding: 8px 16px; background: #07c160; color: white; border: none;
+            border-radius: 8px; margin-right: 8px;
         }
-        .edit-form .cancel-btn {
-            background: #999;
-        }
+        .edit-form .cancel-btn { background: #999; }
         .activate-config {
-            margin-top: 8px;
-            width: 100%;
-            padding: 8px;
-            background: #07c160;
-            color: white;
-            border: none;
-            border-radius: 8px;
+            margin-top: 8px; width: 100%; padding: 8px; background: #07c160;
+            color: white; border: none; border-radius: 8px;
         }
 
-        /* ===== 备份区域样式（一键清除移至顶部） ===== */
+        /* 备份区域 */
         .backup-section {
-            margin-top: 24px;
-            padding: 16px;
-            background: white;
-            border-radius: 12px;
+            margin-top: 24px; padding: 16px; background: white; border-radius: 12px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
-        .backup-section h3 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-        .backup-actions {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
+        .backup-section h3 { font-size: 18px; font-weight: 600; margin-bottom: 12px; }
+        .backup-actions { display: flex; gap: 12px; margin-bottom: 8px; }
         .backup-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            background: #07c160;
-            color: white;
+            flex: 1; padding: 12px; border: none; border-radius: 8px;
+            font-size: 16px; font-weight: 500; cursor: pointer;
+            background: #07c160; color: white;
         }
-        .backup-btn.import {
-            background: #007aff;
-        }
-        .backup-btn.danger {
-            background: #ff3b30;
-        }
-        .backup-hint {
-            font-size: 13px;
-            color: #999;
-            margin-bottom: 12px;
-        }
-        /* 一键清除按钮容器（置于顶部） */
-        .clear-all-top {
-            margin-bottom: 16px;
-            border-bottom: 1px solid #f0f0f0;
-            padding-bottom: 16px;
-        }
+        .backup-btn.import { background: #007aff; }
+        .backup-btn.danger { background: #ff3b30; }
+        .backup-hint { font-size: 13px; color: #999; margin-bottom: 12px; }
+        .clear-all-top { margin-bottom: 16px; border-bottom: 1px solid #f0f0f0; padding-bottom: 16px; }
 
-        /* ===== 联系人列表页布局 ===== */
-        #contactListPage {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            min-height: 0;
-        }
-
-        .tab-content {
-            flex: 1;
-            min-height: 0;
-            position: relative;
-        }
-
+        /* 联系人列表页 */
+        #contactListPage { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+        .tab-content { flex: 1; min-height: 0; position: relative; }
         #chatsTab, #friendsTab, #dynamicTab {
-            height: 100%;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            height: 100%; overflow: hidden; display: flex; flex-direction: column;
         }
-
-        .contact-list {
-            flex: 1;
-            overflow-y: auto;
-            min-height: 0;
-            background: #fff;
-        }
-
+        .contact-list { flex: 1; overflow-y: auto; min-height: 0; background: #fff; }
         .moments-list {
-            flex: 1;
-            overflow-y: auto;
-            min-height: 0;
-            padding: 12px;
-            background: #f5f5f5;
+            flex: 1; overflow-y: auto; min-height: 0; padding: 12px; background: #f5f5f5;
         }
-
         .user-profile {
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            padding: 16px;
-            background: #ffffff;
-            border-bottom: 1px solid #f0f0f0;
-            cursor: pointer;
+            flex-shrink: 0; display: flex; align-items: center; padding: 16px;
+            background: #fff; border-bottom: 1px solid #f0f0f0; cursor: pointer;
         }
-        .user-info {
-            flex: 1;
-        }
+        .user-info { flex: 1; }
         .user-name-input {
-            font-size: 18px;
-            font-weight: 600;
-            border: none;
-            outline: none;
-            background: transparent;
-            padding: 4px 0;
-            width: 100%;
+            font-size: 18px; font-weight: 600; border: none; outline: none;
+            background: transparent; padding: 4px 0; width: 100%;
         }
         .user-status-input {
-            font-size: 14px;
-            color: #666;
-            border: none;
-            outline: none;
-            background: transparent;
-            padding: 4px 0;
-            width: 100%;
+            font-size: 14px; color: #666; border: none; outline: none;
+            background: transparent; padding: 4px 0; width: 100%;
         }
         .user-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: #07c160;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 28px;
-            margin-left: 16px;
-            cursor: pointer;
-            overflow: hidden;
-            flex-shrink: 0;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            width: 60px; height: 60px; border-radius: 50%; background: #07c160;
+            display: flex; align-items: center; justify-content: center; color: white;
+            font-size: 28px; margin-left: 16px; cursor: pointer; overflow: hidden;
+            flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
-        .user-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .chats-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            background: #ffffff;
-            border-bottom: 1px solid #f0f0f0;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; background: #fff; border-bottom: 1px solid #f0f0f0;
             flex-shrink: 0;
         }
-        .chats-header-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .chats-header-left h2 {
-            font-size: 22px;
-            font-weight: 600;
-            color: #1a1a1a;
-            letter-spacing: -0.3px;
-        }
-        .chats-header-right {
-            display: flex;
-            align-items: center;
-        }
+        .chats-header-left { display: flex; align-items: center; gap: 8px; }
+        .chats-header-left h2 { font-size: 22px; font-weight: 600; color: #1a1a1a; letter-spacing: -0.3px; }
+        .chats-header-right { display: flex; align-items: center; }
         .circle-plus {
-            display: inline-block;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: #f0f0f0;
-            text-align: center;
-            line-height: 36px;
-            font-size: 26px;
-            font-weight: 300;
-            cursor: pointer;
-            color: #555;
-            transition: background 0.2s;
+            display: inline-block; width: 36px; height: 36px; border-radius: 50%;
+            background: #f0f0f0; text-align: center; line-height: 36px; font-size: 26px;
+            font-weight: 300; cursor: pointer; color: #555; transition: background 0.2s;
         }
-        .circle-plus:hover {
-            background: #e0e0e0;
-        }
+        .circle-plus:hover { background: #e0e0e0; }
         .search-container {
-            display: flex;
-            align-items: center;
-            padding: 8px 16px;
-            background: #f5f5f5;
-            border-bottom: 1px solid #f0f0f0;
-            flex-shrink: 0;
+            display: flex; align-items: center; padding: 8px 16px; background: #f5f5f5;
+            border-bottom: 1px solid #f0f0f0; flex-shrink: 0;
         }
-        .search-container i {
-            font-size: 16px;
-            color: #999;
-            margin-right: 8px;
-        }
+        .search-container i { font-size: 16px; color: #999; margin-right: 8px; }
         .search-container input {
-            flex: 1;
-            border: none;
-            outline: none;
-            background: transparent;
-            font-size: 16px;
-            padding: 8px 0;
+            flex: 1; border: none; outline: none; background: transparent;
+            font-size: 16px; padding: 8px 0;
         }
-        .search-container input::placeholder {
-            color: #aaa;
-        }
+        .search-container input::placeholder { color: #aaa; }
         .tab-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-around;
-            padding: 8px 0 4px;
-            background: #ffffff;
-            border-top: 1px solid #f0f0f0;
-            border-bottom: none;
-            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: space-around;
+            padding: 8px 0 4px; background: #fff; border-top: 1px solid #f0f0f0;
+            border-bottom: none; flex-shrink: 0;
         }
         .tab-item {
-            flex: 1;
-            text-align: center;
-            font-size: 12px;
-            color: #999;
-            padding: 4px 0 6px;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            transition: color 0.2s;
+            flex: 1; text-align: center; font-size: 12px; color: #999;
+            padding: 4px 0 6px; cursor: pointer; display: flex; flex-direction: column;
+            align-items: center; gap: 2px; transition: color 0.2s;
         }
-        .tab-item i {
-            font-size: 22px;
-        }
-        .tab-item.active {
-            color: #06c755;
-            font-weight: 500;
-        }
+        .tab-item i { font-size: 22px; }
+        .tab-item.active { color: #06c755; font-weight: 500; }
         .contact-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            border-bottom: 1px solid #f5f5f5;
-            cursor: pointer;
+            display: flex; align-items: center; padding: 12px 16px;
+            border-bottom: 1px solid #f5f5f5; cursor: pointer;
         }
         .contact-avatar {
-            width: 52px;
-            height: 52px;
-            background: #06c755;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 26px;
-            margin-right: 14px;
-            flex-shrink: 0;
-            overflow: hidden;
+            width: 52px; height: 52px; background: #06c755; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; color: white;
+            font-size: 26px; margin-right: 14px; flex-shrink: 0; overflow: hidden;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
-        .contact-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .contact-info {
-            flex: 1;
-            min-width: 0;
-        }
+        .contact-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .contact-info { flex: 1; min-width: 0; }
         .contact-row {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
+            display: flex; align-items: baseline; justify-content: space-between;
             margin-bottom: 6px;
         }
-        .contact-name {
-            font-weight: 600;
-            font-size: 16px;
-            color: #1a1a1a;
-        }
-        .contact-time {
-            font-size: 12px;
-            color: #999;
-            margin-left: 8px;
-            white-space: nowrap;
-        }
+        .contact-name { font-weight: 600; font-size: 16px; color: #1a1a1a; }
+        .contact-time { font-size: 12px; color: #999; margin-left: 8px; white-space: nowrap; }
         .contact-lastmsg {
-            color: #666;
-            font-size: 14px;
-            white-space: nowrap;
-            overflow: hidden;
+            color: #666; font-size: 14px; white-space: nowrap; overflow: hidden;
             text-overflow: ellipsis;
         }
         .unread-badge {
-            background: #06c755;
-            color: white;
-            font-size: 12px;
-            font-weight: 600;
-            padding: 2px 6px;
-            border-radius: 16px;
-            min-width: 22px;
-            text-align: center;
-            margin-left: 10px;
-            line-height: 1.2;
+            background: #06c755; color: white; font-size: 12px; font-weight: 600;
+            padding: 2px 6px; border-radius: 16px; min-width: 22px; text-align: center;
+            margin-left: 10px; line-height: 1.2;
         }
-        .blocked-badge {
-            color: #ff3b30;
-            font-size: 12px;
-            margin-left: 6px;
-        }
+        .blocked-badge { color: #ff3b30; font-size: 12px; margin-left: 6px; }
 
-        /* ===== 新建/编辑联系人模态框 ===== */
+        /* 模态框 */
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 30;
-            display: none;
-            align-items: center;
-            justify-content: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 30; display: none;
+            align-items: center; justify-content: center;
         }
-        .modal-overlay.active {
-            display: flex;
-        }
+        .modal-overlay.active { display: flex; }
         .modal-content {
-            background: white;
-            width: 90%;
-            max-width: 340px;
-            border-radius: 20px;
-            padding: 20px;
-            max-height: 80%;
-            overflow-y: auto;
+            background: white; width: 90%; max-width: 340px; border-radius: 20px;
+            padding: 20px; max-height: 80%; overflow-y: auto;
         }
         .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 16px;
         }
-        .modal-header h3 {
-            font-size: 18px;
-        }
-        .close-modal {
-            font-size: 24px;
-            cursor: pointer;
-        }
-        .form-group {
-            margin-bottom: 16px;
-        }
+        .modal-header h3 { font-size: 18px; }
+        .close-modal { font-size: 24px; cursor: pointer; }
+        .form-group { margin-bottom: 16px; }
         .form-group label {
-            display: block;
-            font-size: 14px;
-            margin-bottom: 4px;
-            color: #666;
+            display: block; font-size: 14px; margin-bottom: 4px; color: #666;
         }
         .form-group input, .form-group textarea, .form-group select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
+            width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;
             font-size: 15px;
         }
-        .form-group textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-        .avatar-type {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+        .avatar-type { display: flex; gap: 10px; margin-bottom: 10px; }
         .avatar-type label {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 14px;
-            color: #333;
+            display: flex; align-items: center; gap: 4px; font-size: 14px; color: #333;
         }
         .avatar-preview {
-            width: 60px;
-            height: 60px;
-            background: #07c160;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            margin: 10px 0;
-            overflow: hidden;
+            width: 60px; height: 60px; background: #07c160; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; color: white;
+            font-size: 24px; margin: 10px 0; overflow: hidden;
         }
-        .avatar-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
         .upload-btn {
-            background: #07c160;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            display: inline-block;
+            background: #07c160; color: white; border: none; padding: 8px 16px;
+            border-radius: 8px; font-size: 14px; cursor: pointer; display: inline-block;
             margin-top: 5px;
         }
-
         .save-btn, .cancel-btn, .form-actions button {
-            flex: 1;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 500;
-            cursor: pointer;
+            flex: 1; padding: 14px; border: none; border-radius: 8px;
+            font-size: 18px; font-weight: 500; cursor: pointer;
         }
-        .save-btn {
-            background: #07c160;
-            color: white;
-        }
-        .cancel-btn {
-            background: #f0f0f0;
-            color: #333;
-        }
-        .form-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-        }
+        .save-btn { background: #07c160; color: white; }
+        .cancel-btn { background: #f0f0f0; color: #333; }
+        .form-actions { display: flex; gap: 12px; margin-top: 20px; }
+        #saveProfileDetails { width: 100%; margin-top: 20px; font-size: 16px; flex: none; }
 
-        #saveProfileDetails {
-            width: 100%;
-            margin-top: 20px;
-            font-size: 16px;
-            flex: none;
-        }
-
-        /* ===== 聊天详情页 ===== */
-        .chat-detail {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: #87CEFA;
-            min-height: 0;
-        }
-
+        /* 聊天详情页 */
+        .chat-detail { flex: 1; display: flex; flex-direction: column; background: #87CEFA; min-height: 0; }
         .chat-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            background-color: transparent;
-            color: #000;
-            flex-shrink: 0;
-            position: relative;
-            z-index: 10;
-            pointer-events: auto;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; background-color: transparent; color: #000;
+            flex-shrink: 0; position: relative; z-index: 10; pointer-events: auto;
         }
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 18px;
-            font-weight: 500;
-        }
-        .header-left span:first-child {
-            cursor: pointer;
-        }
-        .header-right {
-            display: flex;
-            gap: 16px;
-            font-size: 20px;
-        }
-        .header-right span {
-            cursor: pointer;
-        }
-        /* 确保按钮内部图标也响应点击 */
-        .header-left span, .header-right span {
-            pointer-events: auto;
-            cursor: pointer;
-        }
+        .header-left { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 500; }
+        .header-left span:first-child { cursor: pointer; }
+        .header-right { display: flex; gap: 16px; font-size: 20px; }
+        .header-right span { cursor: pointer; }
+        .header-left span, .header-right span { pointer-events: auto; cursor: pointer; }
 
         .chat-messages {
-            flex-grow: 1;
-            padding: 10px 12px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            -webkit-overflow-scrolling: touch;
+            flex-grow: 1; padding: 10px 12px; overflow-y: auto; display: flex;
+            flex-direction: column; gap: 8px; background-size: cover; background-position: center;
+            background-repeat: no-repeat; -webkit-overflow-scrolling: touch;
             background: #87CEFA;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%2387CEFA"/><circle cx="20" cy="20" r="15" fill="%23fff" opacity="0.1"/><circle cx="80" cy="80" r="20" fill="%23fff" opacity="0.1"/></svg>');
             min-height: 0;
         }
 
         .message {
-            display: flex;
-            align-items: flex-start;
-            max-width: 85%;
-            position: relative;
+            display: flex; align-items: flex-start; max-width: 85%; position: relative;
         }
-        .message.other {
-            align-self: flex-start;
-        }
+        .message.other { align-self: flex-start; }
         .message.me {
-            align-self: flex-end;
-            flex-direction: row-reverse;
-            align-items: flex-start;
+            align-self: flex-end; flex-direction: row-reverse; align-items: flex-start;
         }
-        /* 多选模式下的选中样式 */
-        .message.selected {
-            background-color: rgba(0, 199, 60, 0.1);
-            border-radius: 8px;
-        }
+        .message.selected { background-color: rgba(0,199,60,0.1); border-radius: 8px; }
 
         .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background-color: #ddd;
-            margin: 0 8px;
-            flex-shrink: 0;
-            overflow: hidden;
+            width: 36px; height: 36px; border-radius: 50%; background-color: #ddd;
+            margin: 0 8px; flex-shrink: 0; overflow: hidden;
         }
-        .avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
         .bubble-wrapper {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            max-width: 100%;
+            position: relative; display: flex; flex-direction: column;
+            align-items: flex-start; max-width: 100%;
         }
-        .message.me .bubble-wrapper {
-            align-items: flex-end;
-        }
+        .message.me .bubble-wrapper { align-items: flex-end; }
 
-        /* 气泡行：包含气泡和时间戳，水平排列 */
         .bubble-row, .voice-row, .transfer-row {
-            display: flex;
-            align-items: center;
-            max-width: 100%;
-            width: 100%;
+            display: flex; align-items: center; max-width: 100%; width: 100%;
         }
-        .message.other .bubble-row,
-        .message.other .voice-row,
-        .message.other .transfer-row {
-            justify-content: flex-start;
-        }
-        .message.me .bubble-row,
-        .message.me .voice-row,
-        .message.me .transfer-row {
-            justify-content: flex-start;
-        }
+        .message.other .bubble-row, .message.other .voice-row, .message.other .transfer-row { justify-content: flex-start; }
+        .message.me .bubble-row, .message.me .voice-row, .message.me .transfer-row { justify-content: flex-start; }
 
-        /* 时间戳间距：AI消息时间戳在右侧，使用左间距；用户消息时间戳在左侧，使用右间距 */
-        .message.other .bubble-row .msg-time,
-        .message.other .voice-row .msg-time,
-        .message.other .transfer-row .msg-time {
-            margin-left: 8px;
-        }
-        .message.me .bubble-row .msg-time,
-        .message.me .voice-row .msg-time,
-        .message.me .transfer-row .msg-time {
-            margin-right: 8px;
-        }
+        .message.other .bubble-row .msg-time, .message.other .voice-row .msg-time, .message.other .transfer-row .msg-time { margin-left: 8px; }
+        .message.me .bubble-row .msg-time, .message.me .voice-row .msg-time, .message.me .transfer-row .msg-time { margin-right: 8px; }
 
-        /* 文本消息气泡样式 */
         .msg-bubble {
-            padding: 10px 14px;
-            font-size: 16px;
-            line-height: 1.4;
-            position: relative;
-            border-radius: 20px;
-            max-width: 100%;
-            word-break: break-word;
+            padding: 10px 14px; font-size: 16px; line-height: 1.4; position: relative;
+            border-radius: 20px; max-width: 100%; word-break: break-word;
         }
+        .message.other .msg-bubble { background-color: #fff; color: #000; }
+        .message.me .msg-bubble { background-color: #00C73C; color: #fff; }
+        .message .msg-bubble img { max-width: 200px; max-height: 200px; border-radius: 8px; display: block; }
 
-        .message.other .msg-bubble {
-            background-color: #ffffff;
-            color: #000;
-        }
-
-        .message.me .msg-bubble {
-            background-color: #00C73C;
-            color: #fff;
-        }
-
-        .message .msg-bubble img {
-            max-width: 200px;
-            max-height: 200px;
-            border-radius: 8px;
-            display: block;
-        }
-
-        /* 转账消息气泡样式 - 原版配色 */
+        /* 转账消息气泡 - 统一为浅蓝底蓝边 */
         .transfer-bubble {
             padding: 12px 16px;
-            background-color: #fdf5e6;
+            background-color: #e6f7ff;
             border-radius: 18px;
-            border: 1px solid #ffd966;
+            border: 1px solid #91d5ff;
             min-width: 150px;
             cursor: pointer;
             color: #333;
         }
-        .message.me .transfer-bubble {
-            background-color: #e6f7ff;
-            border-color: #91d5ff;
-        }
         .transfer-amount {
             font-size: 18px;
             font-weight: 600;
-            color: #d46b00;
-        }
-        .message.me .transfer-amount {
             color: #096dd9;
         }
         .transfer-note {
@@ -1208,1173 +642,471 @@
             margin-top: 4px;
         }
 
-        /* 微信风格语音气泡 - 独立样式 */
+        /* 语音气泡 */
         .voice-bubble-wechat {
-            display: flex;
-            align-items: center;
-            min-width: 100px;
-            max-width: 200px;
-            padding: 8px 12px;
-            border-radius: 18px;
-            background-color: #fff;
-            cursor: pointer;
-            position: relative;
-            -webkit-tap-highlight-color: rgba(0,0,0,0.1);
-            touch-action: manipulation;
+            display: flex; align-items: center; min-width: 100px; max-width: 200px;
+            padding: 8px 12px; border-radius: 18px; background-color: #fff;
+            cursor: pointer; position: relative;
+            -webkit-tap-highlight-color: rgba(0,0,0,0.1); touch-action: manipulation;
         }
-        .message.me .voice-bubble-wechat {
-            background-color: #95ec69;
-        }
-        .voice-icon-wechat {
-            font-size: 20px;
-            margin-right: 8px;
-            color: #333;
-            pointer-events: none;
-        }
-        .message.me .voice-icon-wechat {
-            color: #fff;
-        }
-        .voice-duration-wechat {
-            font-size: 14px;
-            font-weight: 500;
-            margin-left: auto;
-            color: #666;
-        }
-        .message.me .voice-duration-wechat {
-            color: #fff;
-        }
-
-        /* 语音转文字显示区域 */
+        .message.me .voice-bubble-wechat { background-color: #95ec69; }
+        .voice-icon-wechat { font-size: 20px; margin-right: 8px; color: #333; pointer-events: none; }
+        .message.me .voice-icon-wechat { color: #fff; }
+        .voice-duration-wechat { font-size: 14px; font-weight: 500; margin-left: auto; color: #666; }
+        .message.me .voice-duration-wechat { color: #fff; }
         .voice-transcript {
-            font-size: 12px;
-            color: #999;
-            margin-top: 4px;
-            max-width: 200px;
+            font-size: 12px; color: #999; margin-top: 4px; max-width: 200px;
             word-break: break-word;
         }
-        .message.me .voice-transcript {
-            color: #ccc;
-        }
+        .message.me .voice-transcript { color: #ccc; }
 
-        .msg-time {
-            font-size: 11px;
-            color: #333;
-            white-space: nowrap;
-        }
-        .message.me .msg-time {
-            color: #333;
-        }
+        .msg-time { font-size: 11px; color: #333; white-space: nowrap; }
+        .message.me .msg-time { color: #333; }
 
         .system-message {
-            align-self: center;
-            background-color: #e0e0e0;
-            color: #666;
-            font-size: 12px;
-            padding: 5px 12px;
-            border-radius: 20px;
-            max-width: 90%;
-            margin: 8px 0;
+            align-self: center; background-color: #e0e0e0; color: #666;
+            font-size: 12px; padding: 5px 12px; border-radius: 20px;
+            max-width: 90%; margin: 8px 0;
         }
 
         .input-area {
-            display: flex;
-            align-items: center;
-            padding: 8px 12px;
-            background-color: #f7f7f7;
-            border-top: 1px solid #dbdbdb;
-            gap: 10px;
+            display: flex; align-items: center; padding: 8px 12px;
+            background-color: #f7f7f7; border-top: 1px solid #dbdbdb; gap: 10px;
             flex-shrink: 0;
         }
-        .input-btn {
-            font-size: 20px;
-            color: #888;
-            cursor: pointer;
-            width: 24px;
-            text-align: center;
-        }
-        .input-btn:hover {
-            color: #00C73C;
-        }
-        .input-field-container {
-            position: relative;
-            flex-grow: 1;
-        }
+        .input-btn { font-size: 20px; color: #888; cursor: pointer; width: 24px; text-align: center; }
+        .input-btn:hover { color: #00C73C; }
+        .input-field-container { position: relative; flex-grow: 1; }
         .input-field {
-            width: 100%;
-            padding: 8px 36px 8px 12px;
-            border: 1px solid #dbdbdb;
-            border-radius: 18px;
-            outline: none;
-            font-size: 16px;
-            background-color: #fff;
+            width: 100%; padding: 8px 36px 8px 12px; border: 1px solid #dbdbdb;
+            border-radius: 18px; outline: none; font-size: 16px; background-color: #fff;
         }
-        .input-field:focus {
-            border-color: #00C73C;
-        }
-        .input-field:disabled {
-            background-color: #f0f0f0;
-            color: #aaa;
-        }
+        .input-field:focus { border-color: #00C73C; }
+        .input-field:disabled { background-color: #f0f0f0; color: #aaa; }
         .input-smile {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 20px;
-            color: #888;
-            cursor: pointer;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            font-size: 20px; color: #888; cursor: pointer; width: 24px; height: 24px;
+            display: flex; align-items: center; justify-content: center;
         }
-        .input-smile:hover {
-            color: #00C73C;
-        }
-        #recordBtn {
-            margin-left: 0;
-        }
+        .input-smile:hover { color: #00C73C; }
+        #recordBtn { margin-left: 0; }
         .input-loading {
-            position: absolute;
-            right: 40px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 20px;
-            color: #888;
-            width: 24px;
-            height: 24px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
+            position: absolute; right: 40px; top: 50%; transform: translateY(-50%);
+            font-size: 20px; color: #888; width: 24px; height: 24px; display: none;
+            align-items: center; justify-content: center; pointer-events: none;
         }
 
-        /* ===== 联系人选项页面 ===== */
-        #contactOptionsPage {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-height: 0;
-            overflow: hidden;
-        }
-
+        /* 联系人选项页面 */
+        #contactOptionsPage { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
         .options-container {
-            flex: 1;
-            overflow-y: auto;
-            min-height: 0;
-            padding: 20px 16px;
-            background: #f5f5f5;
+            flex: 1; overflow-y: auto; min-height: 0; padding: 20px 16px; background: #f5f5f5;
         }
-
         .ai-avatar-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            margin-bottom: 4px;
-            cursor: pointer;
+            background: white; border-radius: 12px; padding: 20px; display: flex;
+            flex-direction: column; align-items: center; gap: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 4px; cursor: pointer;
         }
         .ai-avatar-card .avatar-large {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: #07c160;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 40px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 80px; height: 80px; border-radius: 50%; background: #07c160;
+            display: flex; align-items: center; justify-content: center; color: white;
+            font-size: 40px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        .ai-avatar-card .avatar-large img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .ai-avatar-card .hint-text {
-            font-size: 14px;
-            color: #666;
-        }
-        .ai-avatar-card:active {
-            background: #f0f0f0;
-        }
+        .ai-avatar-card .avatar-large img { width: 100%; height: 100%; object-fit: cover; }
+        .ai-avatar-card .hint-text { font-size: 14px; color: #666; }
+        .ai-avatar-card:active { background: #f0f0f0; }
 
         .option-button {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            background: white;
-            color: #333;
-            text-align: center;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            width: 100%; padding: 16px; border: none; border-radius: 12px;
+            font-size: 16px; font-weight: 500; cursor: pointer; background: white;
+            color: #333; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
-        .option-button.danger {
-            color: #ff3b30;
-        }
-        .option-button:active {
-            background: #f0f0f0;
-        }
+        .option-button.danger { color: #ff3b30; }
+        .option-button:active { background: #f0f0f0; }
 
         .auto-post-settings {
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
+            background: white; border-radius: 12px; padding: 16px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
-        .switch-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-        }
+        .switch-row { display: flex; align-items: center; justify-content: center; gap: 16px; }
 
         .chat-bg-settings {
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
+            background: white; border-radius: 12px; padding: 16px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
         .chat-bg-settings .preview-area {
-            margin-top: 12px;
-            padding: 12px;
-            background: #f9f9f9;
-            border-radius: 8px;
+            margin-top: 12px; padding: 12px; background: #f9f9f9; border-radius: 8px;
             font-size: 14px;
         }
 
         .bubble-css-settings {
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
+            background: white; border-radius: 12px; padding: 16px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
         .bubble-css-settings .css-input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 14px;
-            resize: vertical;
-            margin-top: 8px;
+            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;
+            font-family: monospace; font-size: 14px; resize: vertical; margin-top: 8px;
         }
         .bubble-css-settings .apply-btn {
-            background: #07c160;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            margin-top: 12px;
-            width: 100%;
+            background: #07c160; color: white; border: none; padding: 10px;
+            border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;
+            margin-top: 12px; width: 100%;
         }
 
         .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 26px;
+            position: relative; display: inline-block; width: 50px; height: 26px;
         }
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+        .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .2s;
-            border-radius: 26px;
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc; transition: .2s; border-radius: 26px;
         }
         .slider:before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white;
-            transition: .2s;
-            border-radius: 50%;
+            position: absolute; content: ""; height: 22px; width: 22px; left: 2px;
+            bottom: 2px; background-color: white; transition: .2s; border-radius: 50%;
         }
-        input:checked + .slider {
-            background-color: #07c160;
-        }
-        input:checked + .slider:before {
-            transform: translateX(24px);
-        }
+        input:checked + .slider { background-color: #07c160; }
+        input:checked + .slider:before { transform: translateX(24px); }
 
-        /* ===== 美化界面样式 ===== */
+        /* 美化界面 */
         .beautify-container {
-            flex: 1;
-            padding: 16px;
-            background: #f5f5f5;
-            overflow-y: auto;
-            min-height: 0;
+            flex: 1; padding: 16px; background: #f5f5f5; overflow-y: auto; min-height: 0;
         }
         .beautify-section {
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
+            background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
-        .beautify-section h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
+        .beautify-section h3 { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
         .preview-area {
-            margin-top: 12px;
-            padding: 12px;
-            background: #f9f9f9;
-            border-radius: 8px;
+            margin-top: 12px; padding: 12px; background: #f9f9f9; border-radius: 8px;
             font-size: 14px;
         }
-        .icon-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 12px;
-        }
+        .icon-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
         .icon-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #f9f9f9;
-            padding: 8px;
-            border-radius: 8px;
+            display: flex; align-items: center; gap: 10px; background: #f9f9f9;
+            padding: 8px; border-radius: 8px;
         }
-        .icon-item .icon-bg {
-            width: 40px;
-            height: 40px;
-            font-size: 20px;
-            background: rgba(0,0,0,0.05);
-            flex-shrink: 0;
-        }
-        .icon-item .icon-label {
-            flex: 1;
-            font-size: 14px;
-        }
-        .icon-item .icon-actions {
-            display: flex;
-            gap: 4px;
-        }
+        .icon-item .icon-bg { width: 40px; height: 40px; font-size: 20px; background: rgba(0,0,0,0.05); flex-shrink: 0; }
+        .icon-item .icon-label { flex: 1; font-size: 14px; }
+        .icon-item .icon-actions { display: flex; gap: 4px; }
         .icon-item button {
-            background: #07c160;
-            color: white;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            cursor: pointer;
+            background: #07c160; color: white; border: none; padding: 6px 10px;
+            border-radius: 6px; font-size: 12px; cursor: pointer;
         }
-        .icon-item button.clear-btn {
-            background: #ff3b30;
-        }
-        .icon-item button:active {
-            opacity: 0.8;
-        }
+        .icon-item button.clear-btn { background: #ff3b30; }
+        .icon-item button:active { opacity: 0.8; }
 
-        /* 应用头部通用样式 */
+        /* 应用头部 */
         .app-header {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            background: white;
-            border-bottom: 1px solid #f0f0f0;
-            flex-shrink: 0;
+            display: flex; align-items: center; padding: 12px 16px; background: white;
+            border-bottom: 1px solid #f0f0f0; flex-shrink: 0;
         }
-        .app-header .back-btn {
-            margin-right: 12px;
-        }
-        .app-header .app-title {
-            font-size: 18px;
-            font-weight: 600;
-        }
+        .app-header .back-btn { margin-right: 12px; }
+        .app-header .app-title { font-size: 18px; font-weight: 600; }
 
-        /* ===== 个人资料界面样式 ===== */
+        /* 个人资料 */
         .profile-container {
-            flex: 1;
-            padding: 20px 16px;
-            background: #f5f5f5;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 0;
+            flex: 1; padding: 20px 16px; background: #f5f5f5; overflow-y: auto;
+            display: flex; flex-direction: column; align-items: center; min-height: 0;
         }
         .profile-avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: #07c160;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 48px;
-            margin: 20px 0;
-            cursor: pointer;
-            overflow: hidden;
+            width: 100px; height: 100px; border-radius: 50%; background: #07c160;
+            display: flex; align-items: center; justify-content: center; color: white;
+            font-size: 48px; margin: 20px 0; cursor: pointer; overflow: hidden;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        .profile-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .profile-name {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #333;
-        }
-        .profile-status {
-            font-size: 16px;
-            color: #666;
-            margin-bottom: 8px;
-        }
-        .profile-bio {
-            font-size: 14px;
-            color: #888;
-            margin-bottom: 30px;
-            max-width: 80%;
-            text-align: center;
-        }
+        .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-name { font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #333; }
+        .profile-status { font-size: 16px; color: #666; margin-bottom: 8px; }
+        .profile-bio { font-size: 14px; color: #888; margin-bottom: 30px; max-width: 80%; text-align: center; }
         .profile-icons {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
-            margin-top: 20px;
+            display: flex; justify-content: space-around; width: 100%; margin-top: 20px;
         }
         .profile-icon-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer;
         }
         .profile-icon-item .icon-bg {
-            width: 60px;
-            height: 60px;
-            background: rgba(0,0,0,0.05);
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            color: #333;
+            width: 60px; height: 60px; background: rgba(0,0,0,0.05); border-radius: 18px;
+            display: flex; align-items: center; justify-content: center; font-size: 28px; color: #333;
         }
-        .profile-icon-item span {
-            font-size: 14px;
-            color: #666;
-        }
+        .profile-icon-item span { font-size: 14px; color: #666; }
 
-        /* ===== 个人档案界面样式 ===== */
+        /* 个人档案 */
         .archive-container {
-            flex: 1;
-            padding: 20px 16px;
-            background: #f5f5f5;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 0;
+            flex: 1; padding: 20px 16px; background: #f5f5f5; overflow-y: auto;
+            display: flex; flex-direction: column; align-items: center; min-height: 0;
         }
-        .archive-field {
-            width: 100%;
-            margin-bottom: 20px;
-        }
+        .archive-field { width: 100%; margin-bottom: 20px; }
         .archive-field label {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 4px;
-            display: block;
+            font-size: 14px; color: #666; margin-bottom: 4px; display: block;
         }
         .archive-field input, .archive-field textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 16px;
-            font-family: inherit;
+            width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px;
+            font-size: 16px; font-family: inherit;
         }
-        .archive-field textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
+        .archive-field textarea { min-height: 80px; resize: vertical; }
 
-        /* ===== 装饰设置界面 ===== */
+        /* 装饰 */
         .decorate-container {
-            flex: 1;
-            padding: 20px 16px;
-            background: #f5f5f5;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            flex: 1; padding: 20px 16px; background: #f5f5f5; overflow-y: auto;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             min-height: 0;
         }
-        .decorate-placeholder {
-            color: #999;
-            font-size: 16px;
-        }
+        .decorate-placeholder { color: #999; font-size: 16px; }
 
-        /* ===== 世界书界面样式 ===== */
+        /* 世界书 */
         .worldbook-container {
-            flex: 1;
-            padding: 16px;
-            background: #f5f5f5;
-            overflow-y: auto;
-            min-height: 0;
+            flex: 1; padding: 16px; background: #f5f5f5; overflow-y: auto; min-height: 0;
         }
         .worldbook-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
         }
-        .worldbook-header h3 {
-            font-size: 18px;
-            font-weight: 600;
-        }
-        .worldbook-actions {
-            display: flex;
-            gap: 8px;
-        }
+        .worldbook-header h3 { font-size: 18px; font-weight: 600; }
+        .worldbook-actions { display: flex; gap: 8px; }
         .worldbook-actions button {
-            background: #07c160;
-            color: white;
-            border: none;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+            background: #07c160; color: white; border: none; width: 44px; height: 44px;
+            border-radius: 50%; font-size: 24px; display: flex; align-items: center;
+            justify-content: center; cursor: pointer;
         }
-        .worldbook-actions button.import-btn {
-            background: #007aff;
-        }
-        .worldbook-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+        .worldbook-actions button.import-btn { background: #007aff; }
+        .worldbook-list { display: flex; flex-direction: column; gap: 12px; }
         .worldbook-item {
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            position: relative;
+            background: white; border-radius: 12px; padding: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05); position: relative;
         }
         .worldbook-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
         }
         .worldbook-name {
-            font-weight: 600;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            font-weight: 600; font-size: 16px; display: flex; align-items: center; gap: 6px;
         }
         .worldbook-badge {
-            background: #07c160;
-            color: white;
-            font-size: 12px;
-            padding: 2px 8px;
+            background: #07c160; color: white; font-size: 12px; padding: 2px 8px;
             border-radius: 12px;
         }
-        .worldbook-badge.global {
-            background: #007aff;
-        }
-        .worldbook-actions-item {
-            display: flex;
-            gap: 8px;
-        }
+        .worldbook-badge.global { background: #007aff; }
+        .worldbook-actions-item { display: flex; gap: 8px; }
         .worldbook-actions-item button {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 4px;
-            color: #555;
+            background: none; border: none; font-size: 20px; cursor: pointer; padding: 4px; color: #555;
         }
         .worldbook-content-preview {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 12px;
-            max-height: 60px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
+            font-size: 14px; color: #666; margin-bottom: 12px; max-height: 60px;
+            overflow: hidden; text-overflow: ellipsis; display: -webkit-box;
+            -webkit-line-clamp: 3; -webkit-box-orient: vertical;
         }
         .worldbook-bound {
-            font-size: 13px;
-            color: #888;
-            margin-top: 8px;
-            padding-top: 8px;
+            font-size: 13px; color: #888; margin-top: 8px; padding-top: 8px;
             border-top: 1px solid #f0f0f0;
         }
-        .worldbook-bound span {
-            color: #07c160;
-        }
+        .worldbook-bound span { color: #07c160; }
 
-        /* ===== 朋友圈样式 ===== */
+        /* 朋友圈 */
         .profile-cover {
-            position: relative;
-            height: 200px;
-            background-size: cover;
-            background-position: center;
-            background-color: #07c160;
-            flex-shrink: 0;
+            position: relative; height: 200px; background-size: cover; background-position: center;
+            background-color: #07c160; flex-shrink: 0;
         }
         .cover-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: 2px solid white;
-            overflow: hidden;
-            background: #07c160;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            color: white;
+            width: 60px; height: 60px; border-radius: 50%; border: 2px solid white;
+            overflow: hidden; background: #07c160; display: flex; align-items: center;
+            justify-content: center; font-size: 30px; color: white;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
-        .cover-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .cover-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .post-btn {
-            background: rgba(0,0,0,0.5);
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            backdrop-filter: blur(2px);
+            background: rgba(0,0,0,0.5); color: white; border: none; width: 40px; height: 40px;
+            border-radius: 50%; font-size: 20px; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; backdrop-filter: blur(2px);
         }
-
-        #dynamicTab {
-            overflow: hidden;
-            min-height: 0;
-        }
+        #dynamicTab { overflow: hidden; min-height: 0; }
         .moments-list {
-            flex: 1;
-            overflow-y: auto;
-            min-height: 0;
-            padding: 12px;
-            background: #f5f5f5;
+            flex: 1; overflow-y: auto; min-height: 0; padding: 12px; background: #f5f5f5;
         }
-
         .moment-item {
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
+            background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
-        .moment-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 12px;
-        }
+        .moment-header { display: flex; align-items: center; margin-bottom: 12px; }
         .moment-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: #07c160;
-            margin-right: 12px;
-            overflow: hidden;
-            flex-shrink: 0;
+            width: 48px; height: 48px; border-radius: 50%; background: #07c160;
+            margin-right: 12px; overflow: hidden; flex-shrink: 0;
         }
         .moment-avatar img, .moment-avatar span {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
+            width: 100%; height: 100%; object-fit: cover; display: flex;
+            align-items: center; justify-content: center; font-size: 24px;
         }
-        .moment-info {
-            flex: 1;
-        }
-        .moment-name {
-            font-weight: 600;
-            font-size: 16px;
-            margin-bottom: 4px;
-        }
-        .moment-time {
-            font-size: 12px;
-            color: #999;
-        }
-        .moment-content {
-            font-size: 15px;
-            line-height: 1.5;
-            margin-bottom: 12px;
-            word-break: break-word;
-        }
+        .moment-info { flex: 1; }
+        .moment-name { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+        .moment-time { font-size: 12px; color: #999; }
+        .moment-content { font-size: 15px; line-height: 1.5; margin-bottom: 12px; word-break: break-word; }
         .moment-images {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 4px;
-            margin-bottom: 12px;
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 12px;
         }
         .moment-image {
-            width: 100%;
-            aspect-ratio: 1/1;
-            background: #f0f0f0;
-            border-radius: 8px;
-            overflow: hidden;
-            cursor: pointer;
+            width: 100%; aspect-ratio: 1/1; background: #f0f0f0; border-radius: 8px;
+            overflow: hidden; cursor: pointer;
         }
-        .moment-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .moment-image img { width: 100%; height: 100%; object-fit: cover; }
         .moment-actions {
-            display: flex;
-            border-top: 1px solid #f0f0f0;
-            padding-top: 12px;
-            margin-top: 4px;
+            display: flex; border-top: 1px solid #f0f0f0; padding-top: 12px; margin-top: 4px;
         }
         .moment-action-btn {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            background: none;
-            border: none;
-            font-size: 14px;
-            color: #666;
-            cursor: pointer;
+            flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+            background: none; border: none; font-size: 14px; color: #666; cursor: pointer;
             padding: 8px 0;
         }
-        .moment-action-btn.liked {
-            color: #ff3b30;
-        }
-        .moment-action-btn i {
-            font-size: 20px;
-        }
-
+        .moment-action-btn.liked { color: #ff3b30; }
+        .moment-action-btn i { font-size: 20px; }
         .like-list {
-            margin-top: 8px;
-            padding: 8px 12px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #333;
+            margin-top: 8px; padding: 8px 12px; background: #f9f9f9; border-radius: 8px;
+            font-size: 14px; color: #333;
         }
-        .like-list i {
-            margin-right: 6px;
-            color: #07c160;
-        }
-
+        .like-list i { margin-right: 6px; color: #07c160; }
         .comments-section {
-            margin-top: 8px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            padding: 8px 12px;
+            margin-top: 8px; background: #f9f9f9; border-radius: 8px; padding: 8px 12px;
         }
         .comment-item {
-            display: flex;
-            align-items: baseline;
-            margin-bottom: 6px;
-            font-size: 14px;
+            display: flex; align-items: baseline; margin-bottom: 6px; font-size: 14px;
         }
-        .comment-name {
-            font-weight: 600;
-            color: #07c160;
-            margin-right: 8px;
-        }
-        .comment-text {
-            color: #333;
-            word-break: break-word;
-        }
+        .comment-name { font-weight: 600; color: #07c160; margin-right: 8px; }
+        .comment-text { color: #333; word-break: break-word; }
         .add-comment {
-            display: flex;
-            align-items: center;
-            margin-top: 8px;
+            display: flex; align-items: center; margin-top: 8px;
         }
         .add-comment input {
-            flex: 1;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            padding: 8px 12px;
-            font-size: 14px;
-            outline: none;
+            flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 8px 12px;
+            font-size: 14px; outline: none;
         }
         .add-comment button {
-            background: #07c160;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 8px 16px;
-            margin-left: 8px;
-            font-size: 14px;
-            cursor: pointer;
+            background: #07c160; color: white; border: none; border-radius: 20px;
+            padding: 8px 16px; margin-left: 8px; font-size: 14px; cursor: pointer;
         }
 
-        .placeholder-page {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: #999;
-            font-size: 16px;
-        }
+        .loading-more { text-align: center; padding: 10px; color: #999; font-size: 13px; display: none; }
+        .loading-more.show { display: block; }
 
-        .loading-more {
-            text-align: center;
-            padding: 10px;
-            color: #999;
-            font-size: 13px;
-            display: none;
-        }
-        .loading-more.show {
-            display: block;
-        }
-
-        /* ===== 加号功能模态框 - 卡片样式（紧凑版） ===== */
+        /* 加号功能模态框 */
         #plusActionModal .modal-content {
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.3);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            color: white;
-            max-width: 400px;
-            width: 90%;
-            border-radius: 20px;
-            padding: 0;
-            overflow: hidden;
-            position: absolute;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
+            background: rgba(255,255,255,0.2); backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1); color: white; max-width: 400px;
+            width: 90%; border-radius: 20px; padding: 0; overflow: hidden;
+            position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
         }
-        .action-card-header {
-            display: flex;
-            justify-content: flex-end;
-            padding: 12px 16px 0;
-        }
-        .close-icon {
-            font-size: 22px;
-            color: white;
-            cursor: pointer;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-        }
-        .close-icon:hover {
-            opacity: 1;
-        }
+        .action-card-header { display: flex; justify-content: flex-end; padding: 12px 16px 0; }
+        .close-icon { font-size: 22px; color: white; cursor: pointer; opacity: 0.8; transition: opacity 0.2s; }
+        .close-icon:hover { opacity: 1; }
         .action-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            padding: 16px;
-            justify-content: center;
+            display: flex; flex-wrap: wrap; gap: 12px; padding: 16px; justify-content: center;
         }
         .action-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            color: white;
-            padding: 8px 4px;
-            transition: background 0.2s;
-            border-radius: 10px;
-            width: calc(25% - 9px);
-            min-width: 70px;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            cursor: pointer; font-size: 12px; color: white; padding: 8px 4px;
+            transition: background 0.2s; border-radius: 10px; width: calc(25% - 9px); min-width: 70px;
         }
-        .action-item:hover {
-            background: rgba(255,255,255,0.2);
-        }
-        .action-item i {
-            font-size: 26px;
-            color: white;
-        }
+        .action-item:hover { background: rgba(255,255,255,0.2); }
+        .action-item i { font-size: 26px; color: white; }
 
-        /* ===== 转账模态框 ===== */
-        #transferModal .modal-content {
-            max-width: 340px;
-        }
-        #transferAmount {
-            font-size: 24px;
-            font-weight: 600;
-            text-align: center;
-        }
-        #transferNote {
-            resize: none;
-        }
+        /* 转账模态框 */
+        #transferModal .modal-content { max-width: 340px; }
+        #transferAmount { font-size: 24px; font-weight: 600; text-align: center; }
+        #transferNote { resize: none; }
 
-        /* 新增：转账操作模态框 */
-        #transferActionModal .modal-content {
-            max-width: 340px;
-        }
+        /* 转账操作模态框 */
+        #transferActionModal .modal-content { max-width: 340px; }
         #transferActionAmount {
-            font-size: 28px;
-            font-weight: 700;
-            color: #d46b00;
-            text-align: center;
-            margin: 10px 0;
+            font-size: 28px; font-weight: 700; color: #096dd9; text-align: center; margin: 10px 0;
         }
         #transferActionNote {
-            font-size: 16px;
-            color: #333;
-            margin: 10px 0;
-            padding: 8px;
-            background: #f5f5f5;
-            border-radius: 8px;
+            font-size: 16px; color: #333; margin: 10px 0; padding: 8px;
+            background: #f5f5f5; border-radius: 8px;
         }
         #transferActionStatus {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 20px;
-            text-align: center;
+            font-size: 14px; color: #666; margin-bottom: 20px; text-align: center;
         }
-        .transfer-action-buttons {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-        }
+        .transfer-action-buttons { display: flex; gap: 12px; margin-top: 20px; }
         .transfer-action-buttons button {
-            flex: 1;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
+            flex: 1; padding: 14px; border: none; border-radius: 8px;
+            font-size: 16px; font-weight: 500; cursor: pointer;
         }
-        #transferAcceptBtn {
-            background: #07c160;
-            color: white;
-        }
-        #transferRejectBtn {
-            background: #ff3b30;
-            color: white;
-        }
+        #transferAcceptBtn { background: #07c160; color: white; }
+        #transferRejectBtn { background: #ff3b30; color: white; }
 
-        /* ===== 长按消息浮动菜单（类似微信，位于消息上方） ===== */
+        /* 长按浮动菜单 */
         .message-float-menu {
-            position: absolute;
-            background: rgba(50, 50, 50, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            color: white;
-            z-index: 1000;
-            min-width: 150px;
-            overflow: hidden;
-            padding: 4px 0;
+            position: absolute; background: rgba(50,50,50,0.95); backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px); border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); color: white; z-index: 1000;
+            min-width: 150px; overflow: hidden; padding: 4px 0;
         }
         .message-float-menu .menu-item {
-            padding: 12px 16px;
-            font-size: 16px;
-            cursor: pointer;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            text-align: center;
+            padding: 12px 16px; font-size: 16px; cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center;
             transition: background 0.2s;
         }
-        .message-float-menu .menu-item:last-child {
-            border-bottom: none;
-        }
-        .message-float-menu .menu-item:hover {
-            background: rgba(255,255,255,0.2);
-        }
+        .message-float-menu .menu-item:last-child { border-bottom: none; }
+        .message-float-menu .menu-item:hover { background: rgba(255,255,255,0.2); }
 
-        /* ===== 多选操作栏 ===== */
+        /* 多选操作栏 */
         .multi-select-bar {
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 16px;
-            background: #f7f7f7;
-            border-top: 1px solid #dbdbdb;
+            display: none; align-items: center; justify-content: space-between;
+            padding: 10px 16px; background: #f7f7f7; border-top: 1px solid #dbdbdb;
             flex-shrink: 0;
         }
-        .multi-select-bar.active {
-            display: flex;
-        }
-        .select-info {
-            font-size: 16px;
-            color: #333;
-        }
-        .select-actions {
-            display: flex;
-            gap: 16px;
-        }
+        .multi-select-bar.active { display: flex; }
+        .select-info { font-size: 16px; color: #333; }
+        .select-actions { display: flex; gap: 16px; }
         .select-actions button {
-            background: none;
-            border: none;
-            font-size: 16px;
-            color: #007aff;
-            cursor: pointer;
-            padding: 8px;
+            background: none; border: none; font-size: 16px; color: #007aff;
+            cursor: pointer; padding: 8px;
         }
-        .select-actions button.danger {
-            color: #ff3b30;
-        }
+        .select-actions button.danger { color: #ff3b30; }
 
-        /* ===== 编辑消息模态框 ===== */
-        #editMessageModal .modal-content {
-            max-width: 400px;
-        }
+        /* 编辑消息 */
+        #editMessageModal .modal-content { max-width: 400px; }
         #editMessageContent {
-            width: 100%;
-            min-height: 100px;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 16px;
-            resize: vertical;
-            margin-bottom: 20px;
+            width: 100%; min-height: 100px; padding: 12px; border: 1px solid #ccc;
+            border-radius: 8px; font-size: 16px; resize: vertical; margin-bottom: 20px;
         }
 
-        /* ===== 语音操作卡片（白色悬浮） ===== */
+        /* 语音卡片 */
         .voice-card {
-            position: absolute;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 300px;
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            padding: 20px;
-            z-index: 1001;
+            position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);
+            width: 300px; background: white; border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); padding: 20px; z-index: 1001;
             display: none;
         }
-        .voice-card.active {
-            display: block;
-        }
-        .voice-card-header {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 10px;
-        }
-        .voice-card-close {
-            font-size: 24px;
-            color: #999;
-            cursor: pointer;
-            padding: 4px;
-        }
-        .voice-card-close:hover {
-            color: #333;
-        }
-        .voice-mic-area {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-        }
+        .voice-card.active { display: block; }
+        .voice-card-header { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+        .voice-card-close { font-size: 24px; color: #999; cursor: pointer; padding: 4px; }
+        .voice-card-close:hover { color: #333; }
+        .voice-mic-area { display: flex; justify-content: center; margin: 20px 0; }
         .voice-mic-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            color: #07c160;
-            cursor: pointer;
-            transition: all 0.2s;
+            width: 80px; height: 80px; border-radius: 50%; background: #f0f0f0;
+            display: flex; align-items: center; justify-content: center; font-size: 40px;
+            color: #07c160; cursor: pointer; transition: all 0.2s;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        .voice-mic-icon.recording {
-            background: #ff3b30;
-            color: white;
-            animation: pulse 1s infinite;
-        }
+        .voice-mic-icon.recording { background: #ff3b30; color: white; animation: pulse 1s infinite; }
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
         .voice-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #ddd;
-            border-radius: 30px;
-            font-size: 16px;
-            margin: 15px 0 10px;
-            outline: none;
+            width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 30px;
+            font-size: 16px; margin: 15px 0 10px; outline: none;
         }
-        .voice-input:focus {
-            border-color: #07c160;
-        }
+        .voice-input:focus { border-color: #07c160; }
         .voice-send-btn {
-            width: 100%;
-            padding: 14px;
-            background: #07c160;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 5px;
-        }
-        .voice-send-btn:active {
-            opacity: 0.8;
+            width: 100%; padding: 14px; background: #07c160; color: white; border: none;
+            border-radius: 30px; font-size: 18px; font-weight: 600; cursor: pointer; margin-top: 5px;
         }
 
-        /* ===== 语音转文字模态框 ===== */
-        #voiceTranscriptModal .modal-content {
-            max-width: 400px;
-        }
+        /* 语音转文字模态框 */
+        #voiceTranscriptModal .modal-content { max-width: 400px; }
         #voiceTranscriptContent {
-            width: 100%;
-            min-height: 80px;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 16px;
-            background: #f9f9f9;
-            margin-bottom: 20px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+            width: 100%; min-height: 80px; padding: 12px; border: 1px solid #ccc;
+            border-radius: 8px; font-size: 16px; background: #f9f9f9; margin-bottom: 20px;
+            white-space: pre-wrap; word-wrap: break-word;
         }
     </style>
 </head>
@@ -3496,7 +2228,6 @@
                     });
                     this.contacts = contacts;
                 } else {
-                    // 默认联系人没有初始消息（messages 为空数组）
                     this.contacts = [{
                         id: Date.now().toString(),
                         avatar: '🤖',
@@ -3508,7 +2239,7 @@
                         pinned: false,
                         muted: false,
                         mutedLastMessage: '',
-                        messages: [], // 改为空数组，无欢迎消息
+                        messages: [],
                         autoPostEnabled: false,
                         autoPostInterval: 1,
                         lastAutoPostTime: 0,
@@ -3721,7 +2452,7 @@
                     pinned: false,
                     muted: false,
                     mutedLastMessage: '',
-                    messages: [], // 清除后也无欢迎消息
+                    messages: [],
                     autoPostEnabled: false,
                     autoPostInterval: 1,
                     lastAutoPostTime: 0,
@@ -4867,7 +3598,7 @@
                 }
             },
 
-            // AI决定是否接收转账
+            // AI决定是否接收转账（只更新状态，不发送文字消息）
             async askAIToHandleTransfer(contact, msgIndex) {
                 const msg = contact.messages[msgIndex];
                 if (!msg || msg.type !== 'transfer' || msg.role !== 'user') return;
@@ -4913,14 +3644,9 @@
                     const reply = data.choices?.[0]?.message?.content?.trim() || '';
                     if (reply.includes('接收')) {
                         transferData.status = 'accepted';
-                        this.addMessageToCurrent('已收款，谢谢！', false, false, 'text');
-                    } else if (reply.includes('退回')) {
-                        transferData.status = 'rejected';
-                        this.addMessageToCurrent('抱歉，我不收这笔转账', false, false, 'text');
                     } else {
-                        // 默认退回
+                        // 默认退回（包括回复“退回”或其他内容）
                         transferData.status = 'rejected';
-                        this.addMessageToCurrent('转账已退回', false, false, 'text');
                     }
                     msg.content = transferData;
                     DataManager.saveContacts();
@@ -4928,7 +3654,7 @@
                     if (document.getElementById('chatDetailPage').style.display === 'flex') {
                         UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
                     }
-                    Utils.showToast('转账状态已更新');
+                    Utils.showToast(transferData.status === 'accepted' ? '转账已接收' : '转账已退回');
                 } catch (err) {
                     console.error(err);
                     Utils.showToast('处理转账时出错');
@@ -5512,7 +4238,7 @@
                             DataManager.saveContacts();
                             UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
                             modal.classList.remove('active');
-                            // 添加一条系统消息告知AI
+                            // 添加一条用户消息告知AI
                             this.addMessageToCurrent('你已接收转账', true, false, 'text');
                         };
                         document.getElementById('transferRejectBtn').onclick = () => {
@@ -6264,7 +4990,7 @@
                 DataManager.contacts.push({
                     id: newId, avatar: avatarId || '🤖', name, remark, personality: personality || '你是一个友好的AI助手。', configId,
                     blocked: false, pinned: false, muted: false, mutedLastMessage: '',
-                    messages: [], // 新建联系人无初始消息
+                    messages: [],
                     autoPostEnabled: false,
                     autoPostInterval: 1,
                     lastAutoPostTime: 0,
