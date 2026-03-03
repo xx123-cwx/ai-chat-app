@@ -2134,8 +2134,7 @@ const ChatHandler = {
         if (this.isMultiSelectMode) return;
         const msg = DataManager.getCurrentContact().messages[index];
         if (!msg || Utils.isRecallMessage(msg)) return;
-        e.preventDefault();
-        e.stopPropagation();
+               e.stopPropagation();
         this.longPressTimer = setTimeout(() => {
             this.showFloatMenu(e, index);
             this.longPressTimer = null;
