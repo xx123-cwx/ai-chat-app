@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>phone</title>
+    <title>AI角色 · 最终版（时间戳颜色+语音转文字规则+降低AI语音概率）</title>
     <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -1228,11 +1228,11 @@
 
         .msg-time {
             font-size: 11px;
-            color: #666;
+            color: #333; /* 统一为深色，与AI一致 */
             white-space: nowrap;
         }
         .message.me .msg-time {
-            color: #ddd;
+            color: #333; /* 用户时间戳也使用相同深色 */
         }
 
         .system-message {
@@ -3103,7 +3103,7 @@
                 if (!lastMsg) return '';
                 if (lastMsg.type === 'image') return '[图片]';
                 if (lastMsg.type === 'voice') return '[语音]';
-                if (lastMsg.type === 'voice_sim') return '[语音]';
+                if (lastMsg.type === 'voice_sim') return '[语音]'; // 统一显示为语音
                 if (lastMsg.type === 'recall') return '已撤回';
                 return lastMsg.content || '';
             },
@@ -3257,6 +3257,7 @@
             // 语音识别函数（模拟）
             recognizeSpeech(audioBlob) {
                 return new Promise((resolve, reject) => {
+                    // 模拟识别结果
                     Utils.showToast('正在识别语音...', 0);
                     setTimeout(() => {
                         const mockText = '这是一条模拟识别的语音消息';
@@ -4193,7 +4194,7 @@
                 });
             },
 
-            // 渲染消息列表（修正时间戳位置）
+            // 渲染消息列表（修正时间戳位置 + 语音转文字规则）
             renderMessages(messages, start, end) {
                 const area = document.getElementById('messageArea');
                 if (!area) return;
@@ -4295,10 +4296,13 @@
                             
                             bubbleWrapper.appendChild(voiceRow);
                             
-                            const transcriptDiv = document.createElement('div');
-                            transcriptDiv.className = 'voice-transcript';
-                            transcriptDiv.textContent = transcript;
-                            bubbleWrapper.appendChild(transcriptDiv);
+                            // 只有模拟语音才显示转文字
+                            if (msg.type === 'voice_sim') {
+                                const transcriptDiv = document.createElement('div');
+                                transcriptDiv.className = 'voice-transcript';
+                                transcriptDiv.textContent = transcript;
+                                bubbleWrapper.appendChild(transcriptDiv);
+                            }
                         } else {
                             const bubbleRow = document.createElement('div'); bubbleRow.className = 'bubble-row';
                             const bubble = document.createElement('div'); bubble.className = 'msg-bubble';
@@ -4791,7 +4795,8 @@
 
                 for (let i = 0; i < sentences.length; i++) {
                     if (this.stopSendingFlag) break;
-                    const useVoice = Math.random() < 0.2;
+                    // 降低语音概率为10%
+                    const useVoice = Math.random() < 0.1;
                     if (useVoice) {
                         this.addMessageToCurrent(sentences[i], false, false, 'voice_sim', { duration: '1"' });
                     } else {
@@ -4880,7 +4885,8 @@
 
                     const sentences = this.splitIntoSentences(reply);
                     if (sentences.length === 1 || reply.length <= 20) {
-                        const useVoice = Math.random() < 0.2;
+                        // 单句也应用10%语音概率
+                        const useVoice = Math.random() < 0.1;
                         if (useVoice) {
                             this.addMessageToCurrent(reply, false, false, 'voice_sim', { duration: '1"' });
                         } else {
