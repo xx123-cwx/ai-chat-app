@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AI角色 · 最终版（时间戳颜色+语音转文字规则+降低AI语音概率）</title>
+    <title>AI角色 · 最终版（转账颜色恢复+AI双向转账）</title>
     <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -1117,28 +1117,32 @@
         }
 
         /* 气泡行：包含气泡和时间戳，水平排列 */
-        .bubble-row, .voice-row {
+        .bubble-row, .voice-row, .transfer-row {
             display: flex;
             align-items: center;
             max-width: 100%;
             width: 100%;
         }
         .message.other .bubble-row,
-        .message.other .voice-row {
+        .message.other .voice-row,
+        .message.other .transfer-row {
             justify-content: flex-start;
         }
         .message.me .bubble-row,
-        .message.me .voice-row {
-            justify-content: flex-start; /* 保持正常流，时间戳和气泡按顺序排列 */
+        .message.me .voice-row,
+        .message.me .transfer-row {
+            justify-content: flex-start;
         }
 
         /* 时间戳间距：AI消息时间戳在右侧，使用左间距；用户消息时间戳在左侧，使用右间距 */
         .message.other .bubble-row .msg-time,
-        .message.other .voice-row .msg-time {
+        .message.other .voice-row .msg-time,
+        .message.other .transfer-row .msg-time {
             margin-left: 8px;
         }
         .message.me .bubble-row .msg-time,
-        .message.me .voice-row .msg-time {
+        .message.me .voice-row .msg-time,
+        .message.me .transfer-row .msg-time {
             margin-right: 8px;
         }
 
@@ -1170,6 +1174,40 @@
             display: block;
         }
 
+        /* 转账消息气泡样式 - 原版配色 */
+        .transfer-bubble {
+            padding: 12px 16px;
+            background-color: #fdf5e6;
+            border-radius: 18px;
+            border: 1px solid #ffd966;
+            min-width: 150px;
+            cursor: pointer;
+            color: #333;
+        }
+        .message.me .transfer-bubble {
+            background-color: #e6f7ff;
+            border-color: #91d5ff;
+        }
+        .transfer-amount {
+            font-size: 18px;
+            font-weight: 600;
+            color: #d46b00;
+        }
+        .message.me .transfer-amount {
+            color: #096dd9;
+        }
+        .transfer-note {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+            word-break: break-word;
+        }
+        .transfer-status {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
         /* 微信风格语音气泡 - 独立样式 */
         .voice-bubble-wechat {
             display: flex;
@@ -1178,28 +1216,20 @@
             max-width: 200px;
             padding: 8px 12px;
             border-radius: 18px;
-            background-color: #fff; /* 对方气泡背景白色 */
-            cursor: pointer; /* 整个气泡可点击触发转文字（但喇叭会阻止冒泡） */
+            background-color: #fff;
+            cursor: pointer;
             position: relative;
             -webkit-tap-highlight-color: rgba(0,0,0,0.1);
-            touch-action: manipulation; /* 优化触摸响应 */
+            touch-action: manipulation;
         }
         .message.me .voice-bubble-wechat {
-            background-color: #95ec69; /* 自己气泡背景绿色 */
+            background-color: #95ec69;
         }
         .voice-icon-wechat {
             font-size: 20px;
             margin-right: 8px;
             color: #333;
-            cursor: pointer;
-            transition: transform 0.1s;
-            pointer-events: auto; /* 确保喇叭可独立点击 */
-            touch-action: manipulation; /* 优化触摸响应 */
-            padding: 8px 4px; /* 增加点击区域 */
-            margin-left: -4px; /* 调整位置 */
-        }
-        .voice-icon-wechat:active {
-            transform: scale(0.9);
+            pointer-events: none;
         }
         .message.me .voice-icon-wechat {
             color: #fff;
@@ -1218,7 +1248,7 @@
         .voice-transcript {
             font-size: 12px;
             color: #999;
-            margin-top: 4px;  /* 与气泡的间距 */
+            margin-top: 4px;
             max-width: 200px;
             word-break: break-word;
         }
@@ -1228,11 +1258,11 @@
 
         .msg-time {
             font-size: 11px;
-            color: #333; /* 统一为深色，与AI一致 */
+            color: #333;
             white-space: nowrap;
         }
         .message.me .msg-time {
-            color: #333; /* 用户时间戳也使用相同深色 */
+            color: #333;
         }
 
         .system-message {
@@ -2055,7 +2085,6 @@
             border-radius: 20px;
             padding: 0;
             overflow: hidden;
-            /* 从输入框上方弹出 */
             position: absolute;
             bottom: 80px;
             left: 50%;
@@ -2094,7 +2123,7 @@
             padding: 8px 4px;
             transition: background 0.2s;
             border-radius: 10px;
-            width: calc(25% - 9px); /* 一行四个，减去gap */
+            width: calc(25% - 9px);
             min-width: 70px;
         }
         .action-item:hover {
@@ -2102,6 +2131,67 @@
         }
         .action-item i {
             font-size: 26px;
+            color: white;
+        }
+
+        /* ===== 转账模态框 ===== */
+        #transferModal .modal-content {
+            max-width: 340px;
+        }
+        #transferAmount {
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+        }
+        #transferNote {
+            resize: none;
+        }
+
+        /* 新增：转账操作模态框 */
+        #transferActionModal .modal-content {
+            max-width: 340px;
+        }
+        #transferActionAmount {
+            font-size: 28px;
+            font-weight: 700;
+            color: #d46b00;
+            text-align: center;
+            margin: 10px 0;
+        }
+        #transferActionNote {
+            font-size: 16px;
+            color: #333;
+            margin: 10px 0;
+            padding: 8px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        #transferActionStatus {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .transfer-action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .transfer-action-buttons button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        #transferAcceptBtn {
+            background: #07c160;
+            color: white;
+        }
+        #transferRejectBtn {
+            background: #ff3b30;
             color: white;
         }
 
@@ -2321,7 +2411,6 @@
                         </div>
                     </div>
                     <div class="ai-status-details" id="aiStatusDetails">
-                        <!-- 动态填充饮水、三餐、位置信息（竖向排列） -->
                         <div class="ai-status-detail-item" id="aiStatusWater">
                             <i class="fa-solid fa-droplet ai-status-water"></i>
                             <span class="ai-status-detail-text">加载中...</span>
@@ -2442,9 +2531,8 @@
                         <div class="contact-list" id="friendsListContainer"></div>
                     </div>
                     <div id="dynamicTab" style="display: none; flex-direction: column; height: 100%;">
-                        <!-- 朋友圈个人封面（右下角显示头像、网名、个性签名，右上角相机） -->
+                        <!-- 朋友圈个人封面 -->
                         <div class="profile-cover" id="profileCover">
-                            <!-- 右下角信息 -->
                             <div style="position: absolute; bottom: 16px; right: 16px; display: flex; flex-direction: column; align-items: flex-end; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <div style="text-align: right;">
@@ -2457,7 +2545,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- 右上角发布按钮 -->
                             <button class="post-btn" id="openPostModalBtn" style="position: absolute; top: 16px; right: 16px;"><i class="fa-solid fa-camera"></i></button>
                         </div>
                         <div class="moments-list" id="momentsList"></div>
@@ -2494,7 +2581,7 @@
                     </div>
                 </div>
                 <div class="chat-messages" id="messageArea"></div>
-                <!-- 多选操作栏（新增编辑按钮） -->
+                <!-- 多选操作栏 -->
                 <div class="multi-select-bar" id="multiSelectBar">
                     <span class="select-info" id="selectCount">已选择 0 条</span>
                     <div class="select-actions">
@@ -2504,7 +2591,6 @@
                     </div>
                 </div>
                 <div class="input-area">
-                    <!-- 为加号图标添加 id -->
                     <span class="input-btn" id="plusActionBtn"><i class="fa-solid fa-plus"></i></span>
                     <span class="input-btn" id="cameraBtn"><i class="fa-solid fa-camera"></i></span>
                     <span class="input-btn" id="imageBtn"><i class="fa-regular fa-image"></i></span>
@@ -2527,7 +2613,7 @@
                     <div class="header-right"></div>
                 </div>
                 <div class="options-container">
-                    <!-- AI角色头像区域（可点击修改） -->
+                    <!-- AI角色头像区域 -->
                     <div class="ai-avatar-card" id="contactAvatarCard">
                         <div class="avatar-large" id="contactAvatarLarge">
                             <span id="contactAvatarLargeText">🤖</span>
@@ -2980,6 +3066,45 @@
             </div>
         </div>
 
+        <!-- 转账模态框（发送） -->
+        <div class="modal-overlay" id="transferModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>转账</h3>
+                    <span class="close-modal" id="closeTransferModal">&times;</span>
+                </div>
+                <div class="form-group">
+                    <label>金额（元）</label>
+                    <input type="number" id="transferAmount" placeholder="0.00" step="0.01" min="0.01">
+                </div>
+                <div class="form-group">
+                    <label>留言</label>
+                    <textarea id="transferNote" rows="3" placeholder="选填"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button class="save-btn" id="sendTransfer">发送</button>
+                    <button class="cancel-btn" id="cancelTransfer">取消</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 转账操作模态框（接收/退回） -->
+        <div class="modal-overlay" id="transferActionModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>转账详情</h3>
+                    <span class="close-modal" id="closeTransferActionModal">&times;</span>
+                </div>
+                <div id="transferActionAmount">¥0.00</div>
+                <div id="transferActionNote"></div>
+                <div id="transferActionStatus"></div>
+                <div class="transfer-action-buttons" id="transferActionButtons">
+                    <button id="transferAcceptBtn">接收</button>
+                    <button id="transferRejectBtn">退回</button>
+                </div>
+            </div>
+        </div>
+
         <!-- 长按消息浮动菜单（类似微信） -->
         <div class="message-float-menu" id="messageFloatMenu" style="display: none;"></div>
 
@@ -3103,7 +3228,12 @@
                 if (!lastMsg) return '';
                 if (lastMsg.type === 'image') return '[图片]';
                 if (lastMsg.type === 'voice') return '[语音]';
-                if (lastMsg.type === 'voice_sim') return '[语音]'; // 统一显示为语音
+                if (lastMsg.type === 'voice_sim') return '[语音]';
+                if (lastMsg.type === 'transfer') {
+                    if (lastMsg.content && lastMsg.content.status === 'accepted') return '[转账-已收款]';
+                    if (lastMsg.content && lastMsg.content.status === 'rejected') return '[转账-已退回]';
+                    return '[转账]';
+                }
                 if (lastMsg.type === 'recall') return '已撤回';
                 return lastMsg.content || '';
             },
@@ -3257,7 +3387,6 @@
             // 语音识别函数（模拟）
             recognizeSpeech(audioBlob) {
                 return new Promise((resolve, reject) => {
-                    // 模拟识别结果
                     Utils.showToast('正在识别语音...', 0);
                     setTimeout(() => {
                         const mockText = '这是一条模拟识别的语音消息';
@@ -3367,6 +3496,7 @@
                     });
                     this.contacts = contacts;
                 } else {
+                    // 默认联系人没有初始消息（messages 为空数组）
                     this.contacts = [{
                         id: Date.now().toString(),
                         avatar: '🤖',
@@ -3378,12 +3508,7 @@
                         pinned: false,
                         muted: false,
                         mutedLastMessage: '',
-                        messages: [{ 
-                            role: 'assistant', 
-                            type: 'text', 
-                            content: '你好！我是你的AI助手，有什么可以帮你的？',
-                            timestamp: Date.now()
-                        }],
+                        messages: [], // 改为空数组，无欢迎消息
                         autoPostEnabled: false,
                         autoPostInterval: 1,
                         lastAutoPostTime: 0,
@@ -3596,7 +3721,7 @@
                     pinned: false,
                     muted: false,
                     mutedLastMessage: '',
-                    messages: [{ role: 'assistant', type: 'text', content: '你好！我是你的AI助手，有什么可以帮你的？', timestamp: Date.now() }],
+                    messages: [], // 清除后也无欢迎消息
                     autoPostEnabled: false,
                     autoPostInterval: 1,
                     lastAutoPostTime: 0,
@@ -4194,7 +4319,7 @@
                 });
             },
 
-            // 渲染消息列表（修正时间戳位置 + 语音转文字规则）
+            // 渲染消息列表（支持语音、转账等类型）
             renderMessages(messages, start, end) {
                 const area = document.getElementById('messageArea');
                 if (!area) return;
@@ -4261,14 +4386,27 @@
                             } else {
                                 icon.dataset.text = msg.content.replace(/'/g, "\\'");
                             }
-                            icon.addEventListener('click', function(e) {
-                                e.stopPropagation();
-                                if (this.dataset.audioId) {
-                                    window.playVoice(this.dataset.audioId, this);
-                                } else if (this.dataset.text) {
-                                    window.speakText(this.dataset.text, this);
-                                }
-                            });
+                            
+                            // 真实语音：点击整个气泡播放
+                            if (msg.type === 'voice') {
+                                voiceBubble.addEventListener('click', function(e) {
+                                    e.stopPropagation();
+                                    const audioId = this.querySelector('.voice-icon-wechat').dataset.audioId;
+                                    if (audioId) {
+                                        window.playVoice(audioId, this.querySelector('.voice-icon-wechat'));
+                                    }
+                                });
+                            } else {
+                                // 模拟语音：点击气泡显示转文字
+                                voiceBubble.addEventListener('click', function(e) {
+                                    e.stopPropagation();
+                                    const transcript = this.dataset.transcript;
+                                    if (transcript) {
+                                        document.getElementById('voiceTranscriptContent').textContent = transcript;
+                                        document.getElementById('voiceTranscriptModal').classList.add('active');
+                                    }
+                                });
+                            }
                             
                             const durationSpan = document.createElement('span');
                             durationSpan.className = 'voice-duration-wechat';
@@ -4276,14 +4414,6 @@
                             
                             voiceBubble.appendChild(icon);
                             voiceBubble.appendChild(durationSpan);
-                            
-                            voiceBubble.addEventListener('click', function(e) {
-                                const transcript = this.dataset.transcript;
-                                if (transcript) {
-                                    document.getElementById('voiceTranscriptContent').textContent = transcript;
-                                    document.getElementById('voiceTranscriptModal').classList.add('active');
-                                }
-                            });
                             
                             const timeSpan = document.createElement('span'); timeSpan.className = 'msg-time'; timeSpan.textContent = Utils.formatTime(msg.timestamp);
                             if (isUser) {
@@ -4303,6 +4433,43 @@
                                 transcriptDiv.textContent = transcript;
                                 bubbleWrapper.appendChild(transcriptDiv);
                             }
+                        } else if (msg.type === 'transfer') {
+                            const transferRow = document.createElement('div'); transferRow.className = 'transfer-row';
+                            const transferBubble = document.createElement('div');
+                            transferBubble.className = 'transfer-bubble';
+                            transferBubble.dataset.index = i; // 添加索引以便点击操作
+                            // 解析转账内容（假设 content 为对象）
+                            let transferData = { amount: '0.00', note: '', status: 'pending' };
+                            if (typeof msg.content === 'object') {
+                                transferData = msg.content;
+                            } else if (typeof msg.content === 'string') {
+                                try {
+                                    transferData = JSON.parse(msg.content);
+                                } catch (e) {
+                                    transferData = { amount: msg.content, note: '', status: 'pending' };
+                                }
+                            }
+                            // 确保状态字段
+                            if (!transferData.status) transferData.status = 'pending';
+                            let statusText = '';
+                            if (transferData.status === 'pending') statusText = '待收款';
+                            else if (transferData.status === 'accepted') statusText = '已收款';
+                            else if (transferData.status === 'rejected') statusText = '已退回';
+                            transferBubble.innerHTML = `
+                                <div class="transfer-amount">¥${transferData.amount}</div>
+                                ${transferData.note ? `<div class="transfer-note">${transferData.note}</div>` : ''}
+                                <div class="transfer-status">${statusText}</div>
+                            `;
+                            
+                            const timeSpan = document.createElement('span'); timeSpan.className = 'msg-time'; timeSpan.textContent = Utils.formatTime(msg.timestamp);
+                            if (isUser) {
+                                transferRow.appendChild(timeSpan);
+                                transferRow.appendChild(transferBubble);
+                            } else {
+                                transferRow.appendChild(transferBubble);
+                                transferRow.appendChild(timeSpan);
+                            }
+                            bubbleWrapper.appendChild(transferRow);
                         } else {
                             const bubbleRow = document.createElement('div'); bubbleRow.className = 'bubble-row';
                             const bubble = document.createElement('div'); bubble.className = 'msg-bubble';
@@ -4528,7 +4695,6 @@
                 }
             },
 
-            // AI状态小部件更新（基于人设的模拟生成，竖向排列三餐）
             async updateAIStatusWidget() {
                 const contacts = DataManager.contacts;
                 if (contacts.length === 0) {
@@ -4654,7 +4820,12 @@
             addMessageToCurrent(text, isUser, isSystem = false, type = 'text', extra = {}) {
                 const contact = DataManager.getCurrentContact();
                 const role = isSystem ? 'system' : (isUser ? 'user' : 'assistant');
-                const msg = { role, type, content: text, timestamp: Date.now(), ...extra };
+                let content = text;
+                // 如果是转账类型，确保 content 是对象
+                if (type === 'transfer' && typeof text === 'object') {
+                    content = text;
+                }
+                const msg = { role, type, content, timestamp: Date.now(), ...extra };
                 contact.messages.push(msg);
                 DataManager.saveContacts();
                 if (document.getElementById('chatDetailPage').style.display === 'flex') {
@@ -4671,6 +4842,110 @@
                     }, 0);
                 }
                 UIManager.renderContactList();
+            },
+
+            // 发送转账（用户发起）
+            sendTransfer(amount, note) {
+                const contact = DataManager.getCurrentContact();
+                if (contact.blocked) { Utils.showToast('你已将对方拉黑，无法发送消息'); return; }
+                if (!amount || parseFloat(amount) <= 0) {
+                    Utils.showToast('请输入有效金额');
+                    return;
+                }
+                const transferData = {
+                    amount: parseFloat(amount).toFixed(2),
+                    note: note || '',
+                    status: 'pending' // pending, accepted, rejected
+                };
+                this.stopSendingChunks();
+                this.addMessageToCurrent(transferData, true, false, 'transfer');
+                Utils.showToast('转账已发送');
+
+                // 如果是转给AI，让AI决定是否接收
+                if (contact) {
+                    this.askAIToHandleTransfer(contact, contact.messages.length - 1);
+                }
+            },
+
+            // AI决定是否接收转账
+            async askAIToHandleTransfer(contact, msgIndex) {
+                const msg = contact.messages[msgIndex];
+                if (!msg || msg.type !== 'transfer' || msg.role !== 'user') return;
+                let transferData = msg.content;
+                if (typeof transferData === 'string') {
+                    try {
+                        transferData = JSON.parse(transferData);
+                    } catch (e) {
+                        return;
+                    }
+                }
+                if (transferData.status !== 'pending') return;
+
+                // 构造提示词
+                const prompt = `用户向你转账 ${transferData.amount} 元，留言：${transferData.note || '无'}。请根据你的人设决定是否接收这笔转账。请回复“接收”或“退回”，只回复这两个词之一。`;
+                let config;
+                if (contact.configId) {
+                    config = DataManager.apiConfigs.find(c => c.id === contact.configId);
+                } else {
+                    config = DataManager.getActiveConfig();
+                }
+                if (!config || !config.base_url || !config.api_key || !config.currentModel) {
+                    Utils.showToast('AI 未配置，无法处理转账');
+                    return;
+                }
+                Utils.showToast('AI 正在处理转账...', 0);
+                try {
+                    const response = await fetch(`${BACKEND_URL}/api/chat`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            base_url: config.base_url,
+                            api_key: config.api_key,
+                            model: config.currentModel,
+                            messages: [
+                                { role: 'system', content: contact.personality },
+                                { role: 'user', content: prompt }
+                            ]
+                        })
+                    });
+                    if (!response.ok) throw new Error('API请求失败');
+                    const data = await response.json();
+                    const reply = data.choices?.[0]?.message?.content?.trim() || '';
+                    if (reply.includes('接收')) {
+                        transferData.status = 'accepted';
+                        this.addMessageToCurrent('已收款，谢谢！', false, false, 'text');
+                    } else if (reply.includes('退回')) {
+                        transferData.status = 'rejected';
+                        this.addMessageToCurrent('抱歉，我不收这笔转账', false, false, 'text');
+                    } else {
+                        // 默认退回
+                        transferData.status = 'rejected';
+                        this.addMessageToCurrent('转账已退回', false, false, 'text');
+                    }
+                    msg.content = transferData;
+                    DataManager.saveContacts();
+                    // 重新渲染消息区域
+                    if (document.getElementById('chatDetailPage').style.display === 'flex') {
+                        UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
+                    }
+                    Utils.showToast('转账状态已更新');
+                } catch (err) {
+                    console.error(err);
+                    Utils.showToast('处理转账时出错');
+                }
+            },
+
+            // AI主动转账：解析AI回复中是否包含【转账|金额|备注】标记
+            parseAIResponseForTransfer(aiReply) {
+                const regex = /【转账\|([\d.]+)\|(.*?)】/;
+                const match = aiReply.match(regex);
+                if (match) {
+                    const amount = parseFloat(match[1]).toFixed(2);
+                    const note = match[2] || '';
+                    const cleanReply = aiReply.replace(regex, '').trim();
+                    return { transfer: { amount, note }, cleanReply };
+                }
+                return null;
             },
 
             sendOnlyMessage() {
@@ -4854,14 +5129,18 @@
                 const worldBookContent = worldBooks.map(w => `【${w.name}】\n${w.content}`).join('\n\n');
                 const worldBookInfo = worldBookContent ? `世界书规则：\n${worldBookContent}` : '';
 
+                // 添加一条系统提示：如果需要转账，请使用格式 【转账|金额|备注】
+                const transferInstruction = '如果你需要主动向用户转账，请在回复中包含【转账|金额|备注】标记，例如“【转账|10|请你喝奶茶】”。否则正常回复。';
+
                 const systemMessages = [
                     { role: 'system', content: timeInfo },
                     { role: 'system', content: userInfo },
-                    { role: 'system', content: contact.personality }
+                    { role: 'system', content: contact.personality },
+                    { role: 'system', content: transferInstruction }
                 ];
                 if (worldBookInfo) systemMessages.push({ role: 'system', content: worldBookInfo });
 
-                const historyMessages = contact.messages.filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.content }));
+                const historyMessages = contact.messages.filter(m => m.role !== 'system').map(m => ({ role: m.role, content: typeof m.content === 'object' ? JSON.stringify(m.content) : m.content }));
                 const messages = [...systemMessages, ...historyMessages];
 
                 try {
@@ -4880,8 +5159,21 @@
                         throw new Error(statusText);
                     }
                     const data = await response.json();
-                    const reply = data.choices?.[0]?.message?.content;
+                    let reply = data.choices?.[0]?.message?.content;
                     if (!reply) throw new Error('AI返回内容为空');
+
+                    // 解析转账标记
+                    const parsed = this.parseAIResponseForTransfer(reply);
+                    if (parsed) {
+                        // 生成转账消息（AI发出）
+                        const transferData = {
+                            amount: parsed.transfer.amount,
+                            note: parsed.transfer.note,
+                            status: 'pending'
+                        };
+                        this.addMessageToCurrent(transferData, false, false, 'transfer');
+                        reply = parsed.cleanReply;
+                    }
 
                     const sentences = this.splitIntoSentences(reply);
                     if (sentences.length === 1 || reply.length <= 20) {
@@ -5179,6 +5471,63 @@
                 this.exitMultiSelectMode();
                 UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
                 Utils.showToast('已删除', 1500);
+            },
+
+            // 处理点击转账气泡
+            handleTransferClick(index) {
+                const contact = DataManager.getCurrentContact();
+                const msg = contact.messages[index];
+                if (!msg || msg.type !== 'transfer') return;
+                let transferData = msg.content;
+                if (typeof transferData === 'string') {
+                    try {
+                        transferData = JSON.parse(transferData);
+                    } catch (e) {
+                        return;
+                    }
+                }
+                // 显示转账操作模态框
+                const modal = document.getElementById('transferActionModal');
+                document.getElementById('transferActionAmount').textContent = `¥${transferData.amount}`;
+                document.getElementById('transferActionNote').textContent = transferData.note || '无留言';
+                let statusText = '';
+                if (transferData.status === 'pending') statusText = '待收款';
+                else if (transferData.status === 'accepted') statusText = '已收款';
+                else if (transferData.status === 'rejected') statusText = '已退回';
+                document.getElementById('transferActionStatus').textContent = `状态：${statusText}`;
+
+                const buttonsDiv = document.getElementById('transferActionButtons');
+                // 根据状态和发送方显示按钮
+                if (msg.role === 'user') {
+                    // 自己发出的转账，只能查看，不能操作
+                    buttonsDiv.style.display = 'none';
+                } else {
+                    // AI发出的转账，且状态为pending时，显示接收/退回按钮
+                    if (transferData.status === 'pending') {
+                        buttonsDiv.style.display = 'flex';
+                        // 绑定事件
+                        document.getElementById('transferAcceptBtn').onclick = () => {
+                            transferData.status = 'accepted';
+                            msg.content = transferData;
+                            DataManager.saveContacts();
+                            UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
+                            modal.classList.remove('active');
+                            // 添加一条系统消息告知AI
+                            this.addMessageToCurrent('你已接收转账', true, false, 'text');
+                        };
+                        document.getElementById('transferRejectBtn').onclick = () => {
+                            transferData.status = 'rejected';
+                            msg.content = transferData;
+                            DataManager.saveContacts();
+                            UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
+                            modal.classList.remove('active');
+                            this.addMessageToCurrent('你已退回转账', true, false, 'text');
+                        };
+                    } else {
+                        buttonsDiv.style.display = 'none';
+                    }
+                }
+                modal.classList.add('active');
             }
         };
 
@@ -5668,6 +6017,16 @@
             messageArea.addEventListener('scroll', () => { if (messageArea.scrollTop < 100 && !ChatHandler.isLoadingMore) ChatHandler.loadMoreMessages(); });
 
             messageArea.addEventListener('click', (e) => {
+                // 处理转账点击
+                const transferBubble = e.target.closest('.transfer-bubble');
+                if (transferBubble) {
+                    const index = transferBubble.dataset.index;
+                    if (index !== undefined) {
+                        ChatHandler.handleTransferClick(parseInt(index));
+                    }
+                    e.preventDefault();
+                    return;
+                }
                 if (!ChatHandler.isMultiSelectMode) return;
                 const msgRow = e.target.closest('.message');
                 if (!msgRow) return;
@@ -5719,6 +6078,9 @@
                     if (action === 'voice') {
                         document.getElementById('plusActionModal').classList.remove('active');
                         document.getElementById('voiceCard').classList.add('active');
+                    } else if (action === 'transfer') {
+                        document.getElementById('plusActionModal').classList.remove('active');
+                        document.getElementById('transferModal').classList.add('active');
                     } else {
                         Utils.showToast(`功能 ${action} 开发中`);
                     }
@@ -5742,6 +6104,37 @@
                 ChatHandler.sendSimulatedVoice(text);
                 document.getElementById('voiceTextInput').value = '';
                 document.getElementById('voiceCard').classList.remove('active');
+            });
+
+            // 转账模态框事件（发送）
+            document.getElementById('closeTransferModal').addEventListener('click', () => {
+                document.getElementById('transferModal').classList.remove('active');
+            });
+            document.getElementById('cancelTransfer').addEventListener('click', () => {
+                document.getElementById('transferModal').classList.remove('active');
+            });
+            document.getElementById('transferModal').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) {
+                    document.getElementById('transferModal').classList.remove('active');
+                }
+            });
+            document.getElementById('sendTransfer').addEventListener('click', () => {
+                const amount = document.getElementById('transferAmount').value.trim();
+                const note = document.getElementById('transferNote').value.trim();
+                ChatHandler.sendTransfer(amount, note);
+                document.getElementById('transferModal').classList.remove('active');
+                document.getElementById('transferAmount').value = '';
+                document.getElementById('transferNote').value = '';
+            });
+
+            // 转账操作模态框（接收/退回）
+            document.getElementById('closeTransferActionModal').addEventListener('click', () => {
+                document.getElementById('transferActionModal').classList.remove('active');
+            });
+            document.getElementById('transferActionModal').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) {
+                    document.getElementById('transferActionModal').classList.remove('active');
+                }
             });
 
             document.getElementById('deleteSelectedBtn').addEventListener('click', () => {
@@ -5871,7 +6264,7 @@
                 DataManager.contacts.push({
                     id: newId, avatar: avatarId || '🤖', name, remark, personality: personality || '你是一个友好的AI助手。', configId,
                     blocked: false, pinned: false, muted: false, mutedLastMessage: '',
-                    messages: [{ role: 'assistant', type: 'text', content: `你好！我是${name}，很高兴认识你！`, timestamp: Date.now() }],
+                    messages: [], // 新建联系人无初始消息
                     autoPostEnabled: false,
                     autoPostInterval: 1,
                     lastAutoPostTime: 0,
