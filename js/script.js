@@ -3366,7 +3366,12 @@ function bindEvents() {
     });
     document.getElementById('recordBtn').addEventListener('click', () => ChatHandler.handleSendWithAI());
 
+    // 修改后的 touchstart 监听：如果点击转账气泡，不启动长按（避免阻止 click）
     document.getElementById('messageArea').addEventListener('touchstart', (e) => {
+        // 如果点击的是转账气泡，不启动长按（避免阻止click）
+        if (e.target.closest('.transfer-bubble')) {
+            return;
+        }
         const msgRow = e.target.closest('.message');
         if (!msgRow) return;
         const index = msgRow.dataset.index;
