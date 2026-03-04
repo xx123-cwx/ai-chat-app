@@ -2841,33 +2841,15 @@ function bindEvents() {
     messageArea.addEventListener('click', (e) => {
         // 优先处理转账气泡点击（即使多选模式下也允许点击转账）
         const transferBubble = e.target.closest('.transfer-bubble');
-                if (transferBubble) {
+        if (transferBubble) {
             const idx = parseInt(transferBubble.dataset.index);
             if (!isNaN(idx)) {
-                // 获取转账数据
-                const contact = DataManager.getCurrentContact();
-                const msg = contact.messages[idx];
-                if (!msg || msg.type !== 'transfer') return;
-                let transferData = msg.content;
-                if (typeof transferData === 'string') {
-                    try { transferData = JSON.parse(transferData); } catch (e) { return; }
-                }
-                if (transferData.status !== 'pending') {
-                    Utils.showToast('该转账已处理');
-                    return;
-                }
-                const amount = transferData.amount;
-                const note = transferData.note || '无留言';
-                const userAction = confirm(`转账金额：¥${amount}\n留言：${note}\n\n点击“确定”收款，点击“取消”退回`);
-                if (userAction) {
-                    ChatHandler.acceptTransferMsg(idx);
-                } else {
-                    ChatHandler.rejectTransferMsg(idx);
-                }
+                ChatHandler.handleTransferClick(idx);
             }
             e.stopPropagation();
             return;
-        }// 处理多选
+        }
+        // 处理多选
         if (ChatHandler.isMultiSelectMode) {
             const msgRow = e.target.closest('.message');
             if (!msgRow) return;
