@@ -1866,22 +1866,50 @@ const ChatHandler = {
         }
     },
 
+    // 优化后的分句逻辑
     splitIntoSentences(text) {
-        const regex = /[。！？.!?]+/;
+        // 如果文本很短，直接返回原文本
+        if (text.length <= 20) return [text];
+
+        // 定义句子结束符（句号、问号、感叹号等）
+        const sentenceEndings = /[。！？.!?]+/;
+        
         let sentences = [];
         let lastIndex = 0;
         let match;
-        while ((match = regex.exec(text.slice(lastIndex))) !== null) {
-            const end = lastIndex + match.index + match[0].length;
-            const sentence = text.slice(lastIndex, end).trim();
-            if (sentence) sentences.push(sentence);
-            lastIndex = end;
+
+        // 查找所有句子结束符
+        while ((match = sentenceEndings.exec(text.slice(lastIndex))) !== null) {
+            const endPos = lastIndex + match.index + match[0].length;
+            const candidate = text.slice(lastIndex, endPos).trim();
+            
+            // 如果候选句子太短（比如只有 "1." 这种序号），则尝试合并到下一个句子
+            if (candidate.length <= 5) {
+                // 继续查找下一个结束符
+                const nextMatch = sentenceEndings.exec(text.slice(endPos));
+                if (nextMatch) {
+                    const nextEndPos = endPos + nextMatch.index + nextMatch[0].length;
+                    const merged = text.slice(lastIndex, nextEndPos).trim();
+                    sentences.push(merged);
+                    lastIndex = nextEndPos;
+                    continue;
+                }
+            }
+            
+            // 正常情况：加入当前句子
+            if (candidate) sentences.push(candidate);
+            lastIndex = endPos;
         }
+
+        // 处理剩余部分
         if (lastIndex < text.length) {
             const remaining = text.slice(lastIndex).trim();
             if (remaining) sentences.push(remaining);
         }
+
+        // 如果最终句子数量很少，直接返回原文本（避免过度拆分）
         if (sentences.length <= 1) return [text];
+        
         return sentences;
     },
 
@@ -2335,6 +2363,8 @@ const ChatHandler = {
 
                     UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
                     modal.classList.remove('active');
+                    // 移除自动发送的“你已接收转账”文本
+                    // this.addMessageToCurrent('你已接收转账', true, false, 'text');
                 };
                 document.getElementById('transferRejectBtn').onclick = () => {
                     transferData.status = 'rejected';
@@ -2342,6 +2372,8 @@ const ChatHandler = {
                     DataManager.saveContacts();
                     UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
                     modal.classList.remove('active');
+                    // 移除自动发送的“你已退回转账”文本
+                    // this.addMessageToCurrent('你已退回转账', true, false, 'text');
                 };
             } else {
                 buttonsDiv.style.display = 'none';
