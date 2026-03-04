@@ -235,6 +235,18 @@ const Utils = {
         return Promise.all(images.map(img => store.put(img)));
     },
 
+    // HTML 转义函数（防止 XSS 和格式错乱）
+    escapeHTML(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>"]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            if (m === '"') return '&quot;';
+            return m;
+        });
+    },
+
     // 语音识别函数（模拟）
     recognizeSpeech(audioBlob) {
         return new Promise((resolve, reject) => {
@@ -1269,9 +1281,11 @@ const UIManager = {
                     if (transferData.status === 'pending') statusText = '待收款';
                     else if (transferData.status === 'accepted') statusText = '已收款';
                     else if (transferData.status === 'rejected') statusText = '已退回';
+                    // 对 note 进行 HTML 转义
+                    const escapedNote = Utils.escapeHTML(transferData.note || '');
                     transferBubble.innerHTML = `
                         <div class="transfer-amount">¥${transferData.amount}</div>
-                        ${transferData.note ? `<div class="transfer-note">${transferData.note}</div>` : ''}
+                        ${transferData.note ? `<div class="transfer-note">${escapedNote}</div>` : ''}
                         <div class="transfer-status">${statusText}</div>
                     `;
 
