@@ -2335,7 +2335,6 @@ const ChatHandler = {
 
                     UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
                     modal.classList.remove('active');
-                    this.addMessageToCurrent('你已接收转账', true, false, 'text');
                 };
                 document.getElementById('transferRejectBtn').onclick = () => {
                     transferData.status = 'rejected';
@@ -2343,7 +2342,6 @@ const ChatHandler = {
                     DataManager.saveContacts();
                     UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
                     modal.classList.remove('active');
-                    this.addMessageToCurrent('你已退回转账', true, false, 'text');
                 };
             } else {
                 buttonsDiv.style.display = 'none';
