@@ -352,6 +352,12 @@ const DataManager = {
                 c.lastAutoPostTime = c.lastAutoPostTime || 0;
                 c.bubbleCss = c.bubbleCss || '';
                 c.chatBackground = c.chatBackground || null;
+                // [亲密付修改] 增加 intimateCard 字段
+                c.intimateCard = c.intimateCard || {
+                    enabled: false,
+                    monthlyLimit: 0,
+                    usedAmount: 0
+                };
                 return c;
             });
             this.contacts = contacts;
@@ -372,7 +378,13 @@ const DataManager = {
                 autoPostInterval: 1,
                 lastAutoPostTime: 0,
                 bubbleCss: '',
-                chatBackground: null
+                chatBackground: null,
+                // [亲密付修改] 增加 intimateCard 字段
+                intimateCard: {
+                    enabled: false,
+                    monthlyLimit: 0,
+                    usedAmount: 0
+                }
             }];
         }
         if (this.contacts.length > 0) this.currentContactId = this.contacts[0].id;
@@ -384,6 +396,26 @@ const DataManager = {
 
     getCurrentContact() {
         return this.contacts.find(c => c.id === this.currentContactId) || this.contacts[0];
+    },
+
+    // [亲密付修改] 更新亲密付已用金额
+    updateIntimateUsed(contactId, amount) {
+        const contact = this.contacts.find(c => c.id === contactId);
+        if (contact && contact.intimateCard && contact.intimateCard.enabled) {
+            contact.intimateCard.usedAmount += amount;
+            this.saveContacts();
+            return true;
+        }
+        return false;
+    },
+
+    // [亲密付修改] 获取角色剩余额度
+    getIntimateRemaining(contactId) {
+        const contact = this.contacts.find(c => c.id === contactId);
+        if (contact && contact.intimateCard && contact.intimateCard.enabled) {
+            return contact.intimateCard.monthlyLimit - contact.intimateCard.usedAmount;
+        }
+        return 0;
     },
 
     loadUserProfile() {
@@ -529,6 +561,63 @@ const WalletManager = {
         });
     },
 
+    // [亲密付修改] 新增亲属卡列表渲染
+    renderIntimateCards() {
+        const container = document.getElementById('intimateCardContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        const contactsWithCard = DataManager.contacts.filter(c => c.intimateCard && c.intimateCard.enabled);
+        if (contactsWithCard.length === 0) {
+            container.innerHTML = '<div style="text-align:center; color:#999; padding:40px;">暂无亲属卡</div>';
+            return;
+        }
+        contactsWithCard.forEach(contact => {
+            const card = document.createElement('div');
+            card.className = 'intimate-card-item';
+            card.dataset.id = contact.id;
+
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = 'intimate-card-avatar';
+            Utils.setImageElement(avatarDiv, contact.avatar, '🤖');
+
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'intimate-card-info';
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'intimate-card-name';
+            nameDiv.textContent = Utils.getDisplayName(contact);
+
+            const limitDiv = document.createElement('div');
+            limitDiv.className = 'intimate-card-limit';
+            limitDiv.textContent = `额度: ¥${contact.intimateCard.monthlyLimit.toFixed(2)}`;
+
+            const usedDiv = document.createElement('div');
+            usedDiv.className = 'intimate-card-used';
+            usedDiv.textContent = `已用: ¥${contact.intimateCard.usedAmount.toFixed(2)}`;
+
+            infoDiv.appendChild(nameDiv);
+            infoDiv.appendChild(limitDiv);
+            infoDiv.appendChild(usedDiv);
+
+            card.appendChild(avatarDiv);
+            card.appendChild(infoDiv);
+            container.appendChild(card);
+        });
+    },
+
+    // [亲密付修改] 进入亲属卡列表
+    showIntimateCards() {
+        document.getElementById('walletMain').style.display = 'none';
+        document.getElementById('intimateCardList').style.display = 'flex';
+        this.renderIntimateCards();
+    },
+
+    // [亲密付修改] 返回钱包主界面
+    hideIntimateCards() {
+        document.getElementById('walletMain').style.display = 'block';
+        document.getElementById('intimateCardList').style.display = 'none';
+    },
+
     init() {
         document.getElementById('walletRecharge').addEventListener('click', () => {
             DataManager.updateBalance(100);
@@ -546,8 +635,12 @@ const WalletManager = {
                 Utils.showToast('余额不足');
             }
         });
-        // 功能入口提示
-        document.querySelectorAll('#walletPay, #walletCard, #walletBill, #walletCoupon').forEach(el => {
+        // [亲密付修改] 修改亲属卡按钮事件
+        document.getElementById('walletPay').addEventListener('click', () => {
+            this.showIntimateCards();
+        });
+        // 其他功能入口提示（银行卡、账单、优惠券）
+        document.querySelectorAll('#walletCard, #walletBill, #walletCoupon').forEach(el => {
             el.addEventListener('click', () => Utils.showToast('功能开发中'));
         });
     }
@@ -1286,6 +1379,42 @@ const UIManager = {
                         transferRow.appendChild(timeSpan);
                     }
                     bubbleWrapper.appendChild(transferRow);
+                // [亲密付修改] 新增亲密付消息渲染
+                } else if (msg.type === 'intimate') {
+                    const intimateRow = document.createElement('div'); intimateRow.className = 'intimate-row';
+                    const intimateBubble = document.createElement('div');
+                    intimateBubble.className = 'intimate-bubble';
+                    intimateBubble.dataset.index = i;
+                    let intimateData = { amount: '0.00', note: '', status: 'pending' };
+                    if (typeof msg.content === 'object') {
+                        intimateData = msg.content;
+                    } else if (typeof msg.content === 'string') {
+                        try {
+                            intimateData = JSON.parse(msg.content);
+                        } catch (e) {
+                            intimateData = { amount: msg.content, note: '', status: 'pending' };
+                        }
+                    }
+                    if (!intimateData.status) intimateData.status = 'pending';
+                    let statusText = '';
+                    if (intimateData.status === 'pending') statusText = '待接收';
+                    else if (intimateData.status === 'accepted') statusText = '已收款';
+                    else if (intimateData.status === 'rejected') statusText = '已退回';
+                    intimateBubble.innerHTML = `
+                        <div class="intimate-amount">¥${intimateData.amount}</div>
+                        ${intimateData.note ? `<div class="intimate-note">${intimateData.note}</div>` : ''}
+                        <div class="intimate-status">${statusText}</div>
+                    `;
+
+                    const timeSpan = document.createElement('span'); timeSpan.className = 'msg-time'; timeSpan.textContent = Utils.formatTime(msg.timestamp);
+                    if (isUser) {
+                        intimateRow.appendChild(timeSpan);
+                        intimateRow.appendChild(intimateBubble);
+                    } else {
+                        intimateRow.appendChild(intimateBubble);
+                        intimateRow.appendChild(timeSpan);
+                    }
+                    bubbleWrapper.appendChild(intimateRow);
                 } else {
                     const bubbleRow = document.createElement('div'); bubbleRow.className = 'bubble-row';
                     const bubble = document.createElement('div'); bubble.className = 'msg-bubble';
@@ -1770,6 +1899,96 @@ const ChatHandler = {
         return null;
     },
 
+    // [亲密付修改] 解析亲密付标记
+    parseAIResponseForIntimate(aiReply) {
+        const regex = /【亲密付\|([\d.]+)\|(.*?)】/;
+        const match = aiReply.match(regex);
+        if (match) {
+            const amount = parseFloat(match[1]).toFixed(2);
+            const note = match[2] || '';
+            const cleanReply = aiReply.replace(regex, '').trim();
+            return { intimate: { amount, note }, cleanReply };
+        }
+        return null;
+    },
+
+    // [亲密付修改] AI处理亲密付请求（用户发起的）
+    async askAIToHandleIntimate(contact, msgIndex) {
+        const msg = contact.messages[msgIndex];
+        if (!msg || msg.type !== 'intimate' || msg.role !== 'user') return;
+        let intimateData = msg.content;
+        if (typeof intimateData === 'string') {
+            try {
+                intimateData = JSON.parse(intimateData);
+            } catch (e) {
+                return;
+            }
+        }
+        if (intimateData.status !== 'pending') return;
+
+        const prompt = `用户向你发起亲密付转账 ${intimateData.amount} 元，留言：${intimateData.note || '无'}。请根据你的人设决定是否接收这笔转账。请回复“接收”或“退回”，只回复这两个词之一。`;
+        let config;
+        if (contact.configId) {
+            config = DataManager.apiConfigs.find(c => c.id === contact.configId);
+        } else {
+            config = DataManager.getActiveConfig();
+        }
+        if (!config || !config.base_url || !config.api_key || !config.currentModel) {
+            Utils.showToast('AI 未配置，无法处理亲密付');
+            return;
+        }
+        Utils.showToast('AI 正在处理亲密付...', 0);
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    base_url: config.base_url,
+                    api_key: config.api_key,
+                    model: config.currentModel,
+                    messages: [
+                        { role: 'system', content: contact.personality },
+                        { role: 'user', content: prompt }
+                    ]
+                })
+            });
+            if (!response.ok) throw new Error('API请求失败');
+            const data = await response.json();
+            const reply = data.choices?.[0]?.message?.content?.trim() || '';
+            if (reply.includes('接收') || reply.includes('收款') || reply.includes('收下') || reply.includes('接受')) {
+                intimateData.status = 'accepted';
+                // AI接收亲密付：用户扣款，增加已用金额
+                const amount = parseFloat(intimateData.amount);
+                if (DataManager.wallet.balance >= amount) {
+                    DataManager.updateBalance(-amount);
+                    DataManager.updateIntimateUsed(contact.id, amount);
+                    DataManager.addTransaction({
+                        id: Date.now(),
+                        name: `亲密付给 ${Utils.getDisplayName(contact)}`,
+                        amount: -amount,
+                        date: new Date().toLocaleDateString(),
+                        type: 'intimate'
+                    });
+                    WalletManager.renderWallet();
+                } else {
+                    Utils.showToast('余额不足，无法完成亲密付');
+                    intimateData.status = 'pending';
+                }
+            } else {
+                intimateData.status = 'rejected';
+            }
+            msg.content = intimateData;
+            DataManager.saveContacts();
+            if (document.getElementById('chatDetailPage').style.display === 'flex') {
+                UIManager.renderMessages(contact.messages, this.currentVisibleStart, this.currentVisibleEnd);
+            }
+            Utils.showToast(intimateData.status === 'accepted' ? '亲密付已接收' : '亲密付已退回');
+        } catch (err) {
+            console.error(err);
+            Utils.showToast('处理亲密付时出错');
+        }
+    },
+
     sendOnlyMessage() {
         const messageInput = document.getElementById('messageInput');
         const text = messageInput.value.trim();
@@ -1892,12 +2111,8 @@ const ChatHandler = {
 
         for (let i = 0; i < sentences.length; i++) {
             if (this.stopSendingFlag) break;
-            const useVoice = Math.random() < 0.1;
-            if (useVoice) {
-                this.addMessageToCurrent(sentences[i], false, false, 'voice_sim', { duration: '1"' });
-            } else {
-                this.addMessageToCurrent(sentences[i], false, false, 'text');
-            }
+            // 始终发送文本消息
+            this.addMessageToCurrent(sentences[i], false, false, 'text');
             if (i < sentences.length - 1) {
                 await new Promise(resolve => setTimeout(resolve, 800));
             }
@@ -1950,6 +2165,13 @@ const ChatHandler = {
         const worldBookContent = worldBooks.map(w => `【${w.name}】\n${w.content}`).join('\n\n');
         const worldBookInfo = worldBookContent ? `世界书规则：\n${worldBookContent}` : '';
 
+        // [亲密付修改] 在系统提示中加入亲密付额度信息
+        let intimateInfo = '';
+        if (contact.intimateCard && contact.intimateCard.enabled) {
+            const remaining = DataManager.getIntimateRemaining(contact.id);
+            intimateInfo = `你当前的亲密付剩余额度为 ¥${remaining.toFixed(2)}，如果需要向用户发起亲密付请求，请在回复中包含【亲密付|金额|备注】标记，例如“【亲密付|10|请你喝奶茶】”。否则正常回复。`;
+        }
+
         const transferInstruction = '如果你需要主动向用户转账，请在回复中包含【转账|金额|备注】标记，例如“【转账|10|请你喝奶茶】”。否则正常回复。';
 
         const systemMessages = [
@@ -1958,6 +2180,7 @@ const ChatHandler = {
             { role: 'system', content: contact.personality },
             { role: 'system', content: transferInstruction }
         ];
+        if (intimateInfo) systemMessages.push({ role: 'system', content: intimateInfo });
         if (worldBookInfo) systemMessages.push({ role: 'system', content: worldBookInfo });
 
         const historyMessages = contact.messages.filter(m => m.role !== 'system').map(m => ({ role: m.role, content: typeof m.content === 'object' ? JSON.stringify(m.content) : m.content }));
@@ -1982,25 +2205,43 @@ const ChatHandler = {
             let reply = data.choices?.[0]?.message?.content;
             if (!reply) throw new Error('AI返回内容为空');
 
-            const parsed = this.parseAIResponseForTransfer(reply);
-            if (parsed) {
+            // 先解析转账标记
+            const parsedTransfer = this.parseAIResponseForTransfer(reply);
+            if (parsedTransfer) {
                 const transferData = {
-                    amount: parsed.transfer.amount,
-                    note: parsed.transfer.note,
+                    amount: parsedTransfer.transfer.amount,
+                    note: parsedTransfer.transfer.note,
                     status: 'pending'
                 };
                 this.addMessageToCurrent(transferData, false, false, 'transfer');
-                reply = parsed.cleanReply;
+                reply = parsedTransfer.cleanReply;
+            }
+
+            // [亲密付修改] 解析亲密付标记（AI主动发起）
+            const parsedIntimate = this.parseAIResponseForIntimate(reply);
+            if (parsedIntimate) {
+                // 检查额度是否充足
+                const amount = parseFloat(parsedIntimate.intimate.amount);
+                const remaining = DataManager.getIntimateRemaining(contact.id);
+                if (amount <= remaining) {
+                    const intimateData = {
+                        amount: parsedIntimate.intimate.amount,
+                        note: parsedIntimate.intimate.note,
+                        status: 'pending'
+                    };
+                    this.addMessageToCurrent(intimateData, false, false, 'intimate');
+                } else {
+                    Utils.showToast('AI发起亲密付失败：额度不足');
+                    // 可以添加一条系统提示告知用户
+                    this.addMessageToCurrent(`[系统] 亲密付发起失败，剩余额度不足。`, false, false, 'text');
+                }
+                reply = parsedIntimate.cleanReply;
             }
 
             const sentences = this.splitIntoSentences(reply);
             if (sentences.length === 1 || reply.length <= 20) {
-                const useVoice = Math.random() < 0.1;
-                if (useVoice) {
-                    this.addMessageToCurrent(reply, false, false, 'voice_sim', { duration: '1"' });
-                } else {
-                    this.addMessageToCurrent(reply, false, false, 'text');
-                }
+                // 始终发送文本
+                this.addMessageToCurrent(reply, false, false, 'text');
             } else {
                 await this.sendAIMessagesInChunks(sentences);
             }
@@ -2471,6 +2712,188 @@ const WorldBookHandler = {
     }
 };
 
+// ==================== 亲密付处理模块（新增）====================
+const IntimateHandler = {
+    selectedContactId: null,
+
+    openRoleModal() {
+        const container = document.getElementById('intimateRoleList');
+        container.innerHTML = '';
+        DataManager.contacts.forEach(contact => {
+            const item = document.createElement('div');
+            item.className = 'intimate-role-item';
+            item.style.display = 'flex';
+            item.style.alignItems = 'center';
+            item.style.padding = '8px';
+            item.style.cursor = 'pointer';
+            item.dataset.id = contact.id;
+
+            const avatar = document.createElement('div');
+            avatar.style.width = '40px';
+            avatar.style.height = '40px';
+            avatar.style.borderRadius = '50%';
+            avatar.style.background = '#07c160';
+            avatar.style.display = 'flex';
+            avatar.style.alignItems = 'center';
+            avatar.style.justifyContent = 'center';
+            avatar.style.marginRight = '12px';
+            avatar.style.overflow = 'hidden';
+            avatar.style.flexShrink = '0';
+            Utils.setImageElement(avatar, contact.avatar, '🤖');
+
+            const name = document.createElement('span');
+            name.textContent = Utils.getDisplayName(contact);
+
+            item.appendChild(avatar);
+            item.appendChild(name);
+            container.appendChild(item);
+
+            item.addEventListener('click', () => {
+                this.selectedContactId = contact.id;
+                document.getElementById('intimateRoleModal').classList.remove('active');
+                document.getElementById('intimateLimitModal').classList.add('active');
+            });
+        });
+        document.getElementById('intimateRoleModal').classList.add('active');
+    },
+
+    saveLimit() {
+        const limit = parseFloat(document.getElementById('intimateLimit').value);
+        if (isNaN(limit) || limit <= 0) {
+            Utils.showToast('请输入有效金额');
+            return;
+        }
+        const contact = DataManager.contacts.find(c => c.id === this.selectedContactId);
+        if (contact) {
+            contact.intimateCard = {
+                enabled: true,
+                monthlyLimit: limit,
+                usedAmount: 0
+            };
+            DataManager.saveContacts();
+            Utils.showToast(`已为 ${Utils.getDisplayName(contact)} 开通亲属卡`);
+        }
+        document.getElementById('intimateLimitModal').classList.remove('active');
+        document.getElementById('intimateLimit').value = '';
+    },
+
+    // [亲密付修改] 打开发送亲密付模态框（用户主动发起）
+    openSendModal(contact) {
+        this.selectedContactId = contact.id;
+        document.getElementById('intimateSendModal').classList.add('active');
+    },
+
+    // [亲密付修改] 发送亲密付（用户发起）
+    sendIntimate() {
+        const amount = parseFloat(document.getElementById('intimateAmount').value);
+        const note = document.getElementById('intimateNote').value.trim();
+        if (isNaN(amount) || amount <= 0) {
+            Utils.showToast('请输入有效金额');
+            return;
+        }
+        const contact = DataManager.contacts.find(c => c.id === this.selectedContactId);
+        if (!contact) return;
+        if (!contact.intimateCard || !contact.intimateCard.enabled) {
+            Utils.showToast('该角色未开通亲属卡');
+            document.getElementById('intimateSendModal').classList.remove('active');
+            return;
+        }
+        // 检查额度
+        const available = contact.intimateCard.monthlyLimit - contact.intimateCard.usedAmount;
+        if (amount > available) {
+            Utils.showToast(`额度不足，剩余可用 ¥${available.toFixed(2)}`);
+            return;
+        }
+
+        const intimateData = {
+            amount: amount.toFixed(2),
+            note: note,
+            status: 'pending'
+        };
+        ChatHandler.stopSendingChunks();
+        ChatHandler.addMessageToCurrent(intimateData, true, false, 'intimate');
+        Utils.showToast('亲密付已发送');
+
+        // 关闭模态框
+        document.getElementById('intimateSendModal').classList.remove('active');
+        document.getElementById('intimateAmount').value = '';
+        document.getElementById('intimateNote').value = '';
+
+        // 让AI处理亲密付请求
+        if (contact) {
+            ChatHandler.askAIToHandleIntimate(contact, contact.messages.length - 1);
+        }
+    },
+
+    // [亲密付修改] 处理亲密付详情点击（用户或AI发起）
+    handleIntimateClick(index) {
+        const contact = DataManager.getCurrentContact();
+        const msg = contact.messages[index];
+        if (!msg || msg.type !== 'intimate') return;
+        let intimateData = msg.content;
+        if (typeof intimateData === 'string') {
+            try {
+                intimateData = JSON.parse(intimateData);
+            } catch (e) {
+                return;
+            }
+        }
+        const modal = document.getElementById('intimateDetailModal');
+        document.getElementById('intimateDetailAmount').textContent = `¥${intimateData.amount}`;
+        document.getElementById('intimateDetailNote').textContent = intimateData.note || '无留言';
+        let statusText = '';
+        if (intimateData.status === 'pending') statusText = '待接收';
+        else if (intimateData.status === 'accepted') statusText = '已收款';
+        else if (intimateData.status === 'rejected') statusText = '已退回';
+        document.getElementById('intimateDetailStatus').textContent = `状态：${statusText}`;
+
+        const buttonsDiv = document.getElementById('intimateActionButtons');
+        // 如果消息是用户自己发的，则不显示操作按钮
+        if (msg.role === 'user') {
+            buttonsDiv.style.display = 'none';
+        } else {
+            // 消息是AI发的，用户作为接收方，显示按钮
+            if (intimateData.status === 'pending') {
+                buttonsDiv.style.display = 'flex';
+                document.getElementById('intimateAcceptBtn').onclick = () => {
+                    intimateData.status = 'accepted';
+                    msg.content = intimateData;
+                    DataManager.saveContacts();
+                    // 用户接收AI发起的亲密付：从用户钱包扣款，增加角色的已用额度
+                    const amount = parseFloat(intimateData.amount);
+                    if (DataManager.wallet.balance >= amount) {
+                        DataManager.updateBalance(-amount);
+                        DataManager.updateIntimateUsed(contact.id, amount);
+                        DataManager.addTransaction({
+                            id: Date.now(),
+                            name: `亲密付给 ${Utils.getDisplayName(contact)}`,
+                            amount: -amount,
+                            date: new Date().toLocaleDateString(),
+                            type: 'intimate'
+                        });
+                        WalletManager.renderWallet();
+                    } else {
+                        Utils.showToast('余额不足，无法接收');
+                        intimateData.status = 'pending'; // 恢复状态
+                    }
+                    UIManager.renderMessages(contact.messages, ChatHandler.currentVisibleStart, ChatHandler.currentVisibleEnd);
+                    modal.classList.remove('active');
+                };
+                document.getElementById('intimateRejectBtn').onclick = () => {
+                    intimateData.status = 'rejected';
+                    msg.content = intimateData;
+                    DataManager.saveContacts();
+                    UIManager.renderMessages(contact.messages, ChatHandler.currentVisibleStart, ChatHandler.currentVisibleEnd);
+                    modal.classList.remove('active');
+                };
+            } else {
+                buttonsDiv.style.display = 'none';
+            }
+        }
+        modal.classList.add('active');
+    }
+};
+
 // ==================== 模态框处理模块 ====================
 const ModalHandler = {
     openNewContactModal() {
@@ -2847,6 +3270,16 @@ function bindEvents() {
             e.stopPropagation();
             return;
         }
+        // [亲密付修改] 亲密付气泡点击
+        const intimateBubble = e.target.closest('.intimate-bubble');
+        if (intimateBubble) {
+            const idx = parseInt(intimateBubble.dataset.index);
+            if (!isNaN(idx)) {
+                IntimateHandler.handleIntimateClick(idx);
+            }
+            e.stopPropagation();
+            return;
+        }
         // 处理多选
         if (ChatHandler.isMultiSelectMode) {
             const msgRow = e.target.closest('.message');
@@ -2903,6 +3336,15 @@ function bindEvents() {
             } else if (action === 'transfer') {
                 document.getElementById('plusActionModal').classList.remove('active');
                 document.getElementById('transferModal').classList.add('active');
+            } else if (action === 'intimate') {
+                document.getElementById('plusActionModal').classList.remove('active');
+                const currentContact = DataManager.getCurrentContact();
+                // [亲密付修改] 如果当前聊天角色已开通亲属卡，则直接弹出发送界面；否则打开角色选择开通额度
+                if (currentContact && currentContact.intimateCard && currentContact.intimateCard.enabled) {
+                    IntimateHandler.openSendModal(currentContact);
+                } else {
+                    IntimateHandler.openRoleModal();
+                }
             } else {
                 Utils.showToast(`功能 ${action} 开发中`);
             }
@@ -3089,7 +3531,13 @@ function bindEvents() {
             autoPostInterval: 1,
             lastAutoPostTime: 0,
             bubbleCss: '',
-            chatBackground: null
+            chatBackground: null,
+            // [亲密付修改] 增加 intimateCard 字段
+            intimateCard: {
+                enabled: false,
+                monthlyLimit: 0,
+                usedAmount: 0
+            }
         });
         DataManager.saveContacts();
         ModalHandler.closeNewContactModal();
@@ -3543,6 +3991,65 @@ function bindEvents() {
         });
     });
 
+    // [亲密付修改] 新增亲属卡返回按钮事件
+    document.getElementById('backToWalletMain').addEventListener('click', () => {
+        WalletManager.hideIntimateCards();
+    });
+
+    // [亲密付修改] 亲密付模态框关闭事件
+    document.getElementById('closeIntimateRoleModal').addEventListener('click', () => {
+        document.getElementById('intimateRoleModal').classList.remove('active');
+    });
+    document.getElementById('cancelIntimateRole').addEventListener('click', () => {
+        document.getElementById('intimateRoleModal').classList.remove('active');
+    });
+    document.getElementById('intimateRoleModal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) {
+            document.getElementById('intimateRoleModal').classList.remove('active');
+        }
+    });
+
+    document.getElementById('closeIntimateLimitModal').addEventListener('click', () => {
+        document.getElementById('intimateLimitModal').classList.remove('active');
+    });
+    document.getElementById('cancelIntimateLimit').addEventListener('click', () => {
+        document.getElementById('intimateLimitModal').classList.remove('active');
+    });
+    document.getElementById('intimateLimitModal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) {
+            document.getElementById('intimateLimitModal').classList.remove('active');
+        }
+    });
+    document.getElementById('saveIntimateLimit').addEventListener('click', () => {
+        IntimateHandler.saveLimit();
+    });
+
+    // [亲密付修改] 亲密付发送模态框事件
+    document.getElementById('closeIntimateSendModal').addEventListener('click', () => {
+        document.getElementById('intimateSendModal').classList.remove('active');
+    });
+    document.getElementById('cancelIntimateSend').addEventListener('click', () => {
+        document.getElementById('intimateSendModal').classList.remove('active');
+    });
+    document.getElementById('intimateSendModal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) {
+            document.getElementById('intimateSendModal').classList.remove('active');
+        }
+    });
+    document.getElementById('sendIntimateBtn').addEventListener('click', () => {
+        IntimateHandler.sendIntimate();
+    });
+
+    // [亲密付修改] 亲密付详情模态框事件
+    document.getElementById('closeIntimateDetailModal').addEventListener('click', () => {
+        document.getElementById('intimateDetailModal').classList.remove('active');
+    });
+    document.getElementById('intimateDetailModal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) {
+            document.getElementById('intimateDetailModal').classList.remove('active');
+        }
+    });
+
     function updateTime() { const now = new Date(); document.getElementById('currentTime').textContent = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`; }
     updateTime(); setInterval(updateTime, 1000);
 }
@@ -3659,7 +4166,13 @@ const BackupHandler = {
             autoPostInterval: 1,
             lastAutoPostTime: 0,
             bubbleCss: '',
-            chatBackground: null
+            chatBackground: null,
+            // [亲密付修改] 增加 intimateCard 字段
+            intimateCard: {
+                enabled: false,
+                monthlyLimit: 0,
+                usedAmount: 0
+            }
         }];
         DataManager.currentContactId = DataManager.contacts[0].id;
         DataManager.userProfile = { name: '我的网名', status: '在线', avatar: '🤖', realName: '', address: '', lineId: '', bio: '', userSetting: '' };

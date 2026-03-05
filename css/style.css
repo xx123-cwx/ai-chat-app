@@ -4,7 +4,7 @@
     padding: 0;
     box-sizing: border-box;
     font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    -webkit-tap-highlight-color: transparent;
+    -webkit-tap-highlight-color: rgba(0,0,0,0.2); /* 修改为黑色半透明高亮 */
 }
 html, body {
     width: 100%;
@@ -304,13 +304,13 @@ html, body {
 
 /* 返回按钮 */
 .back-btn {
-    font-size: 20px; color: #007aff; cursor: pointer; padding: 8px;
+    font-size: 20px; color: #000; cursor: pointer; padding: 8px;
     margin-right: 8px; display: inline-flex; align-items: center;
     justify-content: center; text-decoration: none;
 }
 .back-btn:hover { opacity: 0.8; }
 #backToListBtn, #backToChatBtn {
-    cursor: pointer; font-size: 20px; color: #007aff;
+    cursor: pointer; font-size: 20px; color: #000;
     background-color: transparent; display: inline; padding: 8px;
 }
 
@@ -466,7 +466,7 @@ html, body {
     align-items: center; gap: 2px; transition: color 0.2s;
 }
 .tab-item i { font-size: 22px; }
-.tab-item.active { color: #06c755; font-weight: 500; }
+.tab-item.active { color: #000; font-weight: 500; } /* 修改为黑色 */
 .contact-item {
     display: flex; align-items: center; padding: 12px 16px;
     border-bottom: 1px solid #f5f5f5; cursor: pointer;
@@ -680,7 +680,7 @@ html, body {
     flex-shrink: 0;
 }
 .input-btn { font-size: 20px; color: #888; cursor: pointer; width: 24px; text-align: center; }
-.input-btn:hover { color: #00C73C; }
+.input-btn:hover { color: #333; } /* 修改为黑色 */
 .input-field-container { position: relative; flex-grow: 1; }
 .input-field {
     width: 100%; padding: 8px 36px 8px 12px; border: 1px solid #dbdbdb;
@@ -693,7 +693,7 @@ html, body {
     font-size: 20px; color: #888; cursor: pointer; width: 24px; height: 24px;
     display: flex; align-items: center; justify-content: center;
 }
-.input-smile:hover { color: #00C73C; }
+.input-smile:hover { color: #333; } /* 同时修改表情按钮悬停色 */
 #recordBtn { margin-left: 0; }
 .input-loading {
     position: absolute; right: 40px; top: 50%; transform: translateY(-50%);
@@ -1289,4 +1289,161 @@ input:checked + .slider:before { transform: translateX(24px); }
 
 .transfer-action-buttons button:active {
     opacity: 0.8;
+}
+
+/* ===== 新增亲密付相关样式 ===== */
+/* 亲属卡列表项 */
+.intimate-card-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background: linear-gradient(145deg, #fff5f9, #ffe4ec);
+    border-radius: 16px;
+    margin-bottom: 8px;
+    box-shadow: 0 4px 8px rgba(255,105,180,0.1);
+    border: 1px solid #ffb6c1;
+}
+.intimate-card-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #ff69b4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    margin-right: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid white;
+}
+.intimate-card-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.intimate-card-info {
+    flex: 1;
+}
+.intimate-card-name {
+    font-weight: 600;
+    font-size: 16px;
+    color: #d44e8c;
+    margin-bottom: 4px;
+}
+.intimate-card-limit {
+    font-size: 14px;
+    color: #b34e7a;
+}
+.intimate-card-used {
+    font-size: 14px;
+    color: #ff3b30;
+    margin-left: 8px;
+}
+/* 角色选择列表项（用于亲密付模态框） */
+.intimate-role-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+.intimate-role-item:hover {
+    background: #f5f5f5;
+}
+.intimate-role-item .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.intimate-role-item .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.intimate-role-item .name {
+    font-size: 16px;
+    color: #333;
+}
+
+/* 亲密付气泡样式 */
+.intimate-bubble {
+    padding: 12px 16px;
+    background-color: #fff0f5;
+    border-radius: 18px;
+    border: 1px solid #ff99cc;
+    min-width: 150px;
+    cursor: pointer;
+    color: #333;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(255,105,180,0.1);
+    position: relative;
+}
+/* 使用 Font Awesome 心形图标，置于气泡内部左上角 */
+.intimate-bubble::before {
+    font-family: "Font Awesome 6 Free";
+    content: "\f004";
+    font-weight: 900;
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    font-size: 14px;
+    color: #ff69b4;
+    background: transparent;
+    width: auto;
+    height: auto;
+    border: none;
+    box-shadow: none;
+}
+.intimate-amount {
+    font-size: 18px;
+    font-weight: 600;
+    color: #ff69b4;
+    margin-left: 20px; /* 为图标留出空间 */
+}
+.intimate-note {
+    font-size: 14px;
+    color: #666;
+    margin-top: 4px;
+    word-break: break-word;
+}
+.intimate-status {
+    font-size: 12px;
+    color: #999;
+    margin-top: 4px;
+}
+/* 亲密付发送模态框按钮 */
+#sendIntimateBtn {
+    background: #ff69b4 !important;
+}
+#sendIntimateBtn:hover {
+    opacity: 0.9;
+}
+/* 亲密付详情模态框 */
+#intimateDetailAmount {
+    color: #ff69b4 !important;
+}
+#intimateDetailStatus {
+    color: #ff69b4 !important;
+}
+#intimateAcceptBtn {
+    background: #ff69b4 !important;
+}
+
+/* 亲属卡头部粉白 */
+#intimateCardList .app-header {
+    background: #ffb6c1;
+    color: white;
+    border-bottom: none;
+}
+#intimateCardList .app-header .back-btn {
+    color: white;
+}
+#intimateCardList .app-header .app-title {
+    color: white;
 }
