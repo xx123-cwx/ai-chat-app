@@ -506,14 +506,16 @@
                     </div>
                 </div>
             </div>
-            <!-- 亲属卡管理子页面（新增） -->
-            <div id="intimateCardList" style="display: none; flex-direction: column; height: 100%;">
-                <div class="app-header" style="border-bottom: 1px solid #f0f0f0;">
-                    <span class="back-btn" id="backToWalletMain"><i class="fa-solid fa-arrow-left"></i></span>
-                    <span class="app-title">我的亲属卡</span>
-                </div>
-                <div style="flex:1; overflow-y: auto; padding: 16px;" id="intimateCardContainer"></div>
+            <!-- 原亲属卡子页面已移除，改为独立视图 -->
+        </div>
+
+        <!-- ===== 亲属卡独立界面 ===== -->
+        <div class="app-view" id="intimateCardListView">
+            <div class="app-header" style="border-bottom: 1px solid #f0f0f0;">
+                <span class="back-btn" id="backToWalletMain"><i class="fa-solid fa-arrow-left"></i></span>
+                <span class="app-title">我的亲属卡</span>
             </div>
+            <div style="flex:1; overflow-y: auto; padding: 16px;" id="intimateCardContainer"></div>
         </div>
 
         <!-- 全局 Toast 提示 -->

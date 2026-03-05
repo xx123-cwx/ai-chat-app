@@ -561,7 +561,7 @@ const WalletManager = {
         });
     },
 
-    // [亲密付修改] 新增亲属卡列表渲染
+    // [亲密付修改] 新增亲属卡列表渲染（已改为银行卡样式）
     renderIntimateCards() {
         const container = document.getElementById('intimateCardContainer');
         if (!container) return;
@@ -573,57 +573,113 @@ const WalletManager = {
         }
         contactsWithCard.forEach(contact => {
             const card = document.createElement('div');
-            card.className = 'intimate-card-item';
+            card.className = 'intimate-bank-card';   // 使用新样式
             card.dataset.id = contact.id;
 
-            const avatarDiv = document.createElement('div');
-            avatarDiv.className = 'intimate-card-avatar';
-            Utils.setImageElement(avatarDiv, contact.avatar, '🤖');
+            // 持卡人姓名
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'card-header';
+            headerDiv.innerHTML = `<span class="card-holder">${Utils.getDisplayName(contact)}</span>`;
 
-            const infoDiv = document.createElement('div');
-            infoDiv.className = 'intimate-card-info';
+            // 卡号（若没有则生成一个临时卡号，但已保存在contact中）
+            let cardNumber = contact.intimateCard.cardNumber;
+            if (!cardNumber) {
+                const last4 = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+                cardNumber = `**** **** **** ${last4}`;
+                contact.intimateCard.cardNumber = cardNumber; // 回存
+                DataManager.saveContacts();
+            }
+            const numberDiv = document.createElement('div');
+            numberDiv.className = 'card-number';
+            numberDiv.textContent = cardNumber;
 
-            const nameDiv = document.createElement('div');
-            nameDiv.className = 'intimate-card-name';
-            nameDiv.textContent = Utils.getDisplayName(contact);
-
+            // 额度信息
             const limitDiv = document.createElement('div');
-            limitDiv.className = 'intimate-card-limit';
-            limitDiv.textContent = `额度: ¥${contact.intimateCard.monthlyLimit.toFixed(2)}`;
-
+            limitDiv.className = 'card-limit';
+            limitDiv.innerHTML = `
+                <span>月限额</span>
+                <span>¥${contact.intimateCard.monthlyLimit.toFixed(2)}</span>
+            `;
             const usedDiv = document.createElement('div');
-            usedDiv.className = 'intimate-card-used';
-            usedDiv.textContent = `已用: ¥${contact.intimateCard.usedAmount.toFixed(2)}`;
+            usedDiv.className = 'card-used';
+            usedDiv.textContent = `已用 ¥${contact.intimateCard.usedAmount.toFixed(2)}`;
 
-            infoDiv.appendChild(nameDiv);
-            infoDiv.appendChild(limitDiv);
-            infoDiv.appendChild(usedDiv);
+            card.appendChild(headerDiv);
+            card.appendChild(numberDiv);
+            card.appendChild(limitDiv);
+            card.appendChild(usedDiv);
 
-            card.appendChild(avatarDiv);
-            card.appendChild(infoDiv);
             container.appendChild(card);
         });
     },
 
-    // [亲密付修改] 进入亲属卡列表
-    showIntimateCards() {
-        document.getElementById('walletMain').style.display = 'none';
-        document.getElementById('intimateCardList').style.display = 'flex';
-        this.renderIntimateCards();
+    // ===== 充值模态框 =====
+    ensureRechargeModal() {
+        let modal = document.getElementById('rechargeModal');
+        if (modal) return modal;
+        modal = document.createElement('div');
+        modal.id = 'rechargeModal';
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>充值</h3>
+                    <span class="close-modal" id="closeRechargeModal">&times;</span>
+                </div>
+                <div class="form-group">
+                    <label>充值金额（元）</label>
+                    <input type="number" id="rechargeAmount" placeholder="0.00" step="0.01" min="0.01">
+                </div>
+                <div class="form-actions">
+                    <button class="save-btn" id="confirmRechargeBtn">确认充值</button>
+                    <button class="cancel-btn" id="cancelRechargeBtn">取消</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // 绑定事件
+        document.getElementById('closeRechargeModal').addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+        document.getElementById('cancelRechargeBtn').addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+        document.getElementById('confirmRechargeBtn').addEventListener('click', () => {
+            const amount = parseFloat(document.getElementById('rechargeAmount').value);
+            if (isNaN(amount) || amount <= 0) {
+                Utils.showToast('请输入有效金额');
+                return;
+            }
+            DataManager.updateBalance(amount);
+            DataManager.addTransaction({
+                id: Date.now(),
+                name: '充值',
+                amount: amount,
+                date: new Date().toLocaleDateString(),
+                type: 'recharge'
+            });
+            this.renderWallet();
+            modal.classList.remove('active');
+            Utils.showToast(`充值成功 +${amount.toFixed(2)}`);
+        });
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('active');
+        });
+        return modal;
     },
 
-    // [亲密付修改] 返回钱包主界面
-    hideIntimateCards() {
-        document.getElementById('walletMain').style.display = 'block';
-        document.getElementById('intimateCardList').style.display = 'none';
+    openRechargeModal() {
+        const modal = this.ensureRechargeModal();
+        const input = document.getElementById('rechargeAmount');
+        if (input) input.value = '';
+        modal.classList.add('active');
     },
 
     init() {
+        // 修改充值按钮事件
         document.getElementById('walletRecharge').addEventListener('click', () => {
-            DataManager.updateBalance(100);
-            DataManager.addTransaction({ id: Date.now(), name: '充值', amount: 100, date: new Date().toLocaleDateString(), type: 'recharge' });
-            this.renderWallet();
-            Utils.showToast('充值成功 +100');
+            this.openRechargeModal();
         });
         document.getElementById('walletWithdraw').addEventListener('click', () => {
             if (DataManager.wallet.balance >= 50) {
@@ -635,9 +691,9 @@ const WalletManager = {
                 Utils.showToast('余额不足');
             }
         });
-        // [亲密付修改] 修改亲属卡按钮事件
+        // 亲属卡按钮：打开独立视图
         document.getElementById('walletPay').addEventListener('click', () => {
-            this.showIntimateCards();
+            openApp('intimateCardList');
         });
         // 其他功能入口提示（银行卡、账单、优惠券）
         document.querySelectorAll('#walletCard, #walletBill, #walletCoupon').forEach(el => {
@@ -1756,9 +1812,7 @@ const UIManager = {
 
         return { water, breakfast, lunch, dinner, location };
     }
-};
-
-// ==================== 聊天处理模块 ====================
+};// ==================== 聊天处理模块 ====================
 const ChatHandler = {
     currentVisibleStart: 0, currentVisibleEnd: 0, isLoadingMore: false, prevStart: 0,
     longPressTimer: null,
@@ -2732,14 +2786,23 @@ const IntimateHandler = {
             avatar.style.width = '40px';
             avatar.style.height = '40px';
             avatar.style.borderRadius = '50%';
-            avatar.style.background = '#07c160';
+            avatar.style.backgroundColor = '#f0f0f0';
             avatar.style.display = 'flex';
             avatar.style.alignItems = 'center';
             avatar.style.justifyContent = 'center';
             avatar.style.marginRight = '12px';
             avatar.style.overflow = 'hidden';
             avatar.style.flexShrink = '0';
-            Utils.setImageElement(avatar, contact.avatar, '🤖');
+
+            // 使用 Utils.setImageElement 填充头像，之后为 img 添加 object-fit: contain
+            Utils.setImageElement(avatar, contact.avatar, '🤖').then(() => {
+                const img = avatar.querySelector('img');
+                if (img) {
+                    img.style.objectFit = 'contain';
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                }
+            });
 
             const name = document.createElement('span');
             name.textContent = Utils.getDisplayName(contact);
@@ -2765,10 +2828,15 @@ const IntimateHandler = {
         }
         const contact = DataManager.contacts.find(c => c.id === this.selectedContactId);
         if (contact) {
+            // 生成虚拟卡号：16位数字，每4位一组，显示后4位，前面隐藏
+            const last4 = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            const cardNumber = `**** **** **** ${last4}`;
+
             contact.intimateCard = {
                 enabled: true,
                 monthlyLimit: limit,
-                usedAmount: 0
+                usedAmount: 0,
+                cardNumber: cardNumber   // 保存卡号
             };
             DataManager.saveContacts();
             Utils.showToast(`已为 ${Utils.getDisplayName(contact)} 开通亲属卡`);
@@ -2942,16 +3010,31 @@ function hideAllAppViews() {
     document.getElementById('userProfileView').classList.remove('active');
     document.getElementById('userArchiveView').classList.remove('active');
     document.getElementById('userWalletView').classList.remove('active');
+    document.getElementById('intimateCardListView').classList.remove('active');
 }
 
 function openApp(app) {
     hideAllAppViews();
-    if (app === 'chat') { document.getElementById('chatView').classList.add('active'); ChatHandler.showContactList(); }
-    else if (app === 'settings') { document.getElementById('settingsView').classList.add('active'); UIManager.renderConfigList(); }
-    else if (app === 'worldbook') { document.getElementById('worldBookView').classList.add('active'); UIManager.renderWorldBookList(); }
-    else if (app === 'beautify') { document.getElementById('beautifyView').classList.add('active'); UIManager.renderIconGrid(); }
-    else if (app === 'browser') document.getElementById('browserView').classList.add('active');
-    else if (app === 'phone') document.getElementById('phoneView').classList.add('active');
+    if (app === 'chat') {
+        document.getElementById('chatView').classList.add('active');
+        ChatHandler.showContactList();
+    } else if (app === 'settings') {
+        document.getElementById('settingsView').classList.add('active');
+        UIManager.renderConfigList();
+    } else if (app === 'worldbook') {
+        document.getElementById('worldBookView').classList.add('active');
+        UIManager.renderWorldBookList();
+    } else if (app === 'beautify') {
+        document.getElementById('beautifyView').classList.add('active');
+        UIManager.renderIconGrid();
+    } else if (app === 'browser') {
+        document.getElementById('browserView').classList.add('active');
+    } else if (app === 'phone') {
+        document.getElementById('phoneView').classList.add('active');
+    } else if (app === 'intimateCardList') {
+        document.getElementById('intimateCardListView').classList.add('active');
+        WalletManager.renderIntimateCards();
+    }
 }
 
 // ==================== 自动发布定时器 ====================
@@ -3236,10 +3319,27 @@ function bindEvents() {
     document.querySelectorAll('[data-back]').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (document.getElementById('userWalletView').classList.contains('active')) { document.getElementById('userWalletView').classList.remove('active'); document.getElementById('userProfileView').classList.add('active'); }
-            else if (document.getElementById('userArchiveView').classList.contains('active')) { document.getElementById('userArchiveView').classList.remove('active'); document.getElementById('userProfileView').classList.add('active'); }
-            else if (document.getElementById('userProfileView').classList.contains('active')) { document.getElementById('userProfileView').classList.remove('active'); document.getElementById('chatView').classList.add('active'); ChatHandler.showContactList(); }
-            else hideAllAppViews();
+            if (document.getElementById('intimateCardListView').classList.contains('active')) {
+                // 从亲属卡返回到钱包
+                document.getElementById('intimateCardListView').classList.remove('active');
+                document.getElementById('userWalletView').classList.add('active');
+                WalletManager.renderWallet(); // 刷新钱包显示
+            } else if (document.getElementById('userWalletView').classList.contains('active')) {
+                // 从钱包返回到个人资料
+                document.getElementById('userWalletView').classList.remove('active');
+                document.getElementById('userProfileView').classList.add('active');
+            } else if (document.getElementById('userArchiveView').classList.contains('active')) {
+                // 从个人档案返回到个人资料
+                document.getElementById('userArchiveView').classList.remove('active');
+                document.getElementById('userProfileView').classList.add('active');
+            } else if (document.getElementById('userProfileView').classList.contains('active')) {
+                // 从个人资料返回到聊天
+                document.getElementById('userProfileView').classList.remove('active');
+                document.getElementById('chatView').classList.add('active');
+                ChatHandler.showContactList();
+            } else {
+                hideAllAppViews();
+            }
         });
     });
 
@@ -3993,7 +4093,9 @@ function bindEvents() {
 
     // [亲密付修改] 新增亲属卡返回按钮事件
     document.getElementById('backToWalletMain').addEventListener('click', () => {
-        WalletManager.hideIntimateCards();
+        document.getElementById('intimateCardListView').classList.remove('active');
+        document.getElementById('userWalletView').classList.add('active');
+        WalletManager.renderWallet();
     });
 
     // [亲密付修改] 亲密付模态框关闭事件

@@ -4,7 +4,7 @@
     padding: 0;
     box-sizing: border-box;
     font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    -webkit-tap-highlight-color: rgba(0,0,0,0.2); /* 修改为黑色半透明高亮 */
+    -webkit-tap-highlight-color: rgba(0,0,0,0.2);
 }
 html, body {
     width: 100%;
@@ -466,7 +466,7 @@ html, body {
     align-items: center; gap: 2px; transition: color 0.2s;
 }
 .tab-item i { font-size: 22px; }
-.tab-item.active { color: #000; font-weight: 500; } /* 修改为黑色 */
+.tab-item.active { color: #000; font-weight: 500; }
 .contact-item {
     display: flex; align-items: center; padding: 12px 16px;
     border-bottom: 1px solid #f5f5f5; cursor: pointer;
@@ -627,7 +627,7 @@ html, body {
     min-width: 150px;
     cursor: pointer;
     color: #333;
-    touch-action: manipulation;  /* 优化触摸响应 */
+    touch-action: manipulation;
     -webkit-tap-highlight-color: rgba(0,0,0,0.1);
 }
 .transfer-amount {
@@ -680,7 +680,7 @@ html, body {
     flex-shrink: 0;
 }
 .input-btn { font-size: 20px; color: #888; cursor: pointer; width: 24px; text-align: center; }
-.input-btn:hover { color: #333; } /* 修改为黑色 */
+.input-btn:hover { color: #333; }
 .input-field-container { position: relative; flex-grow: 1; }
 .input-field {
     width: 100%; padding: 8px 36px 8px 12px; border: 1px solid #dbdbdb;
@@ -693,7 +693,7 @@ html, body {
     font-size: 20px; color: #888; cursor: pointer; width: 24px; height: 24px;
     display: flex; align-items: center; justify-content: center;
 }
-.input-smile:hover { color: #333; } /* 同时修改表情按钮悬停色 */
+.input-smile:hover { color: #333; }
 #recordBtn { margin-left: 0; }
 .input-loading {
     position: absolute; right: 40px; top: 50%; transform: translateY(-50%);
@@ -1221,7 +1221,8 @@ input:checked + .slider:before { transform: translateX(24px); }
     width: 100%; min-height: 80px; padding: 12px; border: 1px solid #ccc;
     border-radius: 8px; font-size: 16px; background: #f9f9f9; margin-bottom: 20px;
     white-space: pre-wrap; word-wrap: break-word;
-}/* 转账详情卡片优化 */
+}
+/* 转账详情卡片优化 */
 #transferActionModal .modal-content {
     max-width: 340px;
     border-radius: 24px;
@@ -1436,14 +1437,75 @@ input:checked + .slider:before { transform: translateX(24px); }
 }
 
 /* 亲属卡头部粉白 */
-#intimateCardList .app-header {
+#intimateCardListView .app-header {
     background: #ffb6c1;
     color: white;
     border-bottom: none;
 }
-#intimateCardList .app-header .back-btn {
+#intimateCardListView .app-header .back-btn {
     color: white;
 }
-#intimateCardList .app-header .app-title {
+#intimateCardListView .app-header .app-title {
     color: white;
+}
+
+/* ===== 新增：隐藏亲属卡界面头部多余的“钱包”文字，保留返回按钮和标题 ===== */
+#intimateCardListView .app-header > *:not(.back-btn):not(.app-title) {
+    display: none !important;
+}
+
+/* ---------- 新增银行卡样式 ---------- */
+.intimate-bank-card {
+    background: linear-gradient(145deg, #ff9a9e, #fad0c4);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 12px;
+    box-shadow: 0 8px 16px rgba(255, 105, 180, 0.3);
+    color: white;
+    font-family: 'Courier New', monospace;
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.3);
+    backdrop-filter: blur(2px);
+}
+.intimate-bank-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+.intimate-bank-card .card-holder {
+    font-size: 16px;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.intimate-bank-card .card-number {
+    font-size: 20px;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+.intimate-bank-card .card-limit {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    opacity: 0.9;
+}
+.intimate-bank-card .card-limit span:first-child {
+    font-weight: 500;
+}
+.intimate-bank-card .card-limit span:last-child {
+    font-weight: 600;
+}
+.intimate-bank-card .card-used {
+    margin-top: 8px;
+    font-size: 13px;
+    opacity: 0.8;
+}
+.intimate-bank-card::before {
+    content: "💳";
+    position: absolute;
+    bottom: 12px;
+    right: 16px;
+    font-size: 30px;
+    opacity: 0.3;
 }
