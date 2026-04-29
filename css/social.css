@@ -1,0 +1,99 @@
+/* --- Social Page Styles (Friend Requests, etc.) --- */
+.friend-request-list, .my-friends-list {
+    margin: 20px 0;
+}
+
+.friend-request-item, .my-friend-item {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.friend-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+.friend-avatar-img{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.friend-info {
+    flex-grow: 1;
+}
+
+.friend-info h4 {
+    margin: 0 0 5px;
+    font-size: 16px;
+}
+
+.friend-info p {
+    margin: 0;
+    font-size: 14px;
+    color: #888;
+}
+
+.friend-request-actions button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.friend-request-actions .accept-button {
+    background-color: #007aff;
+    color: #fff;
+}
+
+.friend-request-actions .reject-button {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.my-friend-item .unfriend-button {
+    padding: 8px 15px;
+    border: 1px solid #ff3b30;
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: transparent;
+    color: #ff3b30;
+    font-weight: bold;
+}
+
+
+/* Diary Page */
+#diary-page .page-content {
+    padding: 20px;
+}
+
+#diary-entry {
+    width: 100%;
+    height: 200px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-sizing: border-box;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+#save-diary-button {
+    width: 100%;
+    padding: 15px;
+    background-color: #007aff;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}

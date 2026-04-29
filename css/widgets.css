@@ -1,0 +1,135 @@
+.widgets {
+    margin-top: 20px;
+}
+
+.widget {
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+    padding: 15px;
+    margin-bottom: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.weather {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.weather-left, .weather-right {
+    display: flex;
+    flex-direction: column;
+}
+.weather-left img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-bottom: 5px;
+    object-fit: cover;
+}
+.weather-right {
+    align-items: flex-end;
+}
+.weather-right span {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.widget-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.small-widget {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.small-widget img {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    margin-bottom: 5px;
+}
+
+.app-icon-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+    padding: 15px;
+}
+
+.app-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+.app-icon img {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    margin-bottom: 5px;
+}
+.app-icon span {
+    font-size: 12px;
+    color: #555;
+}
+
+.widget-title {
+    font-weight: bold;
+    color: #333;
+    margin-left: 5px;
+    margin-bottom: 10px;
+    margin-top: 20px;
+}
+
+.clock-widget {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 145px; /* Match app-icon-group height */
+}
+
+.clock {
+    width: 100px;
+    height: 100px;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    position: relative;
+}
+.hand {
+    position: absolute;
+    background-color: #333;
+    transform-origin: bottom center;
+    left: 50%;
+}
+.hour { width: 4px; height: 30px; top: 20px; margin-left: -2px; background-color: #000; }
+.minute { width: 3px; height: 40px; top: 10px; margin-left: -1.5px; }
+.second { width: 1px; height: 45px; top: 5px; margin-left: -0.5px; background-color: red; }
+.center { width: 8px; height: 8px; border-radius: 50%; background-color: #333; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.clock span { position: absolute; font-size: 14px; font-weight: bold; }
+.twelve { top: 5px; left: 50%; transform: translateX(-50%); }
+.three { top: 50%; right: 5px; transform: translateY(-50%); }
+.six { bottom: 5px; left: 50%; transform: translateX(-50%); }
+.nine { top: 50%; left: 5px; transform: translateY(-50%); }
+
+#page2 .app-icon-group.full-width {
+    grid-template-columns: repeat(4, 1fr);
+    padding: 15px;
+}
+#page2 .large-widget {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    font-weight: bold;
+}
+#page2 .large-widget img {
+    width: 80px;
+    height: 80px;
+}

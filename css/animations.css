@@ -1,0 +1,49 @@
+/* --- Animations --- */
+.page-enter-active, .page-leave-active {
+    transition: transform 0.3s ease;
+}
+.page-enter-from {
+    transform: translateX(100%);
+}
+.page-enter-to {
+    transform: translateX(0);
+}
+.page-leave-from {
+    transform: translateX(0);
+}
+.page-leave-to {
+    transform: translateX(-100%);
+}
+
+.page-slide-up-enter-active, .page-slide-up-leave-active {
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.page-slide-up-enter-from, .page-slide-up-leave-to {
+    transform: translateY(100%);
+}
+.page-slide-up-enter-to, .page-slide-up-leave-from {
+    transform: translateY(0);
+}
+
+.page-ios-enter-active {
+    transition: transform .35s cubic-bezier(.16,1,.3,1);
+    z-index: 2;
+}
+.page-ios-leave-active {
+    transition: transform .35s cubic-bezier(.16,1,.3,1);
+    z-index: 1;
+}
+.page-ios-enter-from { transform: translateX(100%); }
+.page-ios-enter-to   { transform: translateX(0); }
+.page-ios-leave-from { transform: translateX(0); }
+.page-ios-leave-to   { transform: translateX(-25%); }
+
+@keyframes slideInUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+@keyframes slideOutDown {
+    from { transform: translateY(0); }
+    to { transform: translateY(100%); }
+}

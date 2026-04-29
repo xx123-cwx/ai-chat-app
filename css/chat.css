@@ -1,0 +1,336 @@
+/* --- Chat Page Styles --- */
+#chat-page .page-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    position: relative;
+}
+
+#chat-page .chat-content-area {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 60px 0 20px;
+    transition: background-image 0.2s ease, background-color 0.2s ease;
+}
+
+#chat-page .chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 15px;
+    position: relative;
+}
+
+#chat-page .user-profile h2 {
+    margin: 0;
+    font-size: 24px;
+    color: #000;
+}
+
+#chat-page .user-profile p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #888;
+}
+
+#chat-page .bg-music-button {
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 15px;
+    padding: 5px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #000;
+}
+
+#chat-page .bg-music-button i {
+    margin-right: 5px;
+}
+
+#chat-page .user-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    background: #eee;
+    cursor: pointer;
+}
+
+#chat-page .user-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    object-fit: cover;
+    display: block;
+}
+
+#chat-page .header-icons {
+    display: flex;
+    gap: 15px;
+    font-size: 20px;
+    color: #000;
+}
+
+#chat-page .search-bar-container {
+    padding: 0 15px;
+}
+
+#chat-page .search-bar {
+    background-color: #f0f2f5;
+    border-radius: 8px;
+    padding: 10px;
+    color: #888;
+    margin: 15px 0;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+}
+#chat-page .search-bar i {
+    margin-right: 8px;
+}
+
+#chat-page .premium-banner {
+    background-color: #e6f3ff;
+    color: #0066cc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    margin: 15px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+#chat-page .friend-list-section,
+#chat-page .ai-friend-list-section {
+    padding: 0 15px;
+    margin-bottom: 20px;
+}
+
+#chat-page .friend-list-section h4,
+#chat-page .ai-friend-list-section h4 {
+    margin: 10px 0;
+    font-size: 16px;
+    color: #000;
+}
+
+#chat-page .friend-action {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    cursor: pointer;
+}
+
+#chat-page .friend-action-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 20px;
+    margin-right: 15px;
+}
+
+#chat-page .friend-action-icon.add-friend {
+    background-color: #06c755;
+}
+
+#chat-page .friend-action-icon.create-group {
+    background-color: #06c755;
+}
+
+#chat-page .friend-action-text h5 {
+    margin: 0;
+    font-size: 16px;
+    color: #000;
+}
+
+#chat-page .friend-action-text p {
+    margin: 5px 0 0;
+    font-size: 12px;
+    color: #888;
+}
+
+#chat-page .friend-action .fa-chevron-right {
+    margin-left: auto;
+    color: #ccc;
+}
+
+#chat-page .ai-friend-item {
+    padding: 15px 0;
+    color: #888;
+}
+
+#chat-page .bottom-nav {
+    width: 100%;
+    height: 60px;
+    background-color: #fff;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+#chat-page .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 12px;
+    color: #888;
+    cursor: pointer;
+}
+
+#chat-page .nav-item.active {
+    color: #000;
+}
+
+#chat-page .nav-item i {
+    font-size: 22px;
+    margin-bottom: 4px;
+}
+
+/* Chat conversation list */
+.chat-conv-list {
+    padding: 0 0 10px;
+}
+.chat-conv-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 15px;
+    border-bottom: 1px solid #f5f5f5;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.chat-conv-item:active { background: #f5f5f5; }
+.chat-conv-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    overflow: hidden;
+    background: #eee;
+}
+.chat-conv-avatar img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+    border-radius: 50%;
+}
+.chat-conv-info { flex: 1; min-width: 0; }
+.chat-conv-name {
+    margin: 0 0 3px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #111;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.chat-conv-preview {
+    margin: 0;
+    font-size: 13px;
+    color: #aaa;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.chat-conv-empty {
+    padding: 30px 20px;
+    text-align: center;
+    color: #ccc;
+    font-size: 14px;
+}
+
+/* ---- Friends Tab ---- */
+.friends-search-bar {
+    display: flex;
+    align-items: center;
+    background: #f2f2f7;
+    border-radius: 12px;
+    padding: 8px 12px;
+    gap: 8px;
+    color: #999;
+    font-size: 14px;
+}
+.friends-search-bar input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 14px;
+    color: #333;
+    flex: 1;
+}
+.friends-section-title {
+    padding: 8px 15px 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.ai-friend-item-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.ai-friend-item-row:active {
+    background: #f5f5f5;
+}
+.ai-friend-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+.ai-friend-info {
+    flex: 1;
+    min-width: 0;
+}
+.ai-friend-name {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ai-friend-sig {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: #999;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ai-friends-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: #bbb;
+    text-align: center;
+}
+.ai-friends-empty i {
+    font-size: 40px;
+    margin-bottom: 12px;
+}
+.ai-friends-empty p {
+    font-size: 14px;
+    white-space: pre-line;
+    line-height: 1.6;
+}
